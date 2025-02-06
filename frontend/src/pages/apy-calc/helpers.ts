@@ -4,6 +4,13 @@ export type ItemT = {
     diff: string;
     monthIncome: string;
   };
+
+  export interface AveragePrice {
+    buyAvg: number;
+    sellAvg: number;
+    totalBuyVolume: number;
+    totalSellVolume: number;
+}
   
   export function calculateAPR(
     initialDeposit: number,
@@ -38,3 +45,32 @@ export type ItemT = {
     return items;
   }
   
+
+  export const calculateAverages = (trades: Trade[]) => {
+    const symbolAverages: {[key: string]: AveragePrice} = {};
+    
+    trades.forEach((trade) => {
+        if (!symbolAverages[trade.symbol]) {
+            symbolAverages[trade.symbol] = {
+                buyAvg: 0,
+                sellAvg: 0,
+                totalBuyVolume: 0,
+                totalSellVolume: 0
+            };
+        }
+
+        const volume = trade.price * trade.qty;
+        
+        if (trade.side.toUpperCase() === 'BUY') {
+            const currentTotal = symbolAverages[trade.symbol].buyAvg * symbolAverages[trade.symbol].totalBuyVolume;
+            symbolAverages[trade.symbol].totalBuyVolume += trade.qty;
+            symbolAverages[trade.symbol].buyAvg = (currentTotal + volume) / symbolAverages[trade.symbol].totalBuyVolume;
+        } else {
+            const currentTotal = symbolAverages[trade.symbol].sellAvg * symbolAverages[trade.symbol].totalSellVolume;
+            symbolAverages[trade.symbol].totalSellVolume += trade.qty;
+            symbolAverages[trade.symbol].sellAvg = (currentTotal + volume) / symbolAverages[trade.symbol].totalSellVolume;
+        }
+    });
+
+    return symbolAverages;
+};

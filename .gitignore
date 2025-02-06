@@ -9,3 +9,28 @@ yarn-error.log*
 .pnp.js
 
 .vscode/*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+venv
+venv/*
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+*.egg
+
+# macOS
+.DS_Store
+
+# Data files
+data/*.json
