@@ -123,56 +123,71 @@ class BybitService:
             # Получаем список файлов и извлекаем символы
             data_dir = 'data'
             symbols = set()
-            print(os.listdir(data_dir))
             for filename in os.listdir(data_dir):
                 if filename.endswith('.json'):
                     symbol = filename.split('_')[0]
                     base_symbol = symbol.replace('USDT', '')  # Убираем USDT из названия
                     symbols.add(base_symbol)
-            
-            # Ограничиваем до 10 символов
-            symbols = list(symbols)[:10]
-            
-            # Получаем текущие цены для всех символов
-            prices = {}
-            for symbol in symbols:
-                try:
-                    price_response = self.session.get_tickers(
-                        category="spot",
-                        symbol=f"{symbol}USDT"
-                    )
-                    if price_response["retCode"] == 0 and price_response["result"]["list"]:
-                        prices[symbol] = float(price_response["result"]["list"][0]["lastPrice"])
-                except Exception as e:
-                    print(f"Ошибка при получении цены для {symbol}: {str(e)}")
-                    prices[symbol] = 0
 
-            # Получаем баланс
-            response = self.session.get_coins_balance(
-                accountType="UNIFIED",
-                coin=",".join(symbols)  # Объединяем символы через запятую
-            )
-
-            if response["retCode"] != 0:
-                raise HTTPException(status_code=400, detail=response["retMsg"])
-
+            # Преобразуем в список и ограничиваем до 10 символов за раз
+            symbols = list(symbols)
             balances = []
-            coins = response["result"]["balance"]
-            
-            for coin in coins:
-                if float(coin["walletBalance"]) > 0:
-                    coin_symbol = coin["coin"]
-                    current_price = prices.get(coin_symbol, 0)
-                    balances.append(
-                        WalletBalance(
-                            coin=coin_symbol,
-                            total=float(coin["walletBalance"]),
-                            free=float(coin["transferBalance"]),
-                            locked=float(coin["locked"]) if "locked" in coin else 0.0,
-                            current_price=current_price,
-                            usd_value=float(coin["walletBalance"]) * current_price
+
+            # Обрабатываем символы по 10 за раз
+            for i in range(0, len(symbols), 10):
+                current_symbols = symbols[i:i + 10]
+                print(f"Обрабатываем символы: {current_symbols}")
+
+                # Получаем текущие цены для всех символов
+                prices = {}
+                for symbol in current_symbols:
+                    try:
+                        price_response = self.session.get_tickers(
+                            category="spot",
+                            symbol=f"{symbol}USDT"
                         )
-                    )
+                        if price_response["retCode"] == 0 and price_response["result"]["list"]:
+                            prices[symbol] = float(price_response["result"]["list"][0]["lastPrice"])
+                    except Exception as e:
+                        print(f"Ошибка при получении цены для {symbol}: {str(e)}")
+                        prices[symbol] = 0
+
+                # Получаем баланс
+                response = self.session.get_coins_balance(
+                    accountType="UNIFIED",
+                    coin=",".join(current_symbols)  # Объединяем символы через запятую
+                )
+
+                if response["retCode"] != 0:
+                    raise HTTPException(status_code=400, detail=response["retMsg"])
+
+                # Создаем записи для всех символов, даже с нулевым балансом
+                for symbol in current_symbols:
+                    current_price = prices.get(symbol, 0)
+                    coin_data = next((coin for coin in response["result"]["balance"] if coin["coin"] == symbol), None)
+                    
+                    if coin_data and float(coin_data["walletBalance"]) > 0:
+                        balances.append(
+                            WalletBalance(
+                                coin=symbol,
+                                total=float(coin_data["walletBalance"]),
+                                free=float(coin_data["transferBalance"]),
+                                locked=float(coin_data["locked"]) if "locked" in coin_data else 0.0,
+                                current_price=current_price,
+                                usd_value=float(coin_data["walletBalance"]) * current_price
+                            )
+                        )
+                    else:
+                        balances.append(
+                            WalletBalance(
+                                coin=symbol,
+                                total=0.0,
+                                free=0.0,
+                                locked=0.0,
+                                current_price=current_price,
+                                usd_value=0.0
+                            )
+                        )
             return balances
         except Exception as e:
             print(f"Ошибка при получении баланса: {str(e)}")
@@ -189,6 +204,8 @@ async def get_funding_rates(
 ):
     symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
     return await bybit.get_funding_rates(symbols)
+
+
 
 @app.get("/user/trades/{symbol}", response_model=List[Trade])
 async def get_user_trades(
@@ -209,52 +226,7 @@ async def get_user_trades(
             status_code=500,
             detail=f"Ошибка при получении сделок: {str(e)}"
         )
-    
-@app.get("/user/trades2/{symbol}", response_model=List[Trade])
-async def get_user_trades2(
-    symbol: str,
-    limit: int = 50,
-    startTime: int = None,
-    endTime: int = None,
-    bybit: BybitService = Depends(get_bybit_service)
-) -> List[Trade]:
-    try:
-        print(f"Получен запрос для символа: {symbol}, лимит: {limit}, период: {startTime}-{endTime}")
-        params = {
-            "category": "spot",
-            "symbol": symbol,
-            "limit": limit,
-            "orderStatus": "Filled"
-        }
-        
-        if startTime:
-            params["startTime"] = startTime
-        if endTime:
-            params["endTime"] = endTime
 
-        response = bybit.session.get_executions(**params)
-
-        if response["retCode"] != 0:
-            print(f"Ошибка API Bybit: {response}")
-            raise HTTPException(status_code=400, detail=response["retMsg"])
-        
-        trades = [
-            Trade(
-                symbol=trade["symbol"],
-                side=trade["side"],
-                price=float(trade["execPrice"]),
-                qty=float(trade["execQty"]),
-                timestamp=int(trade["execTime"]),
-                orderId=trade["orderId"]
-            )
-            for trade in response["result"]["list"]
-        ]
-        
-        return trades
-
-    except Exception as e:
-        print(f"Исключение в get_user_trades2: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/wallet/balance", response_model=List[WalletBalance])
 async def get_wallet_balance(
@@ -324,6 +296,7 @@ async def collect_historical_trades(
                 
                 all_trades.extend(formatted_trades)
                 print(f"Получено {len(formatted_trades)} сделок")
+                all_trades.sort(key=lambda x: x["timestamp"], reverse=True)
                 
                 # Сохраняем промежуточные результаты
                 with open(filename, 'w') as f:

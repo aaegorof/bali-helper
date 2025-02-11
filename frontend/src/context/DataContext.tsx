@@ -1,14 +1,18 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Balance } from '@/components/WalletBalance';
+import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 interface DataContextType {
     dataFiles: string[];
     refreshDataFiles: () => Promise<void>;
+    walletBalances: Balance[];
+    setWalletBalances: Dispatch<SetStateAction<Balance[]>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [dataFiles, setDataFiles] = useState<string[]>([]);
+    const [walletBalances, setWalletBalances] = useState<Balance[]>([]);
 
     const fetchDataFiles = async () => {
         try {
@@ -29,7 +33,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     return (
-        <DataContext.Provider value={{ dataFiles, refreshDataFiles }}>
+        <DataContext.Provider value={{ dataFiles, refreshDataFiles, walletBalances, setWalletBalances }}>
             {children}
         </DataContext.Provider>
     );

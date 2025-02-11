@@ -1,3 +1,7 @@
+import { Trade } from "@/components/TradeHistory";
+import { Balance } from "@/components/WalletBalance";
+import { cp } from "fs";
+
 export type ItemT = {
     balancesWithInvestment: string;
     balancesWithoutInvestment: string;
@@ -73,4 +77,37 @@ export type ItemT = {
     });
 
     return symbolAverages;
+};
+
+
+export const calculateProfitLoss = (average: AveragePrice, coinBalance: Balance) => {
+  const tradePercentage = (average.sellAvg- average.buyAvg)/average.buyAvg * 100
+  const totalBuy = average.totalBuyVolume * average.buyAvg;
+  const totalSold = average.totalSellVolume * average.sellAvg;
+  const profitLoss = totalSold - totalBuy;
+  const tokensLeft = average.totalBuyVolume - average.totalSellVolume
+  const profitLossPercentage = totalBuy > 0 ? (profitLoss / totalBuy) * 100 : 0;
+  // Находим текущий баланс и цену для выбранной монеты
+  const currentValue = coinBalance 
+    ? coinBalance.total * (coinBalance.current_price || 0)
+    : 0;
+
+  const walletVal = (coinBalance?.usd_value ?? 0)
+  
+  const unrealisedProfit = profitLoss + walletVal
+  
+  const unrealisedProfitPercentage = (unrealisedProfit / totalBuy) * 100
+  
+  const potentialProfit = (tokensLeft - coinBalance.total) * coinBalance.current_price
+  
+
+  return {
+    profitLoss,
+    profitLossPercentage,
+    currentValue,
+    unrealisedProfit,
+    unrealisedProfitPercentage,
+    tradePercentage,
+    potentialProfit,
+  };
 };

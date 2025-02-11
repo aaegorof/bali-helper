@@ -4,6 +4,7 @@ import FundingRateDisplay from './bybit-api-tests';
 import APYCalculation from './pages/APYCalculation';
 import TradingAnalyser from './components/TradingAnalyser';
 import { DataProvider } from './context/DataContext';
+import TransactionAnalyzer from './pages/permata';
 
 const App = () => {
     return (
@@ -21,6 +22,9 @@ const App = () => {
                             <Link to="/trading-analyser" className="text-white hover:text-gray-300">
                                 Trading Analyser
                             </Link>
+                            <Link to="/permata" className="text-white hover:text-gray-300">
+                                Permata
+                            </Link>
                             <Link to="/settings" className="text-white hover:text-gray-300">
                                 Settings
                             </Link>
@@ -32,6 +36,7 @@ const App = () => {
                         <Route path="/apy" element={<APYCalculation />} />
                         <Route path="/trading-analyser" element={<TradingAnalyser />} />
                         <Route path="/settings" element={<div>Settings Page</div>} />
+                        <Route path='/permata' element={<TransactionAnalyzer/>}/>
                     </Routes>
                 </div>
             </Router>

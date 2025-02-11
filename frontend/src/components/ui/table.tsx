@@ -105,6 +105,56 @@ const TableCaption = React.forwardRef<
 ))
 TableCaption.displayName = "TableCaption"
 
+
+
+
+interface Column<T> {
+  header: string;
+  accessorKey: keyof T;
+  className?: string;
+  render?: (value: any, row: T) => React.ReactNode;
+}
+
+interface TableFullProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  className?: string;
+}
+
+function TableFull<T>({ data, columns, className }: TableFullProps<T>) {
+  return (
+    <Table className={className}>
+      <TableHeader>
+        <TableRow>
+          {columns.map((column, index) => (
+            <TableHead key={index} className={column.className}>
+              {column.header}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((row, rowIndex) => (
+          <TableRow key={rowIndex}>
+            {columns.map((column, colIndex) => (
+              <TableCell key={colIndex} className={column.className}>
+                {column.render 
+                  ? column.render(row[column.accessorKey], row)
+                  : row[column.accessorKey] as React.ReactNode}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+
+
+export { TableFull };
+export type { Column, TableFullProps };
+
 export {
   Table,
   TableHeader,
