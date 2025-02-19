@@ -21,7 +21,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { FilterType, FilterText, FilterDates, ClearFilters } from "./filters";
+import { FilterType, FilterText, FilterDates, FilterCategory, FilterAmount } from "./filters";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
@@ -39,6 +39,7 @@ import {
   SelectValue,
   SelectTrigger,
 } from "@/components/ui/select";
+import { TRANSACTION_COLORS } from "@/lib/constants";
 
 type Props = {
   data: TransactionDb[];
@@ -120,15 +121,32 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
         header: "Type",
         id: "type",
         accessorKey: "credit_debit",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          return (
+            <span
+              style={{
+                color: TRANSACTION_COLORS[value.toLowerCase()]?.text,
+              }}
+            >
+              {value}
+            </span>
+          );
+        },
         Filter: FilterType,
         filterFn: multiIncludesFilter,
+      },{
+        header: "Category",
+        id: "category",
+        accessorKey: "category",
+        Filter: FilterCategory,
       },
       {
         header: "Amount",
         accessorKey: "amount",
         sortingFn: "alphanumeric",
         className: "text-nowrap text-right",
-        Filter: ClearFilters,
+        Filter: FilterAmount,
         filterFn: 'inNumberRange',
         cell: ({ getValue }) =>
           getValue()
@@ -186,7 +204,7 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
     <div className="overflow-x-auto">
       <div>
         {getHeaderGroups().map((headerGroup) => (
-          <div className="flex gap-2 items-center py-2">
+          <div className="flex gap-4 items-center py-2">
             {headerGroup.headers.map((header) => (
               <div>
                 {header.column.columnDef.Filter ? (

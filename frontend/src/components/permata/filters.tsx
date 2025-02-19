@@ -2,7 +2,16 @@ import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "../ui/select";
 import { FilterX } from "lucide-react";
+import { transactionCategories } from "@/lib/constants";
 
 const FilterType = ({ column }) => {
   const val = column?.getFilterValue() ?? [true, true];
@@ -52,20 +61,33 @@ const FilterText = ({ column }) => {
   );
 };
 
-const ClearFilters = ({ column, reset }) => {
+const FilterCategory = ({ column }) => {
+  const val = column?.getFilterValue() ?? "";
+  return (
+    <Select value={val} onValueChange={(value) => column.setFilterValue(value)}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select category" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem key={"All"} value={null}>
+            All
+          </SelectItem>
+          {transactionCategories.map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};
+
+const FilterAmount = ({ column, reset }) => {
   const [min, max] = column?.getFilterValue() ?? ["", ""];
-  console.log(min, max);
   return (
     <div className="flex gap-2">
-      <Button
-        variant="ghost"
-        className="w-10 aspect-square"
-        onClick={() => {
-          reset();
-        }}
-      >
-        <FilterX />
-      </Button>
       <div className="flex gap-2">
         <Input
           type="number"
@@ -82,6 +104,15 @@ const ClearFilters = ({ column, reset }) => {
           onChange={(e) => column.setFilterValue([min, Number(e.target.value)])}
         />
       </div>
+      <Button
+        variant="ghost"
+        className="w-10 aspect-square"
+        onClick={() => {
+          reset();
+        }}
+      >
+        <FilterX />
+      </Button>
     </div>
   );
 };
@@ -120,4 +151,4 @@ const FilterDates = ({ column }) => {
   );
 };
 
-export { FilterType, FilterText, FilterDates, ClearFilters };
+export { FilterType, FilterText, FilterDates, FilterAmount, FilterCategory };

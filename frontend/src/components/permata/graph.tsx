@@ -11,6 +11,7 @@ import {
   } from "chart.js";
   import { Bar } from "react-chartjs-2";
 import { formatNumberToKMil } from "@/lib/utils";
+import { TRANSACTION_COLORS } from "@/lib/constants";
 
 
 ChartJS.register(
@@ -25,9 +26,10 @@ ChartJS.register(
 
 type Props = {
   data: TransactionDb[];
+  className?: string;
 };
 
-const GraphPermata = ({ data }: Props) => {
+const GraphPermata = ({ data, className }: Props) => {
   const [monthlyData, setMonthlyData] = useState(null);
 
   useEffect(() => {
@@ -62,12 +64,12 @@ const GraphPermata = ({ data }: Props) => {
         {
           label: "Debit",
           data: debitData,
-          backgroundColor: "rgba(255, 99, 132, 0.5)",
+          backgroundColor: TRANSACTION_COLORS.debit.background,
         },
         {
           label: "Credit",
           data: creditData,
-          backgroundColor: "rgba(53, 162, 235, 0.5)",
+          backgroundColor: TRANSACTION_COLORS.credit.background,
         },
       ],
     });
@@ -100,7 +102,7 @@ const GraphPermata = ({ data }: Props) => {
     },
   };
   return (
-    <div>
+    <div className={className}>
       {monthlyData && (
         <div className="mb-4">
           <Bar options={chartOptions} data={monthlyData} />

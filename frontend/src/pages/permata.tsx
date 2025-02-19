@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import GraphPermata from "@/components/permata/graph";
 import TransactionsPermata from "@/components/permata/transactions";
 import { formatNumberToKMil } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { TRANSACTION_COLORS } from "@/lib/constants";
 
 
 export interface TransactionDb {
@@ -120,7 +122,6 @@ const TransactionAnalyzer = () => {
     }
 
     const res = await saveTransactionsToDatabase(allParsedData);
-    console.log(res);
     setTransactions(res.transactions);
   };
 
@@ -137,33 +138,57 @@ const TransactionAnalyzer = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Transaction Analyzer</h1>
 
-      <Card className="mb-4">
-        <div className="flex gap-4 p-4">
+      <Card className="mb-4 grid grid-cols-[1fr_2fr_1fr] gap-4">
+        <div className="p-4 grid place-content-start gap-8">
+          <div className="text-xs">
+            <p>You can upload a file from Permata Bank export, it will automatically save these transactions to the database.</p>
+            <p>After uploading, you will see ulpoaded transactions. If you want to see all transactions, you can click on the "All Transactions" button.</p>
+            <p>Transactions will be unique by hash, so if you upload the same file multiple times, it will not add the same transactions again.</p>
+            </div>
           <input
             type="file"
             accept=".csv, .xlsx, .xls"
             multiple
             onChange={handleFileUpload}
           />
-          <div className="mb-4">
+          <Button
+            onClick={async () => {
+              const response = await fetch(`http://localhost:5500/api/transactions`);
+              const data: TransactionDb[] = await response.json();
+              setTransactions(data);
+            }}
+            variant="outline"
+            className="w-full"
+          >
+            All Transactions
+          </Button>
+          </div>
+          <GraphPermata data={filteredTransactions} className="max-h-[400px]"/>
+          <div className="p-4">
+            <p className="text-xs">Calculated from {filteredTransactions.length !== transactions.length && <span><span className="font-bold">{filteredTransactions.length}</span> filtered transactions out of</span>} <span className="font-bold">{transactions.length}</span> total transactions.</p>
             <p>
               Total Debit:{" "}
-              <span className="font-bold">
+              <span 
+                className="font-bold"
+                style={{ color: TRANSACTION_COLORS.debit.text }}
+              >
                 {formatNumberToKMil(totalDebit)}
               </span>
             </p>
             <p>
               Total Credit:{" "}
-              <span className="font-bold">
+              <span 
+                className="font-bold"
+                style={{ color: TRANSACTION_COLORS.credit.text }}
+              >
                 {formatNumberToKMil(totalCredit)}
               </span>
             </p>
-          </div>
+          
         </div>
       </Card>
 
-      <div className="grid grid-cols-[1fr_2fr] gap-4">
-        <GraphPermata data={filteredTransactions} />
+      <div className="grid gap-4">
         <TransactionsPermata 
           data={transactions} 
           onFilterChange={setFilteredTransactions}
