@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Input, DebounceInput, DebounceNumberInput } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -50,7 +50,7 @@ const FilterType = ({ column }) => {
 const FilterText = ({ column }) => {
   const val = column?.getFilterValue() ?? "";
   return (
-    <Input
+    <DebounceInput
       type="search"
       placeholder="Search..."
       value={val}
@@ -89,19 +89,17 @@ const FilterAmount = ({ column, reset }) => {
   return (
     <div className="flex gap-2">
       <div className="flex gap-2">
-        <Input
-          type="number"
+        <DebounceNumberInput
           placeholder="Min"
           value={min}
           step={100000}
-          onChange={(e) => column.setFilterValue([Number(e.target.value), max])}
+          onChange={(e) => column.setFilterValue([e, max])}
         />
-        <Input
-          type="number"
+        <DebounceNumberInput
           placeholder="Max"
           value={max}
           step={100000}
-          onChange={(e) => column.setFilterValue([min, Number(e.target.value)])}
+          onChange={(e) => column.setFilterValue([min, e])}
         />
       </div>
       <Button

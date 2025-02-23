@@ -26,6 +26,150 @@ const InputLabel = ({children, label}: {children: React.ReactNode, label: string
       <Label>{label}</Label>
       {children}
     </div>
-}
+} 
 
-export { Input, InputLabel }
+
+
+const DebounceInput = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<"input"> & { delay?: number }
+>(({ onChange, delay = 300, ...props }, ref) => {
+  const [value, setValue] = React.useState(props.defaultValue || "");
+  const timeoutRef = React.useRef<NodeJS.Timeout>();
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (props.value !== undefined) {
+      setValue(props.value);
+    }
+  }, [props.value]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      onChange?.(event);
+    }, delay);
+  };
+
+  return (
+    <Input
+      {...props}
+      value={value}
+      onChange={handleChange}
+      ref={ref}
+    />
+  );
+});
+DebounceInput.displayName = "DebounceInput";
+
+
+const NumberInput = React.forwardRef<
+  HTMLInputElement,
+  Omit<React.ComponentProps<"input">, "type" | "onChange"> & {
+    onChange?: (value: number | null) => void;
+    value?: number | null;
+  }
+>(({ className, onChange, value, ...props }, ref) => {
+  // Форматирование числа для отображения
+  const formatNumber = (num: number | null) => {
+    if (num === null) return "";
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
+
+  // Очистка строки от всего, кроме цифр
+  const cleanNumber = (str: string) => {
+    return str.replace(/[^\d.-]/g, "");
+  };
+
+  // Обработка изменения значения
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = cleanNumber(e.target.value);
+    
+    // Если поле пустое, передаем null
+    if (!cleaned) {
+      onChange?.(null);
+      return;
+    }
+
+    const num = parseFloat(cleaned);
+    
+    // Проверяем, является ли значение числом
+    if (!isNaN(num)) {
+      onChange?.(num);
+    }
+  };
+
+  return (
+    <Input
+      {...props}
+      type="text"
+      inputMode="numeric"
+      value={formatNumber(value)}
+      onChange={handleChange}
+      ref={ref}
+      className={cn("text-right", className)}
+    />
+  );
+});
+NumberInput.displayName = "NumberInput";
+
+const DebounceNumberInput = React.forwardRef<
+  HTMLInputElement,
+  Omit<React.ComponentProps<typeof NumberInput>, "onChange"> & {
+    onChange?: (value: number | null) => void;
+    delay?: number;
+  }
+>(({ onChange, delay = 300, ...props }, ref) => {
+  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const [value, setValue] = React.useState<number | null>(props.value ?? null);
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (props.value !== undefined) {
+      setValue(props.value);
+    }
+  }, [props.value]);
+
+  const handleChange = (newValue: number | null) => {
+    setValue(newValue);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      onChange?.(newValue);
+    }, delay);
+  };
+
+  return (
+    <NumberInput
+      {...props}
+      value={value}
+      onChange={handleChange}
+      ref={ref}
+    />
+  );
+});
+DebounceNumberInput.displayName = "DebounceNumberInput";
+
+export { Input, InputLabel, DebounceInput, NumberInput, DebounceNumberInput }

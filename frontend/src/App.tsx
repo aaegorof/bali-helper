@@ -5,30 +5,38 @@ import APYCalculation from './pages/APYCalculation';
 import TradingAnalyser from './components/TradingAnalyser';
 import { DataProvider } from './context/DataContext';
 import TransactionAnalyzer from './pages/permata';
+import { ThemeProvider } from './components/theme-provider';
+import { ModeToggle } from './components/mode-toggle';
+
 
 const App = () => {
     return (
-        <DataProvider>
-            <Router>
-                <div>
-                    <nav className="bg-gray-800 p-4 mb-4">
-                        <div className="container mx-auto flex justify-center space-x-4">
-                            <Link to="/" className="text-white hover:text-gray-300">
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <DataProvider>
+                <Router>
+                    <div>
+                    <nav className="bg-accent text-accent-foreground p-4 mb-4">
+                        <div className="container mx-auto flex items-center justify-center gap-8">
+                            <Link to="/" className="hover:text-gray-300">
                                 Funding Rates
                             </Link>
-                            <Link to="/apy" className="text-white hover:text-gray-300">
+                            <Link to="/apy" className="hover:text-gray-300">
                                 APY Calculation
                             </Link>
-                            <Link to="/trading-analyser" className="text-white hover:text-gray-300">
+                            <Link to="/trading-analyser" className="hover:text-gray-300">
                                 Trading Analyser
                             </Link>
-                            <Link to="/permata" className="text-white hover:text-gray-300">
+                            <Link to="/permata" className="hover:text-gray-300">
                                 Permata
                             </Link>
-                            <Link to="/settings" className="text-white hover:text-gray-300">
+                            <Link to="/settings" className="hover:text-gray-300">
                                 Settings
                             </Link>
+                            <div className='ml-auto'>
+                                <ModeToggle />
+                            </div>
                         </div>
+                        
                     </nav>
 
                     <Routes>
@@ -38,9 +46,10 @@ const App = () => {
                         <Route path="/settings" element={<div>Settings Page</div>} />
                         <Route path='/permata' element={<TransactionAnalyzer/>}/>
                     </Routes>
-                </div>
-            </Router>
-        </DataProvider>
+                    </div>
+                </Router>
+            </DataProvider>
+        </ThemeProvider>
     );
 }
 

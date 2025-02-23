@@ -165,6 +165,40 @@ app.get('/api/transactions', (req, res) => {
     });
 });
 
+app.post('/api/transactions/update-category', (req, res) => {
+    const { ids, category } = req.body;
+    console.log(ids, category, req.body, req);
+    if (!Array.isArray(ids) || !category) {
+        return res.status(400).json({
+            error: 'Invalid input - ids must be an array and category must be specified'
+        });
+    }
+
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `UPDATE transactions SET category = ? WHERE id IN (${placeholders})`;
+    // transactionIds передаются в params для подстановки в SQL запрос
+    // они заменят плейсхолдеры (?) в условии WHERE id IN (?)
+    // например, если transactionIds = [1,2,3], то запрос будет:
+    // UPDATE transactions SET category = 'some_category' WHERE id IN (1,2,3)
+    const params = [category, ...ids];
+
+    db.run(query, params, function(err) {
+        if (err) {
+            console.error('Error updating categories:', err);
+            return res.status(500).json({
+                error: 'Error updating categories',
+                details: err.message
+            });
+        }
+
+        console.log(`Updated ${this.changes} transactions`);
+        res.status(200).json({
+            success: true,
+            updatedCount: this.changes
+        });
+    });
+});
+
 
 const PORT = process.env.PORT || 5500;
 app.listen(PORT, () => {

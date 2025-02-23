@@ -20,15 +20,21 @@ import {
   PaginationState,
   SortingState,
   useReactTable,
+  Column,
 } from "@tanstack/react-table";
-import { FilterType, FilterText, FilterDates, FilterCategory, FilterAmount } from "./filters";
+import {
+  FilterType,
+  FilterText,
+  FilterDates,
+  FilterCategory,
+  FilterAmount,
+} from "./filters";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  FilterX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,6 +46,29 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { TRANSACTION_COLORS } from "@/lib/constants";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BulkEditDialog } from "./bulk-edit-dialog";
+import { useTransactions } from "./hooks";
+
+declare module '@tanstack/table-core' {
+  interface ColumnMeta<TData extends unknown, TValue> {
+    className?: string;
+    Filter?: React.ComponentType<{
+      column: Column<TData, TValue>;
+      reset: () => void;
+    }>;
+  }
+}
+
+type TableColumnDef<TData> = ColumnDef<TData, any> & {
+  meta?: {
+    className?: string;
+    Filter?: React.ComponentType<{
+      column: Column<TData, any>;
+      reset: () => void;
+    }>;
+  };
+};
 
 type Props = {
   data: TransactionDb[];
@@ -61,6 +90,8 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
     pageIndex: 0,
     pageSize: 30,
   });
+
+  const { fetchTransactions } = useTransactions();
 
   const multiIncludesFilter: FilterFn<any> = (row, columnId, filterValue) => {
     if (!filterValue) return true;
@@ -90,19 +121,51 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
     }
   };
 
-  const columns = useMemo<ColumnDef<TransactionDb, any>[]>(
+  const columns = useMemo<TableColumnDef<TransactionDb>[]>(
     () => [
+      {
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected()}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        ),
+        id: "select",
+        cell: ({ row }) => {
+          return (
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  row.toggleSelected(true);
+                } else {
+                  row.toggleSelected(false);
+                }
+              }}
+            />
+          );
+        },
+      },
       {
         header: "Date",
         id: "date",
         accessorKey: "posted_date",
-        cell: ({ getValue }) => new Date(getValue()).toLocaleDateString(),
+        cell: ({ getValue }) => {
+          const date = new Date(getValue() as string);
+          const day = date.getDate();
+          const month = date.toLocaleString("default", { month: "short" });
+          const year = date.getFullYear();
+          return `${day} ${month} ${year}`;
+        },
         sortingFn: (a, b) => {
           const dateA = new Date(a.original.posted_date);
           const dateB = new Date(b.original.posted_date);
           return dateA.getTime() - dateB.getTime();
         },
-        Filter: FilterDates,
+        meta: {
+          Filter: FilterDates,
+        },
         filterFn: filterByDateRange,
       },
       {
@@ -114,15 +177,17 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
       {
         header: "Description",
         accessorKey: "description",
-        Filter: FilterText,
-        className: "text-xs",
+        meta: {
+          Filter: FilterText,
+          className: "text-xs",
+        },
       },
       {
         header: "Type",
         id: "type",
         accessorKey: "credit_debit",
         cell: ({ getValue }) => {
-          const value = getValue();
+          const value = getValue() as string;
           return (
             <span
               style={{
@@ -133,21 +198,28 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
             </span>
           );
         },
-        Filter: FilterType,
+        meta: {
+          Filter: FilterType,
+        },
         filterFn: multiIncludesFilter,
-      },{
+      },
+      {
         header: "Category",
         id: "category",
         accessorKey: "category",
-        Filter: FilterCategory,
+        meta: {
+          Filter: FilterCategory,
+        },
       },
       {
         header: "Amount",
         accessorKey: "amount",
         sortingFn: "alphanumeric",
-        className: "text-nowrap text-right",
-        Filter: FilterAmount,
-        filterFn: 'inNumberRange',
+        meta: {
+          className: "text-nowrap text-right",
+          Filter: FilterAmount,
+        },
+        filterFn: "inNumberRange",
         cell: ({ getValue }) =>
           getValue()
             .toString()
@@ -171,7 +243,9 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
     getPageCount,
     setPageIndex,
     setPageSize,
-    getRowCount
+    getRowCount,
+    resetRowSelection,
+    getSelectedRowModel,
   } = useReactTable({
     data: data,
     state: {
@@ -200,20 +274,29 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
     onFilterChange(getRowData().rows.map((row) => row.original));
   }, [getRowData()]);
 
+  const onResetFilters = () => {
+    setFilters(defaultFilters);
+    resetRowSelection();
+  };
+
   return (
     <div className="overflow-x-auto">
       <div>
         {getHeaderGroups().map((headerGroup) => (
-          <div className="flex gap-4 items-center py-2">
+          <div className="flex gap-4 items-center py-2" key={headerGroup.id}>
+            <BulkEditDialog
+              ids={getSelectedRowModel().rows.map((row) => row.original.id)}
+              onSave={async () => {
+                await fetchTransactions();
+                resetRowSelection();
+              }}
+            />
             {headerGroup.headers.map((header) => (
-              <div>
-                {header.column.columnDef.Filter ? (
-                  <header.column.columnDef.Filter
+              <div key={header.id + "filter"}>
+                {header.column.columnDef.meta?.Filter ? (
+                  <header.column.columnDef.meta.Filter
                     column={header.column}
-                    reset={() => {
-                      setFilters(defaultFilters);
-                      // setColumnFilters(defaultFilters);
-                    }}
+                    reset={onResetFilters}
                   />
                 ) : null}
               </div>
@@ -230,7 +313,7 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
                   <TableHead
                     id={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className={header.column.columnDef.className}
+                    className={header.column.columnDef.meta?.className}
                     key={header.id}
                   >
                     {flexRender(
@@ -238,7 +321,7 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
                       header.getContext()
                     )}
                     <span>
-                      {{
+                      {{  
                         asc: " 🔼",
                         desc: " 🔽",
                       }[header.column.getIsSorted() as string] ?? null}
@@ -252,11 +335,11 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
         <TableBody>
           {getRowModel().rows.map((row) => {
             return (
-              <TableRow id={row.id}>
+              <TableRow id={row.original.id.toString() + "row"}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     id={cell.id}
-                    className={cell.column.columnDef.className}
+                    className={cell.column.columnDef.meta?.className}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
