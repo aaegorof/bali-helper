@@ -1,8 +1,9 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '../transactions.db');
+const DB_PATH = path.join(__dirname, '../../transactions.db');
 
+// Создаем или открываем базу данных
 const db = new sqlite3.Database(DB_PATH, (err) => {
     if (err) {
         console.error('Ошибка при подключении к базе данных:', err.message);
@@ -11,9 +12,10 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     console.log('Подключение к базе данных успешно');
 });
 
+// Инициализация всех таблиц
 function initializeTables() {
     db.serialize(() => {
-        // Основная таблица транзакций - убрана лишняя запятая после user_id
+        // Основная таблица транзакций
         db.run(`CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             posted_date TEXT,
@@ -34,16 +36,17 @@ function initializeTables() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Индексы
+        // Добавляем внешний ключ
+        db.run(`PRAGMA foreign_keys = ON`);
+
+        // Добавьте в функцию initializeTables()
         db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id)`);
         db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_posted_date ON transactions(posted_date)`);
         db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_hash ON transactions(transaction_hash)`);
-
-        // Внешние ключи
-        db.run(`PRAGMA foreign_keys = ON`);
     });
 }
 
+// Запускаем инициализацию при старте
 initializeTables();
 
-module.exports = db;
+module.exports = db; 

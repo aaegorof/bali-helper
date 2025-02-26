@@ -1,56 +1,20 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import FundingRateDisplay from './bybit-api-tests';
-import APYCalculation from './pages/APYCalculation';
-import TradingAnalyser from './components/TradingAnalyser';
-import { DataProvider } from './context/DataContext';
-import TransactionAnalyzer from './pages/permata';
-import { ThemeProvider } from './components/theme-provider';
-import { ModeToggle } from './components/mode-toggle';
-
+import React from "react";
+import { DataProvider } from "./context/DataContext";
+import { ThemeProvider } from "./components/theme-provider";
+import { AuthProvider } from "@/contexts/auth-context";
+import { AppContent } from "./components/app-content";
 
 const App = () => {
-    return (
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <DataProvider>
-                <Router>
-                    <div>
-                    <nav className="bg-accent text-accent-foreground p-4 mb-4">
-                        <div className="container mx-auto flex items-center justify-center gap-8">
-                            <Link to="/" className="hover:text-gray-300">
-                                Funding Rates
-                            </Link>
-                            <Link to="/apy" className="hover:text-gray-300">
-                                APY Calculation
-                            </Link>
-                            <Link to="/trading-analyser" className="hover:text-gray-300">
-                                Trading Analyser
-                            </Link>
-                            <Link to="/permata" className="hover:text-gray-300">
-                                Permata
-                            </Link>
-                            <Link to="/settings" className="hover:text-gray-300">
-                                Settings
-                            </Link>
-                            <div className='ml-auto'>
-                                <ModeToggle />
-                            </div>
-                        </div>
-                        
-                    </nav>
 
-                    <Routes>
-                        <Route path="/" element={<FundingRateDisplay />} />
-                        <Route path="/apy" element={<APYCalculation />} />
-                        <Route path="/trading-analyser" element={<TradingAnalyser />} />
-                        <Route path="/settings" element={<div>Settings Page</div>} />
-                        <Route path='/permata' element={<TransactionAnalyzer/>}/>
-                    </Routes>
-                    </div>
-                </Router>
-            </DataProvider>
-        </ThemeProvider>
-    );
-}
+  return (
+    <ThemeProvider storageKey="vite-ui-theme">
+      <AuthProvider>
+        <DataProvider>
+          <AppContent />
+        </DataProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
 
 export default App;
