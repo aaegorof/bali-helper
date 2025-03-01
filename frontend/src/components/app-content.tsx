@@ -40,13 +40,14 @@ export function AppContent() {
             <Link to="/settings" className="hover:text-gray-300">
               Settings
             </Link>
+            
+            <div className="flex gap-2 ml-auto">
             <UserSwitcher
-              currentUser={currentUser}
-              recentUsers={recentUsers}
+              currentUser={currentUser.email}
+              recentUsers={recentUsers.map(user => user.email)}
               onSwitch={switchUser}
               onLogout={logout}
             />
-            <div className="ml-auto">
               <ModeToggle />
             </div>
           </div>

@@ -8,6 +8,8 @@ import { formatNumberToKMil } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TRANSACTION_COLORS } from "@/lib/constants";
 import { useTransactions } from "@/components/permata/hooks";
+import { getUserTransactions, saveTransactions } from "@/services/api";
+import { useAuth } from '@/contexts/auth-context';
 
 export interface TransactionDb {
   id?: number;
@@ -17,6 +19,9 @@ export interface TransactionDb {
   amount?: number;
   category?: string;
   time?: string;
+  transaction_hash?: string;
+  user_id?: number;
+  created_at?: string;
 }
 
 export interface Transaction {
@@ -46,44 +51,33 @@ const parseCSV = (csvText) => {
   return data;
 };
 
-const saveTransactionsToDatabase = async (transactions: Transaction[]) => {
+const saveTransactionsToDatabase = async (transactions: Transaction[], userId: number) => {
   try {
-    const response = await fetch("http://localhost:5500/api/transactions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(
-        transactions.map((tr) => ({
-          posted_date: tr["Posted Date (mm/dd/yyyy)"],
-          description: tr.Description,
-          credit_debit: tr["Credit/Debit"],
-          amount: parseFloat(
-            tr.Amount.replace(/[^0-9.-]+/g, "")
-              ?.split(".")
-              ?.at(0)
-          ),
-        }))
+    const transactionsToSave: TransactionDb[] = transactions.map((tr) => ({
+      posted_date: tr["Posted Date (mm/dd/yyyy)"],
+      description: tr.Description,
+      credit_debit: tr["Credit/Debit"],
+      amount: parseFloat(
+        tr.Amount.replace(/[^0-9.-]+/g, "")
+          ?.split(".")
+          ?.at(0)
       ),
-    });
-
-    if (!response.ok) {
-      throw new Error("Ошибка при сохранении транзакций");
-    }
-
-    console.log("Транзакции успешно сохранены");
-    return response.json();
+    }));
+    const response = await saveTransactions(transactionsToSave, userId);
+    return response;
   } catch (error) {
-    console.error("Ошибка:", error);
+    console.error("Ошибка при сохранении транзакций:", error);
+    throw error;
   }
 };
 
+
 const TransactionAnalyzer = () => {
-  // const [transactions, setTransactions] = useState<TransactionDb[]>([]);
+  const { currentUser } = useAuth();
   const [filteredTransactions, setFilteredTransactions] = useState<
     TransactionDb[]
   >([]);
-
+  
   const { transactions, setTransactions, fetchTransactions } = useTransactions();
 
   const [totalDebit, totalCredit] = useMemo(() => {
@@ -108,6 +102,11 @@ const TransactionAnalyzer = () => {
     const files = event.target.files;
     let allParsedData = [];
 
+    if (!currentUser) {
+      console.error('No user logged in');
+      return;
+    }
+
     for (const file of files) {
       const fileExtension = file.name.split(".").pop().toLowerCase();
 
@@ -125,18 +124,24 @@ const TransactionAnalyzer = () => {
       }
     }
 
-    const res = await saveTransactionsToDatabase(allParsedData);
+    const res = await saveTransactionsToDatabase(allParsedData, currentUser.id);
     setTransactions(res.transactions);
   };
 
   useEffect(() => {
-    // const fetchTransactions = async () => {
-    //   const response = await fetch(`http://localhost:5500/api/transactions`);
-    //   const data: TransactionDb[] = await response.json();
-    //   setTransactions(data);
-    // };
+    const loadTransactions = async () => {
+      if (currentUser) {
+        try {
+          const data = await getUserTransactions(currentUser.id);
+          setTransactions(data);
+        } catch (error) {
+          console.error('Failed to load transactions:', error);
+        }
+      }
+    };
     
-  }, [fetchTransactions]);
+    loadTransactions();
+  }, [currentUser]);
 
   return (
     <div className="container mx-auto p-4">
@@ -169,10 +174,8 @@ const TransactionAnalyzer = () => {
             <h3>Show:</h3>
             <Button
               onClick={async () => {
-                const response = await fetch(
-                  `http://localhost:5500/api/transactions`
-                );
-                const data: TransactionDb[] = await response.json();
+                if (!currentUser) return;
+                const data = await getUserTransactions(currentUser.id);
                 setTransactions(data);
               }}
               variant="outline"

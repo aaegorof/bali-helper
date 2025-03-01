@@ -12,38 +12,47 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 });
 
 function initializeTables() {
-    db.serialize(() => {
-        // Основная таблица транзакций - убрана лишняя запятая после user_id
-        db.run(`CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            posted_date TEXT,
-            description TEXT,
-            credit_debit TEXT,
-            amount REAL,
-            time TEXT,
-            transaction_hash TEXT UNIQUE,
-            category TEXT,
-            user_id INTEGER,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            try {
+                // Основная таблица транзакций
+                db.run(`CREATE TABLE IF NOT EXISTS transactions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    posted_date TEXT,
+                    description TEXT,
+                    credit_debit TEXT,
+                    amount REAL,
+                    time TEXT,
+                    transaction_hash TEXT UNIQUE,
+                    category TEXT,
+                    user_id INTEGER,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`);
 
-        // Таблица пользователей
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
+                // Таблица пользователей
+                db.run(`CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )`);
 
-        // Индексы
-        db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id)`);
-        db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_posted_date ON transactions(posted_date)`);
-        db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_hash ON transactions(transaction_hash)`);
+                // Индексы
+                db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id)`);
+                db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_posted_date ON transactions(posted_date)`);
+                db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_hash ON transactions(transaction_hash)`);
 
-        // Внешние ключи
-        db.run(`PRAGMA foreign_keys = ON`);
+                // Внешние ключи
+                db.run(`PRAGMA foreign_keys = ON`);
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
     });
 }
 
-initializeTables();
-
-module.exports = db;
+module.exports = {
+    db,
+    initializeTables
+};

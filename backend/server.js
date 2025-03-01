@@ -1,8 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./db');
-const { initializeDatabase } = require('./migrations');
+const { db, initializeTables } = require('./db');
 const { determineCategory } = require('./helpers');
 
 const app = express();
@@ -10,14 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Запускаем миграции при старте сервера
-initializeDatabase()
-  .then(() => {
-    console.log('Database migration completed successfully');
-  })
-  .catch(err => {
-    console.error('Database migration failed:', err);
-    process.exit(1);
-  });
+initializeTables()
 
 app.post('/api/auth/login', async (req, res) => {
   const { email } = req.body;
@@ -34,7 +26,7 @@ app.post('/api/auth/login', async (req, res) => {
 
       if (user) {
         // Пользователь найден
-        return res.json({ user });
+        return res.json({ id: user.id, email: user.email });
       } else {
         // Создаем нового пользователя
         const createUserQuery = 'INSERT INTO users (email) VALUES (?)';
