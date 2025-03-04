@@ -1,21 +1,23 @@
 import { useState } from 'react';
 import { TransactionDb } from '@/pages/permata';
+import { getUserTransactions } from '@/services/api';
+import { useAuth } from '@/contexts/auth-context';
 
 export function useTransactions() { 
   const [transactions, setTransactions] = useState<TransactionDb[]>([]);
+  const { currentUser } = useAuth();
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`http://localhost:5500/api/transactions`);
-      const data: TransactionDb[] = await response.json();
-      setTransactions(data);
-      return data;
+      const response = await getUserTransactions(currentUser?.id);
+      setTransactions(response);
+      return response;
     } catch (error) {
       console.error('Error fetching transactions:', error);
       return [];
     }
   };
-  console.log(transactions);
+  
   return {
     transactions,
     setTransactions,

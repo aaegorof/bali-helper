@@ -41,3 +41,53 @@ export async function saveTransactions(transactions: TransactionDb[], userId: nu
 
   return response.json();
 } 
+
+export const removeTransactions = async (ids: number[]) => {
+  const response = await fetch(`${API_BASE_URL}/api/transactions`, {
+    method: 'DELETE',
+    body: JSON.stringify({ ids }),
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to remove transactions');
+  }
+
+  return response.json();
+}   
+
+export type RespSuggestCategory = {
+  success: Boolean
+            category: string,
+            keywordCategory?: string,
+            aiCategory?: string
+}
+
+export async function suggestCategory({description}: TransactionDb): Promise<RespSuggestCategory> {
+  const response = await fetch(`${API_BASE_URL}/api/transactions/suggest-category`, {
+    method: 'POST',
+    headers: {
+     'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ description }),
+  })
+  if (!response.ok) {
+    throw new Error('Failed to suggest category');
+  }
+
+  return response.json();
+}
+
+export async function updateCategories(ids: number[], category: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/api/transactions/update-categories`, {
+    method: 'POST',
+    headers: {
+     'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ids, category }),
+  })
+  if (!response.ok) {
+    throw new Error('Failed to update categories');
+  }
+
+  return response.json();
+}

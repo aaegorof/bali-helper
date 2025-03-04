@@ -2,8 +2,10 @@ import React, { useState, useCallback } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FilterCategory } from "./filters";
-import { transactionCategories } from "@/lib/constants";
+
 import { toast } from "sonner";
+import { transactionCategories } from "../../../../backend/categories";
+import { removeTransactions, updateCategories } from "@/services/api";
 
 type BulkEditProps = {
   ids: number[];
@@ -14,14 +16,8 @@ const BulkEdit = ({ids, onSave}: BulkEditProps) => {
   const [category, setCategory] = useState("");
 
   const save = useCallback(() => {
-    fetch(`http://localhost:5500/api/transactions/update-category`, {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ids: [...ids], category }),
-    }).then((res) => {
-      if (res.ok) {
+   updateCategories(ids, category).then((res) => {
+      if (res.success) {
         toast.success("Category updated");
         onSave();
       } else {
@@ -47,7 +43,8 @@ const BulkEdit = ({ids, onSave}: BulkEditProps) => {
         </SelectGroup>
       </SelectContent>
     </Select>
-    <div className="flex justify-end">
+    <div className="flex gap-2 justify-end">
+    <Button variant="destructive" onClick={() => removeTransactions(ids)}>Remove</Button>
     <Button onClick={() => {
         save();
     }}>Save</Button>

@@ -78,7 +78,7 @@ const TransactionAnalyzer = () => {
     TransactionDb[]
   >([]);
   
-  const { transactions, setTransactions, fetchTransactions } = useTransactions();
+  const { transactions, setTransactions } = useTransactions();
 
   const [totalDebit, totalCredit] = useMemo(() => {
     let totalD = 0;
@@ -95,6 +95,7 @@ const TransactionAnalyzer = () => {
   }, [filteredTransactions]);
 
   useEffect(() => {
+    console.log(transactions.map(t => t.category))
     setFilteredTransactions(transactions);
   }, [transactions]);
 

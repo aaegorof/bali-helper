@@ -1,7 +1,9 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+import sqlite3 from 'sqlite3';
+import path from 'path';
+import { initializeVectorTables } from './vectorDb';
 
-const DB_PATH = path.join(__dirname, '../transactions.db');
+// Исправляем путь к базе данных
+const DB_PATH = path.join(process.cwd(), '../transactions.db');
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
     if (err) {
@@ -11,7 +13,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     console.log('Подключение к базе данных успешно');
 });
 
-function initializeTables() {
+async function initializeTables(): Promise<void> {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
             try {
@@ -44,7 +46,16 @@ function initializeTables() {
                 // Внешние ключи
                 db.run(`PRAGMA foreign_keys = ON`);
 
-                resolve();
+                // После создания основных таблиц, инициализируем векторные таблицы
+                initializeVectorTables()
+                    .then(() => {
+                        console.log('Векторные таблицы успешно инициализированы');
+                        resolve();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при инициализации векторных таблиц:', error);
+                        reject(error);
+                    });
             } catch (error) {
                 reject(error);
             }
@@ -52,7 +63,4 @@ function initializeTables() {
     });
 }
 
-module.exports = {
-    db,
-    initializeTables
-};
+export { db, initializeTables };

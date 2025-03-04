@@ -286,6 +286,7 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
           <div className="flex gap-4 items-center py-2" key={headerGroup.id}>
             <BulkEditDialog
               ids={getSelectedRowModel().rows.map((row) => row.original.id)}
+              transactions={getSelectedRowModel().rows.map((row) => row.original)}
               onSave={async () => {
                 await fetchTransactions();
                 resetRowSelection();
