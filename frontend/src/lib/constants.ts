@@ -1,13 +1,3 @@
-export const transactionCategories = [
-  "Cafe/Restaurant",
-  "Supermarket/Products", 
-  "Transfers/Payments",
-  "Bills",
-  "Entertainment",
-  "Shopping",
-  "Tourism",
-]; 
-
 export const TRANSACTION_COLORS = {
   debit: {
     background: "rgba(255, 99, 132, 0.5)",

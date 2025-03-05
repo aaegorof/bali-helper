@@ -18,19 +18,18 @@ const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
 
 // Интерфейсы для типизации
 interface TransactionEmbedding {
-  id: number;
-  transaction_id: number;
   description: string;
   category: string;
   embedding: string;
-  created_at: string;
+  last_used_at: string;
+  usage_count: number;
 }
 
 interface SimilarTransaction {
-  transaction_id: number;
   description: string;
   category: string;
   similarity: number;
+  usage_count: number;
 }
 
 // Создаем подключение к базе данных
@@ -42,27 +41,61 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
   console.log('Подключение к векторной базе данных успешно');
 });
 
-// Инициализация таблиц для векторной базы данных
+// Функция для удаления дубликатов и обновления структуры данных
+async function removeDuplicateEmbeddings(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      try {
+        // Создаем временную таблицу для хранения уникальных записей
+        db.run(`CREATE TEMPORARY TABLE temp_embeddings AS
+          SELECT 
+            description,
+            MAX(category) as category,
+            MAX(embedding) as embedding,
+            MAX(last_used_at) as last_used_at,
+            SUM(usage_count) as usage_count
+          FROM transaction_embeddings
+          GROUP BY description`);
+
+        // Удаляем все записи из основной таблицы
+        db.run(`DELETE FROM transaction_embeddings`);
+
+        // Копируем данные из временной таблицы обратно в основную
+        db.run(`INSERT INTO transaction_embeddings 
+          SELECT * FROM temp_embeddings`);
+
+        // Удаляем временную таблицу
+        db.run(`DROP TABLE temp_embeddings`);
+
+        console.log('Дубликаты успешно удалены');
+        resolve();
+      } catch (error) {
+        console.error('Ошибка при удалении дубликатов:', error);
+        reject(error);
+      }
+    });
+  });
+}
+
+// Обновляем функцию инициализации, чтобы она также удаляла дубликаты
 async function initializeVectorTables(): Promise<void> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       try {
         // Создаем таблицу для хранения embeddings транзакций
         db.run(`CREATE TABLE IF NOT EXISTS transaction_embeddings (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          transaction_id INTEGER,
-          description TEXT,
+          description TEXT PRIMARY KEY,
           category TEXT,
           embedding TEXT,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+          last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          usage_count INTEGER DEFAULT 1
         )`);
 
-        // Индексы
-        db.run(`CREATE INDEX IF NOT EXISTS idx_transaction_embeddings_transaction_id 
-                ON transaction_embeddings(transaction_id)`);
+        // Удаляем дубликаты после создания таблицы
+        removeDuplicateEmbeddings()
+          .then(() => resolve())
+          .catch((error) => reject(error));
 
-        resolve();
       } catch (error) {
         console.error('Ошибка при инициализации векторных таблиц:', error);
         reject(error);
@@ -128,26 +161,57 @@ async function determineCategoryWithAI(description: string): Promise<string> {
 
 // Функция для сохранения embedding в базу данных
 async function saveEmbedding(
-  transactionId: number, 
-  description: string, 
+  description: string,
   category: string, 
   embedding: number[]
-): Promise<number> {
+): Promise<void> {
   return new Promise((resolve, reject) => {
     // Сохраняем embedding как JSON строку
     const embeddingJson = JSON.stringify(embedding);
     
-    db.run(
-      `INSERT INTO transaction_embeddings (transaction_id, description, category, embedding) 
-       VALUES (?, ?, ?, ?)`,
-      [transactionId, description, category, embeddingJson],
-      function(this: { lastID: number }, err: Error | null) {
+    // Сначала проверяем существующую запись
+    db.get(
+      `SELECT category FROM transaction_embeddings WHERE description = ?`,
+      [description],
+      (err: Error | null, row: { category: string } | undefined) => {
         if (err) {
-          console.error('Ошибка при сохранении embedding:', err);
+          console.error('Ошибка при проверке существующей записи:', err);
           return reject(err);
         }
-        
-        resolve(this.lastID);
+
+        // Если запись существует и категория отличается, обновляем только категорию
+        if (row && row.category !== category) {
+          db.run(
+            `UPDATE transaction_embeddings 
+             SET category = ?,
+                 last_used_at = CURRENT_TIMESTAMP,
+                 usage_count = usage_count + 1
+             WHERE description = ?`,
+            [category, description],
+            function(err: Error | null) {
+              if (err) {
+                console.error('Ошибка при обновлении категории:', err);
+                return reject(err);
+              }
+              resolve();
+            }
+          );
+        } else {
+          // Если записи нет или категория та же, используем INSERT OR REPLACE
+          db.run(
+            `INSERT OR REPLACE INTO transaction_embeddings 
+             (description, category, embedding, last_used_at, usage_count)
+             VALUES (?, ?, ?, CURRENT_TIMESTAMP, 1)`,
+            [description, category, embeddingJson],
+            function(err: Error | null) {
+              if (err) {
+                console.error('Ошибка при сохранении embedding:', err);
+                return reject(err);
+              }
+              resolve();
+            }
+          );
+        }
       }
     );
   });
@@ -159,16 +223,12 @@ async function findSimilarTransactions(description: string, limit = 5): Promise<
     const queryEmbedding = await createEmbedding(description);
     
     return new Promise((resolve, reject) => {
-      // Добавляем индекс для оптимизации, если его еще нет
-      db.run(`CREATE INDEX IF NOT EXISTS idx_transaction_embeddings_created_at 
-              ON transaction_embeddings(created_at DESC)`);
-      
-      // Получаем только последние N записей для сравнения
+      // Получаем записи, сортируя по частоте использования и времени последнего использования
       db.all(
-        `SELECT transaction_id, description, category, embedding 
+        `SELECT description, category, embedding, usage_count 
          FROM transaction_embeddings 
-         ORDER BY created_at DESC 
-         LIMIT 1000`,  // Ограничиваем выборку последними 1000 записями
+         ORDER BY usage_count DESC, last_used_at DESC 
+         LIMIT 1000`,
         [],
         (err: Error | null, rows: TransactionEmbedding[]) => {
           if (err) {
@@ -180,10 +240,10 @@ async function findSimilarTransactions(description: string, limit = 5): Promise<
           const similarities = rows.map(row => {
             const rowEmbedding = JSON.parse(row.embedding);
             return {
-              transaction_id: row.transaction_id,
               description: row.description,
               category: row.category,
-              similarity: cosineSimilarity(queryEmbedding, rowEmbedding)
+              similarity: cosineSimilarity(queryEmbedding, rowEmbedding),
+              usage_count: row.usage_count
             };
           });
           

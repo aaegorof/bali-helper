@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { FilterCategory } from "./filters";
 
 import { toast } from "sonner";
 import { transactionCategories } from "../../../../backend/categories";
@@ -18,13 +17,13 @@ const BulkEdit = ({ids, onSave}: BulkEditProps) => {
   const save = useCallback(() => {
    updateCategories(ids, category).then((res) => {
       if (res.success) {
-        toast.success("Category updated");
+        toast.success(`Category updated for ${ids.length} transactions`);
         onSave();
       } else {
-        toast.error("Failed to update category");
+        toast.error(`Failed to update categories: ${res.error}`);
       }
     }).catch((err) => {
-      toast.error("Failed to update category");
+      toast.error(`Failed to update categories: ${err}`);
     });
   }, [ids, category]);
 

@@ -77,7 +77,12 @@ export async function suggestCategory({description}: TransactionDb): Promise<Res
   return response.json();
 }
 
-export async function updateCategories(ids: number[], category: string): Promise<{ success: boolean }> {
+export type RespUpdateCategories = {
+  success: boolean,
+  error?: string
+}
+
+export async function updateCategories(ids: number[], category: string): Promise<RespUpdateCategories> {
   const response = await fetch(`${API_BASE_URL}/api/transactions/update-categories`, {
     method: 'POST',
     headers: {
@@ -87,6 +92,22 @@ export async function updateCategories(ids: number[], category: string): Promise
   })
   if (!response.ok) {
     throw new Error('Failed to update categories');
+  }
+
+  return response.json();
+}
+
+export async function createEmbeddingsForUser(userId: number): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/api/transactions/create-embeddings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create embeddings');
   }
 
   return response.json();

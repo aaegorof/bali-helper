@@ -50,6 +50,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BulkEditDialog } from "./bulk-edit-dialog";
 import { useTransactions } from "./hooks";
 
+// Add type for checkbox event
+type CheckboxEvent = {
+  nativeEvent: PointerEvent;
+};
+
 declare module '@tanstack/table-core' {
   interface ColumnMeta<TData extends unknown, TValue> {
     className?: string;
@@ -72,7 +77,7 @@ type TableColumnDef<TData> = ColumnDef<TData, any> & {
 
 type Props = {
   data: TransactionDb[];
-  onFilterChange: (filteredData: TransactionDb[]) => void;
+  onFilterChange?: (filteredData: TransactionDb[]) => void;
 };
 
 const defaultFilters: ColumnFiltersState = [
@@ -83,16 +88,17 @@ const defaultFilters: ColumnFiltersState = [
 
 const defaultSorting: SortingState = [{ id: "date", desc: true }];
 
-const TransactionsPermata = ({ data, onFilterChange }: Props) => {
+const TransactionsPermata = () => {
   const [filters, setFilters] = useState<ColumnFiltersState>(defaultFilters);
   const [sorting, setSorting] = useState<SortingState>(defaultSorting);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 30,
   });
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
-  const { fetchTransactions } = useTransactions();
-
+  const { fetchTransactions, setTransactions, transactions: data, setFilteredTransactions } = useTransactions();
+  // console.log(data)
   const multiIncludesFilter: FilterFn<any> = (row, columnId, filterValue) => {
     if (!filterValue) return true;
     const [Debit, Credit] = filterValue;
@@ -132,18 +138,43 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
           />
         ),
         id: "select",
-        cell: ({ row }) => {
+        cell: ({ row, table }) => {
           return (
+            // <div onClick={(e) => {
+            //   const shiftPressed = e.shiftKey;
+            //   const currentIndex = row.index;
+            //   const checked = !row.getIsSelected();
+
+            //   console.log(shiftPressed, currentIndex, checked)
+            
+            //     if (shiftPressed && lastSelectedIndex !== null) {
+            //       const start = Math.min(lastSelectedIndex, currentIndex);
+            //       const end = Math.max(lastSelectedIndex, currentIndex);
+
+            //       const rows = table.getRowModel().rows.filter((r) => r.index >= start && r.index <= end);
+            //       rows.forEach((r) => r.toggleSelected(!!checked));
+            //       console.log(rows)
+            //       // setLastSelectedIndex(null)
+            //       // for (let i = start; i <= end; i++) {
+            //       //   const targetRow = table.getRowModel().rows.;
+            //       //   console.log(targetRow)
+            //       //   targetRow.toggleSelected(!!checked);
+            //       // }
+            //     } 
+            //     // else {
+            //       // row.toggleSelected(!!checked);
+            //     // }
+            //     row.toggleSelected(!!checked);
+            //     setLastSelectedIndex(currentIndex);
+            // }}>
             <Checkbox
               checked={row.getIsSelected()}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  row.toggleSelected(true);
-                } else {
-                  row.toggleSelected(false);
-                }
+              // @ts-ignore - ignore type error for checkbox event
+              onCheckedChange={(checked: boolean) => {
+                row.toggleSelected(!!checked);
               }}
             />
+            // </div>
           );
         },
       },
@@ -271,7 +302,8 @@ const TransactionsPermata = ({ data, onFilterChange }: Props) => {
   });
 
   useEffect(() => {
-    onFilterChange(getRowData().rows.map((row) => row.original));
+    const data = [...getRowData().rows.map((row) => row.original)]
+    setFilteredTransactions(data);
   }, [getRowData()]);
 
   const onResetFilters = () => {

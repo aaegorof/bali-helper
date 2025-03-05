@@ -261,7 +261,7 @@ app.post('/api/transactions', async (req: Request, res: Response) => {
         if (transaction.description && transaction.category) {
           const embedding = await createEmbedding(transaction.description);
           if (transaction.id !== undefined) {
-            await saveEmbedding(transaction.id, transaction.description, transaction.category, embedding);
+            await saveEmbedding(transaction.description, transaction.category, embedding);
           }
           console.log(`Создан embedding для транзакции ID ${transaction.id}`);
         }
@@ -363,21 +363,6 @@ app.post('/api/transactions/update-categories', async (req: Request, res: Respon
         // Обновляем embeddings для измененных транзакций
         const embeddingPromises = updatedTransactions.map(async (transaction) => {
             try {
-                // Удаляем старые embeddings
-                await new Promise<void>((resolve, reject) => {
-                    db.run(
-                        `DELETE FROM transaction_embeddings WHERE transaction_id = ?`,
-                        [transaction.id],
-                        (err: Error | null) => {
-                            if (err) {
-                                console.error('Error deleting old embedding:', err);
-                                return reject(err);
-                            }
-                            resolve();
-                        }
-                    );
-                });
-                
                 // Парсим время из описания
                 const { cleanDescription } = parseTimeFromDescription(transaction?.description || '');
                 
@@ -385,7 +370,7 @@ app.post('/api/transactions/update-categories', async (req: Request, res: Respon
                 if (cleanDescription) {
                     const embedding = await createEmbedding(cleanDescription);
                     if (transaction.id !== undefined) {
-                        await saveEmbedding(transaction.id, cleanDescription, category, embedding);
+                        await saveEmbedding(cleanDescription, category, embedding);
                     }
                 }
             } catch (error) {
@@ -491,21 +476,6 @@ app.post('/api/transactions/update-single-category', async (req: Request, res: R
         });
         
         if (updatedTransaction && updatedTransaction?.description) {
-            // Удаляем старый embedding
-            await new Promise<void>((resolve, reject) => {
-                db.run(
-                    `DELETE FROM transaction_embeddings WHERE transaction_id = ?`,
-                    [id],
-                    (err: Error | null) => {
-                        if (err) {
-                            console.error('Error deleting old embedding:', err);
-                            return reject(err);
-                        }
-                        resolve();
-                    }
-                );
-            });
-            
             // Парсим время из описания
             const { cleanDescription } = parseTimeFromDescription(updatedTransaction.description);
             
@@ -513,7 +483,7 @@ app.post('/api/transactions/update-single-category', async (req: Request, res: R
             if (cleanDescription) {
                 const embedding = await createEmbedding(cleanDescription);
                 if (updatedTransaction.id !== undefined) {
-                    await saveEmbedding(updatedTransaction.id, cleanDescription, category, embedding);
+                    await saveEmbedding(cleanDescription, category, embedding);
                 }
             }
         }
@@ -526,6 +496,67 @@ app.post('/api/transactions/update-single-category', async (req: Request, res: R
         console.error('Error updating transaction category:', err);
         res.status(500).json({
             error: 'Error updating transaction category',
+            details: err.message
+        });
+    }
+});
+
+// Endpoint for creating embeddings for all user transactions
+app.post('/api/transactions/create-embeddings', async (req: Request, res: Response) => {
+    const { userId } = req.body;
+    
+    if (!userId) {
+        return res.status(400).json({
+            error: 'User ID is required'
+        });
+    }
+
+    try {
+        // Получаем все транзакции пользователя
+        const transactions: Transaction[] = await new Promise((resolve, reject) => {
+            db.all(
+                `SELECT id, description, category FROM transactions WHERE user_id = ?`,
+                [userId],
+                (err: Error | null, rows: Transaction[]) => {
+                    if (err) {
+                        console.error('Error fetching transactions:', err);
+                        return reject(err);
+                    }
+                    resolve(rows);
+                }
+            );
+        });
+
+        // Создаем embeddings для каждой транзакции
+        const embeddingPromises = transactions.map(async (transaction) => {
+            try {
+                if (transaction.description && transaction.category) {
+                    const { cleanDescription } = parseTimeFromDescription(transaction.description);
+                    if (cleanDescription) {
+                        const embedding = await createEmbedding(cleanDescription);
+                        if (transaction.id !== undefined) {
+                            await saveEmbedding(cleanDescription, transaction.category, embedding);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating embedding for transaction:', error);
+                // Продолжаем выполнение даже при ошибке создания embedding
+            }
+        });
+
+        // Ждем завершения создания всех embeddings
+        await Promise.all(embeddingPromises);
+
+        res.status(200).json({
+            success: true,
+            message: 'Embeddings created successfully',
+            count: transactions.length
+        });
+    } catch (err: any) {
+        console.error('Error creating embeddings:', err);
+        res.status(500).json({
+            error: 'Error creating embeddings',
             details: err.message
         });
     }

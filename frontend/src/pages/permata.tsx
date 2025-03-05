@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 
 import * as XLSX from "xlsx";
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { TRANSACTION_COLORS } from "@/lib/constants";
 import { useTransactions } from "@/components/permata/hooks";
 import { getUserTransactions, saveTransactions } from "@/services/api";
 import { useAuth } from '@/contexts/auth-context';
+import { Toaster } from "sonner";
 
 export interface TransactionDb {
   id?: number;
@@ -74,11 +75,13 @@ const saveTransactionsToDatabase = async (transactions: Transaction[], userId: n
 
 const TransactionAnalyzer = () => {
   const { currentUser } = useAuth();
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    TransactionDb[]
-  >([]);
   
-  const { transactions, setTransactions } = useTransactions();
+  const { transactions, setTransactions, filteredTransactions } = useTransactions();
+  console.log('Component render:', { filteredTransactions });
+
+  useEffect(() => {
+    console.log('filteredTransactions changed:', filteredTransactions);
+  }, [filteredTransactions, filteredTransactions.length]);
 
   const [totalDebit, totalCredit] = useMemo(() => {
     let totalD = 0;
@@ -93,11 +96,6 @@ const TransactionAnalyzer = () => {
     });
     return [totalD, totalC];
   }, [filteredTransactions]);
-
-  useEffect(() => {
-    console.log(transactions.map(t => t.category))
-    setFilteredTransactions(transactions);
-  }, [transactions]);
 
   const handleFileUpload = async (event) => {
     const files = event.target.files;
@@ -129,20 +127,6 @@ const TransactionAnalyzer = () => {
     setTransactions(res.transactions);
   };
 
-  useEffect(() => {
-    const loadTransactions = async () => {
-      if (currentUser) {
-        try {
-          const data = await getUserTransactions(currentUser.id);
-          setTransactions(data);
-        } catch (error) {
-          console.error('Failed to load transactions:', error);
-        }
-      }
-    };
-    
-    loadTransactions();
-  }, [currentUser]);
 
   return (
     <div className="container mx-auto p-4">
@@ -229,8 +213,8 @@ const TransactionAnalyzer = () => {
 
       <div className="grid gap-4">
         <TransactionsPermata
-          data={transactions}
-          onFilterChange={setFilteredTransactions}
+          // data={transactions}
+          // onFilterChange={setFilteredTransactions}
           // allTransactions={transactions}
         />
       </div>

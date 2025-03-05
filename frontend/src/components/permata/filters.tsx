@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, DebounceInput, DebounceNumberInput } from "@/components/ui/input";
 import { Button } from "../ui/button";
@@ -11,7 +11,7 @@ import {
   SelectItem,
 } from "../ui/select";
 import { FilterX } from "lucide-react";
-import { transactionCategories } from "@/lib/constants";
+import { transactionCategories } from "../../../../backend/categories";
 
 const FilterType = ({ column }) => {
   const val = column?.getFilterValue() ?? [true, true];
