@@ -7,10 +7,10 @@ import TransactionsPermata from "@/components/permata/transactions";
 import { formatNumberToKMil } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TRANSACTION_COLORS } from "@/lib/constants";
-import { useTransactions } from "@/components/permata/hooks";
 import { getUserTransactions, saveTransactions } from "@/services/api";
 import { useAuth } from '@/contexts/auth-context';
 import { Toaster } from "sonner";
+import { TransactionsProvider, useTransactionsContext } from "@/components/permata/transactions-context";
 
 export interface TransactionDb {
   id?: number;
@@ -72,16 +72,10 @@ const saveTransactionsToDatabase = async (transactions: Transaction[], userId: n
   }
 };
 
-
-const TransactionAnalyzer = () => {
+const TransactionAnalyzerContent = () => {
   const { currentUser } = useAuth();
+  const { transactions, setTransactions, filteredTransactions } = useTransactionsContext();
   
-  const { transactions, setTransactions, filteredTransactions } = useTransactions();
-  console.log('Component render:', { filteredTransactions });
-
-  useEffect(() => {
-    console.log('filteredTransactions changed:', filteredTransactions);
-  }, [filteredTransactions, filteredTransactions.length]);
 
   const [totalDebit, totalCredit] = useMemo(() => {
     let totalD = 0;
@@ -132,8 +126,8 @@ const TransactionAnalyzer = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Transaction Analyzer</h1>
 
-      <Card className="mb-4 grid grid-cols-[1fr_2fr_1fr] gap-4">
-        <div className="p-4 grid place-content-start gap-8">
+      <div className="mb-4 grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-4">
+        <Card className="p-4 grid place-content-start gap-8">
           <div className="text-xs">
             <p>
               You can upload a file from Permata Bank export, it will
@@ -155,7 +149,7 @@ const TransactionAnalyzer = () => {
             multiple
             onChange={handleFileUpload}
           />
-          <div className="grid gap-2">
+          <div className="flex gap-2 items-center">
             <h3>Show:</h3>
             <Button
               onClick={async () => {
@@ -176,9 +170,11 @@ const TransactionAnalyzer = () => {
               Uncategorized transactions
             </Button>
           </div>
-        </div>
-        <GraphPermata data={filteredTransactions} className="max-h-[400px]" />
-        <div className="p-4">
+        </Card>
+
+        <GraphPermata className="max-h-[400px]" />
+
+        <Card className="p-4">
           <p className="text-xs">
             Calculated from{" "}
             {filteredTransactions.length !== transactions.length && (
@@ -208,17 +204,20 @@ const TransactionAnalyzer = () => {
               {formatNumberToKMil(totalCredit)}
             </span>
           </p>
-        </div>
-      </Card>
-
-      <div className="grid gap-4">
-        <TransactionsPermata
-          // data={transactions}
-          // onFilterChange={setFilteredTransactions}
-          // allTransactions={transactions}
-        />
+        </Card>
+      </div>
+      <div className="grid gap-4 mt-8">
+        <TransactionsPermata />
       </div>
     </div>
+  );
+};
+
+const TransactionAnalyzer = () => {
+  return (
+    <TransactionsProvider>
+      <TransactionAnalyzerContent />
+    </TransactionsProvider>
   );
 };
 

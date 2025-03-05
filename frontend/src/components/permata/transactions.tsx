@@ -48,7 +48,7 @@ import {
 import { TRANSACTION_COLORS } from "@/lib/constants";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BulkEditDialog } from "./bulk-edit-dialog";
-import { useTransactions } from "./hooks";
+import { useTransactionsContext } from "./transactions-context";
 
 // Add type for checkbox event
 type CheckboxEvent = {
@@ -75,11 +75,6 @@ type TableColumnDef<TData> = ColumnDef<TData, any> & {
   };
 };
 
-type Props = {
-  data: TransactionDb[];
-  onFilterChange?: (filteredData: TransactionDb[]) => void;
-};
-
 const defaultFilters: ColumnFiltersState = [
   { id: "type", value: [true, true] },
   { id: "date", value: ["", ""] },
@@ -97,8 +92,8 @@ const TransactionsPermata = () => {
   });
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
-  const { fetchTransactions, setTransactions, transactions: data, setFilteredTransactions } = useTransactions();
-  // console.log(data)
+  const { fetchTransactions, transactions: data, setFilteredTransactions } = useTransactionsContext();
+
   const multiIncludesFilter: FilterFn<any> = (row, columnId, filterValue) => {
     if (!filterValue) return true;
     const [Debit, Credit] = filterValue;
@@ -126,6 +121,10 @@ const TransactionsPermata = () => {
       return new Date(cellValue) <= new Date(endDate);
     }
   };
+
+  useEffect(() => {
+    resetRowSelection();
+  }, [data])
 
   const columns = useMemo<TableColumnDef<TransactionDb>[]>(
     () => [
@@ -221,9 +220,7 @@ const TransactionsPermata = () => {
           const value = getValue() as string;
           return (
             <span
-              style={{
-                color: TRANSACTION_COLORS[value.toLowerCase()]?.text,
-              }}
+              className={value === "Debit" ? "text-destructive" : "text-positive"}
             >
               {value}
             </span>
@@ -251,10 +248,20 @@ const TransactionsPermata = () => {
           Filter: FilterAmount,
         },
         filterFn: "inNumberRange",
-        cell: ({ getValue }) =>
-          getValue()
-            .toString()
-            .replace(/\B(?=(\d{3})+(?!\d))/g, " "),
+        cell: ({ getValue, row }) =>
+          row.original.credit_debit === "Debit" ? (
+            <span className="text-destructive">
+              {getValue()
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+            </span>
+          ) : (
+            <span className="text-positive">
+              {getValue()
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+            </span>
+          )
       },
     ],
     []

@@ -1,10 +1,10 @@
 export const TRANSACTION_COLORS = {
   debit: {
-    background: "rgba(255, 99, 132, 0.5)",
-    text: "rgb(255, 99, 132)",
+    background: "hsl(347 80% 60% / 0.75)", // destructive with 0.5 opacity
+    text: "hsl(347 80% 60%)", // destructive
   },
   credit: {
-    background: "rgba(53, 162, 235, 0.5)",
-    text: "rgb(53, 162, 235)",
+    background: "hsl(138 78% 33% / 0.75)", // positive with 0.5 opacity 
+    text: "hsl(138 78% 33%)", // positive
   },
-} as const; 
+} as const;

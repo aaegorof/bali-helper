@@ -1,4 +1,3 @@
-import { TransactionDb  } from "@/pages/permata";
 import React, { useEffect, useState } from "react";
 import {
     Chart as ChartJS,
@@ -12,6 +11,7 @@ import {
   import { Bar } from "react-chartjs-2";
 import { formatNumberToKMil } from "@/lib/utils";
 import { TRANSACTION_COLORS } from "@/lib/constants";
+import { useTransactionsContext } from "./transactions-context";
 
 
 ChartJS.register(
@@ -25,13 +25,12 @@ ChartJS.register(
 
 
 type Props = {
-  data: TransactionDb[];
   className?: string;
 };
 
-const GraphPermata = ({ data, className }: Props) => {
+const GraphPermata = ({ className }: Props) => {
   const [monthlyData, setMonthlyData] = useState(null);
-
+  const { filteredTransactions: data } = useTransactionsContext();
   useEffect(() => {
     // Prepare Data for Chart
     const monthly = {};
@@ -80,6 +79,10 @@ const GraphPermata = ({ data, className }: Props) => {
     plugins: {
       legend: {
         position: "bottom" as const,
+        labels: {
+          usePointStyle: true,
+          pointStyle: "circle",
+        },
       },
       title: {
         display: true,
@@ -104,7 +107,7 @@ const GraphPermata = ({ data, className }: Props) => {
   return (
     <div className={className}>
       {monthlyData && (
-        <div className="mb-4">
+        <div>
           <Bar options={chartOptions} data={monthlyData} />
         </div>
       )}
