@@ -44,6 +44,7 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
         <Button 
           variant="outline" 
           disabled={ids.length === 0}
+          className="w-[13ch]"
         >
           Bulk Edit ({ids.length})
         </Button>

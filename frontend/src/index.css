@@ -105,5 +105,16 @@
     p + p{
       margin-top: 1em;
     }
+    h1 {
+      @apply text-2xl font-bold;
+      margin-top: 1.2em;
+      margin-bottom: 1em;
+    }
+    h2 {
+      @apply text-xl font-bold;
+    }
+    h3 {
+      @apply text-lg font-bold;
+    }
   }
 }

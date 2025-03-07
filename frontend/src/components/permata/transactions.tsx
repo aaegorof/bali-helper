@@ -21,6 +21,7 @@ import {
   SortingState,
   useReactTable,
   Column,
+  Row,
 } from "@tanstack/react-table";
 import {
   FilterType,
@@ -28,6 +29,7 @@ import {
   FilterDates,
   FilterCategory,
   FilterAmount,
+  MultiFilterCategory,
 } from "./filters";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +37,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +53,7 @@ import { TRANSACTION_COLORS } from "@/lib/constants";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BulkEditDialog } from "./bulk-edit-dialog";
 import { useTransactionsContext } from "./transactions-context";
+import { cn } from "@/lib/utils";
 
 // Add type for checkbox event
 type CheckboxEvent = {
@@ -79,6 +84,7 @@ const defaultFilters: ColumnFiltersState = [
   { id: "type", value: [true, true] },
   { id: "date", value: ["", ""] },
   { id: "amount", value: ["", ""] },
+  { id: "category", value: null },
 ];
 
 const defaultSorting: SortingState = [{ id: "date", desc: true }];
@@ -90,6 +96,7 @@ const TransactionsPermata = () => {
     pageIndex: 0,
     pageSize: 30,
   });
+  const [rowSelection, setRowSelection] = useState({});
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const { fetchTransactions, transactions: data, setFilteredTransactions } = useTransactionsContext();
@@ -136,44 +143,18 @@ const TransactionsPermata = () => {
             aria-label="Select all"
           />
         ),
+        meta: {
+          className: "w-4",
+        },
         id: "select",
-        cell: ({ row, table }) => {
+        cell: ({ row }) => {
           return (
-            // <div onClick={(e) => {
-            //   const shiftPressed = e.shiftKey;
-            //   const currentIndex = row.index;
-            //   const checked = !row.getIsSelected();
-
-            //   console.log(shiftPressed, currentIndex, checked)
-            
-            //     if (shiftPressed && lastSelectedIndex !== null) {
-            //       const start = Math.min(lastSelectedIndex, currentIndex);
-            //       const end = Math.max(lastSelectedIndex, currentIndex);
-
-            //       const rows = table.getRowModel().rows.filter((r) => r.index >= start && r.index <= end);
-            //       rows.forEach((r) => r.toggleSelected(!!checked));
-            //       console.log(rows)
-            //       // setLastSelectedIndex(null)
-            //       // for (let i = start; i <= end; i++) {
-            //       //   const targetRow = table.getRowModel().rows.;
-            //       //   console.log(targetRow)
-            //       //   targetRow.toggleSelected(!!checked);
-            //       // }
-            //     } 
-            //     // else {
-            //       // row.toggleSelected(!!checked);
-            //     // }
-            //     row.toggleSelected(!!checked);
-            //     setLastSelectedIndex(currentIndex);
-            // }}>
             <Checkbox
               checked={row.getIsSelected()}
-              // @ts-ignore - ignore type error for checkbox event
               onCheckedChange={(checked: boolean) => {
                 row.toggleSelected(!!checked);
               }}
             />
-            // </div>
           );
         },
       },
@@ -195,6 +176,7 @@ const TransactionsPermata = () => {
         },
         meta: {
           Filter: FilterDates,
+          className: "text-nowrap w-[8ch]",
         },
         filterFn: filterByDateRange,
       },
@@ -202,6 +184,9 @@ const TransactionsPermata = () => {
         header: "Time",
         id: "time",
         accessorKey: "time",
+        meta: {
+          className: "text-nowrap text-right w-[8ch]",
+        },
         // cell: ({ getValue }) => new Date(getValue()).toLocaleTimeString(),
       },
       {
@@ -236,7 +221,14 @@ const TransactionsPermata = () => {
         id: "category",
         accessorKey: "category",
         meta: {
-          Filter: FilterCategory,
+          Filter: MultiFilterCategory,
+        },
+        // filterFn: "arrIncludesSome",
+        filterFn: (row, columnId, filterValue) => {
+          const cellValue = row.getValue(columnId) as string;
+          if (!filterValue || filterValue.length === 0) return true;
+          if (filterValue.includes("Uncategorized") && filterValue.length === 1) return cellValue === "" || cellValue === 'Uncategorized';
+          return filterValue.includes(cellValue)
         },
       },
       {
@@ -244,7 +236,7 @@ const TransactionsPermata = () => {
         accessorKey: "amount",
         sortingFn: "alphanumeric",
         meta: {
-          className: "text-nowrap text-right",
+          className: "text-nowrap text-right justify-end",
           Filter: FilterAmount,
         },
         filterFn: "inNumberRange",
@@ -267,9 +259,36 @@ const TransactionsPermata = () => {
     []
   );
 
+  const table = useReactTable({
+    data: data,
+    state: {
+      columnFilters: filters,
+      sorting,
+      pagination,
+      rowSelection,
+    },
+    onRowSelectionChange: setRowSelection,
+    initialState: {
+      columnFilters: defaultFilters,
+    },
+    columns,
+    enableColumnFilters: true,
+    filterFns: {
+      multiIncludes: multiIncludesFilter,
+    },
+    getFilteredRowModel: getFilteredRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setFilters,
+    onPaginationChange: setPagination,
+    enableRowSelection: true,
+    enableMultiRowSelection: true,
+  });
+
   const {
     getHeaderGroups,
-    getRowModel,
     getFilteredRowModel: getRowData,
     firstPage,
     getCanPreviousPage,
@@ -284,29 +303,7 @@ const TransactionsPermata = () => {
     getRowCount,
     resetRowSelection,
     getSelectedRowModel,
-  } = useReactTable({
-    data: data,
-    state: {
-      columnFilters: filters,
-      sorting,
-      pagination,
-    },
-    initialState: {
-      columnFilters: defaultFilters,
-    },
-    columns,
-    enableColumnFilters: true,
-    filterFns: {
-      multiIncludes: multiIncludesFilter,
-    },
-    onSortingChange: setSorting,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnFiltersChange: setFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
-  });
+  } = table;
 
   useEffect(() => {
     const data = [...getRowData().rows.map((row) => row.original)]
@@ -317,6 +314,29 @@ const TransactionsPermata = () => {
     setFilters(defaultFilters);
     resetRowSelection();
   };
+
+  function handleRowClick(rowIndex: number, row: Row<TransactionDb>, event: React.MouseEvent) {
+    
+    if (lastSelectedIndex !== null && event.shiftKey) {
+      const start = Math.min(lastSelectedIndex, rowIndex);
+        const end = Math.max(lastSelectedIndex, rowIndex);
+        
+        const newSelection = { ...rowSelection };
+        for (let i = start; i <= end; i++) {
+          const currentRow = table.getRowModel().rowsById[i]
+          
+          if (currentRow) {
+            newSelection[currentRow.id] = true;
+          }
+        }
+        
+        setRowSelection(newSelection);
+        setLastSelectedIndex(rowIndex);
+      } else {
+        row.toggleSelected();
+        setLastSelectedIndex(rowIndex);
+    }
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -353,19 +373,20 @@ const TransactionsPermata = () => {
                   <TableHead
                     id={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className={header.column.columnDef.meta?.className}
                     key={header.id}
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    <div className={cn("flex items-center gap-2 justify-inherit", header.column.columnDef.meta?.className)}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                     <span>
                       {{  
-                        asc: " 🔼",
-                        desc: " 🔽",
+                        asc: <ArrowUp className="w-4 h-4" />,
+                        desc: <ArrowDown className="w-4 h-4" />,
                       }[header.column.getIsSorted() as string] ?? null}
                     </span>
+                    </div>
                   </TableHead>
                 ))}
               </TableRow>
@@ -373,9 +394,9 @@ const TransactionsPermata = () => {
           ))}
         </TableHeader>
         <TableBody>
-          {getRowModel().rows.map((row) => {
+          {table.getRowModel().rows.map((row) => {
             return (
-              <TableRow id={row.original.id.toString() + "row"}>
+              <TableRow className='cursor-pointer' id={row.original.id.toString() + "row"} onClick={(e) => handleRowClick(row.index, row, e)}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     id={cell.id}

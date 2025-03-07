@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 
 import * as XLSX from "xlsx";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import GraphPermata from "@/components/permata/graph";
 import TransactionsPermata from "@/components/permata/transactions";
 import { formatNumberToKMil } from "@/lib/utils";
@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { TRANSACTION_COLORS } from "@/lib/constants";
 import { getUserTransactions, saveTransactions } from "@/services/api";
 import { useAuth } from '@/contexts/auth-context';
-import { Toaster } from "sonner";
 import { TransactionsProvider, useTransactionsContext } from "@/components/permata/transactions-context";
+  import { Input } from "@/components/ui/input";
 
 export interface TransactionDb {
   id?: number;
@@ -123,11 +123,15 @@ const TransactionAnalyzerContent = () => {
 
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Transaction Analyzer</h1>
+    <div className="container mx-auto">
+      <h1>Transaction Analyzer</h1>
 
-      <div className="mb-4 grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-4">
-        <Card className="p-4 grid place-content-start gap-8">
+      <div className="mb-4 grid grid-cols-1 xl:grid-cols-[1fr_2fr_1fr] gap-4">
+        <Card>
+          <CardHeader>
+          <CardTitle>Import Transactions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-8">
           <div className="text-xs">
             <p>
               You can upload a file from Permata Bank export, it will
@@ -143,40 +147,26 @@ const TransactionAnalyzerContent = () => {
               file multiple times, it will not add the same transactions again.
             </p>
           </div>
-          <input
+          <Input
             type="file"
             accept=".csv, .xlsx, .xls"
             multiple
+            className="cursor-pointer bg-accent"
             onChange={handleFileUpload}
           />
-          <div className="flex gap-2 items-center">
-            <h3>Show:</h3>
-            <Button
-              onClick={async () => {
-                if (!currentUser) return;
-                const data = await getUserTransactions(currentUser.id);
-                setTransactions(data);
-              }}
-              variant="outline"
-            >
-              All Transactions
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setTransactions(transactions.filter((tr) => !tr.category));
-              }}
-            >
-              Uncategorized transactions
-            </Button>
-          </div>
+          </CardContent>
         </Card>
 
         <GraphPermata className="max-h-[400px]" />
+        
 
         <Card className="p-4">
-          <p className="text-xs">
-            Calculated from{" "}
+          <CardHeader>
+          <CardTitle>Total</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs">
+              Calculated from{" "}
             {filteredTransactions.length !== transactions.length && (
               <span>
                 <span className="font-bold">{filteredTransactions.length}</span>{" "}
@@ -204,6 +194,7 @@ const TransactionAnalyzerContent = () => {
               {formatNumberToKMil(totalCredit)}
             </span>
           </p>
+          </CardContent>
         </Card>
       </div>
       <div className="grid gap-4 mt-8">

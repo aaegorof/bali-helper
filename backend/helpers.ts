@@ -7,9 +7,13 @@ function determineKeywordCategory(description: string): string {
   if (!description) return "";
 
   const lowerDesc = description.toLowerCase();
-Object.entries(catKeywords).forEach(([group, keywords]) => {
-  if(keywords.includes(lowerDesc)) return group
-})
+  
+  // forEach не возвращает значение, нужно использовать for...of или find
+  for (const [group, keywords] of Object.entries(catKeywords)) {
+    if (keywords.includes(lowerDesc)) {
+      return group;
+    }
+  }
 
   return "";
 }

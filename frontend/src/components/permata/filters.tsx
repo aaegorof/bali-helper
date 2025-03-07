@@ -12,6 +12,8 @@ import {
 } from "../ui/select";
 import { FilterX } from "lucide-react";
 import { transactionCategories } from "../../../../backend/categories";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { DatePicker } from "../ui/datepicker";
 
 const FilterType = ({ column }) => {
   const val = column?.getFilterValue() ?? [true, true];
@@ -78,9 +80,42 @@ const FilterCategory = ({ column }) => {
               {category}
             </SelectItem>
           ))}
+          <SelectItem key={'empty'} value={"Uncategorized"}>
+              {'Uncategorized'}
+            </SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
+  );
+};
+
+const MultiFilterCategory = ({ column }) => {
+  const val = column?.getFilterValue() ?? null;
+  const options = [
+    ...transactionCategories.map(category => ({
+      label: category,
+      value: category
+    })),
+    { label: "Uncategorized", value: "Uncategorized" }
+  ];
+
+  return (
+    <MultiSelect
+      options={options}
+      defaultValue={val}
+      value={val}
+      onValueChange={(values) => {
+        // Если выбрано "All" или все категории, очищаем фильтр
+        if (values.includes(null) || values.length === options.length - 1) {
+          column.setFilterValue(null);
+        } else {
+          column.setFilterValue(values);
+        }
+      }}
+      placeholder="Select categories..."
+      maxCount={1}
+      className="w-full min-w-80"
+    />
   );
 };
 
@@ -119,34 +154,10 @@ const FilterDates = ({ column }) => {
   const [start, end] = column?.getFilterValue();
   return (
     <div className="flex gap-2">
-      <div className="flex items-center space-x-2">
-        <Input
-          type="date"
-          value={start}
-          onChange={(e) =>
-            column.setFilterValue(([a, b]) => [e.target.value, b])
-          }
-        />
-      </div>
-      <div className="flex items-center space-x-2">
-        <Input
-          type="date"
-          value={end}
-          onChange={(e) =>
-            column.setFilterValue(([a, b]) => [a, e.target.value])
-          }
-        />
-        {/* <DatePicker
-    mode="single"
-    selected={endDate}
-    onSelect={setEndDate}
-    placeholderText="End Date"
-    className="w-full"
-  /> */}
-        {/* <CalendarIcon className="w-4 h-4 opacity-50" /> */}
-      </div>
+      <DatePicker date={start} setDate={(date) => column.setFilterValue(([a, b]) => [date, b])} />
+      <DatePicker date={end} setDate={(date) => column.setFilterValue(([a, b]) => [a, date])} />
     </div>
   );
 };
 
-export { FilterType, FilterText, FilterDates, FilterAmount, FilterCategory };
+export { FilterType, FilterText, FilterDates, FilterAmount, FilterCategory, MultiFilterCategory };
