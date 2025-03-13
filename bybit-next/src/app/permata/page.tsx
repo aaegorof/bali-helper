@@ -12,6 +12,8 @@ import Graph from './components/graph';
 import { useRouter } from 'next/navigation';
 import TransactionUploader from './components/transaction-uploader';
 import TotalAmounts from './components/total-amounts';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function Permata() {
   const router = useRouter();
@@ -36,8 +38,13 @@ export default function Permata() {
   // }
 
   return (
-    <div className="container mx-auto">
-      <h1>Permata</h1>
+    <main className="container mx-auto">
+      <div className="flex justify-between items-center">
+        <h1>Permata</h1>
+        <Link href="/">
+          <Button variant="outline">Back to Home</Button>
+        </Link>
+      </div>
 
       <TransactionsProvider>
         <div className="mb-8 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_2fr_1fr]">
@@ -65,6 +72,6 @@ export default function Permata() {
         <h2 className="mb-2">Transactions</h2>
         <Transactions />
       </TransactionsProvider>
-    </div>
+    </main>
   );
 }

@@ -1,7 +1,5 @@
 'use client';
 import { LoginForm } from '@/components/auth/login-form';
-import { ModeToggle } from '@/components/mode-toggle';
-import TestStyles from '@/components/test-styles';
 import {
   Card,
   CardContent,
@@ -24,13 +22,8 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Bybit Tools</h1>
-        <ModeToggle />
-      </div>
-
-      <TestStyles />
+    <main className="container mx-auto">
+      <h1>Home page</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
         <ModuleCard

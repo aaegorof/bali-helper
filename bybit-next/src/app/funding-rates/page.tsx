@@ -59,9 +59,9 @@ export default function FundingRates() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Funding Rates</h1>
+    <main className="container mx-auto">
+      <div className="flex justify-between items-center">
+        <h1>Funding Rates</h1>
         <Link href="/">
           <Button variant="outline">Back to Home</Button>
         </Link>
@@ -139,6 +139,6 @@ export default function FundingRates() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 } 

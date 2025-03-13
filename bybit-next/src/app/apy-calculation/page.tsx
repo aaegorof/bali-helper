@@ -27,9 +27,9 @@ export default function APYCalculation() {
   );
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">APY Calculation</h1>
+    <main className="container mx-auto">
+      <div className="flex justify-between items-center">
+        <h1>APY Calculation</h1>
         <Link href="/">
           <Button variant="outline">Back to Home</Button>
         </Link>
@@ -100,6 +100,6 @@ export default function APYCalculation() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 } 

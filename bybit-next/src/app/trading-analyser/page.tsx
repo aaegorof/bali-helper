@@ -9,9 +9,9 @@ import UpdateDataForm from './components/update-data-form';
 
 export default function TradingAnalyser() {
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Trading Analyser</h1>
+    <main className="container mx-auto">
+      <div className="flex justify-between items-center">
+        <h1>Trading Analyser</h1>
         <Link href="/">
           <Button variant="outline">Back to Home</Button>
         </Link>
@@ -23,6 +23,6 @@ export default function TradingAnalyser() {
         <UpdateDataForm />
         <TradeHistory />
       </div>
-    </div>
+    </main>
   );
 } 

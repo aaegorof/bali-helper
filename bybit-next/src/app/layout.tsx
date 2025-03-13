@@ -1,14 +1,12 @@
-import { ModeToggle } from '@/components/mode-toggle';
 import { Providers } from '@/components/providers';
-import { UserSwitcher } from '@/components/user-switcher';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
-import Link from 'next/link';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { ensureDatabaseInitialized } from './lib/init';
+import AppMenu from '@/components/app-menu';
 
 const satoshi = localFont({
   variable: '--font-satoshi',
@@ -44,26 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" suppressHydrationWarning>
       <body className={`${satoshi.variable} ${inter.className}`}>
         <Providers session={session}>
-          <nav className="bg-accent text-accent-foreground mb-4 p-4">
-            <div className="container mx-auto flex items-center justify-center gap-8">
-              <Link href="/" className="hover:text-gray-300">
-                Funding Rates
-              </Link>
-              <Link href="/apy-calculation" className="hover:text-gray-300">
-                APY Calculation
-              </Link>
-              <Link href="/trading-analyser" className="hover:text-gray-300">
-                Trading Analyser
-              </Link>
-              <Link href="/permata" className="hover:text-gray-300">
-                Permata
-              </Link>
-              <div className="ml-auto flex gap-2">
-                <UserSwitcher session={session} />
-                <ModeToggle />
-              </div>
-            </div>
-          </nav>
+          <AppMenu />
           {children}
           <Toaster />
         </Providers>
