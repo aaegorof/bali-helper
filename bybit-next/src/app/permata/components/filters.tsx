@@ -11,17 +11,19 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { FilterX } from 'lucide-react';
-import { transactionCategories } from '@/app/lib/categories';
+import { transactionCategories } from '@/app/permata/categories';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { DatePicker } from '@/components/ui/datepicker';
+import { TransactionDb } from '@/app/api/transactions/route';
+import { Column } from '@tanstack/react-table';
 
-const FilterType = ({ column }) => {
+const FilterType = ({ column }: { column: Column<TransactionDb> }) => {
   const val = column?.getFilterValue() ?? [true, true];
   return (
     <div className="flex gap-2">
       <Checkbox
         id="includeDebit"
-        checked={val.at(0)}
+        checked={val?.at(0)}
         onCheckedChange={(v) => {
           column.setFilterValue(([a, b]) => [v, b]);
         }}
@@ -34,7 +36,7 @@ const FilterType = ({ column }) => {
       </label>
       <Checkbox
         id="includeCredit"
-        checked={val.at(1)}
+        checked={val?.at(1)}
         onCheckedChange={(v) => {
           column.setFilterValue(([a, b]) => [a, v]);
         }}
@@ -49,7 +51,7 @@ const FilterType = ({ column }) => {
   );
 };
 
-const FilterText = ({ column }) => {
+const FilterText = ({ column }: { column: Column<TransactionDb, string> }) => {
   const val = column?.getFilterValue() ?? '';
   return (
     <DebounceInput
@@ -63,8 +65,8 @@ const FilterText = ({ column }) => {
   );
 };
 
-const FilterCategory = ({ column }) => {
-  const val = column?.getFilterValue() ?? '';
+const FilterCategory = ({ column }: { column: Column<TransactionDb> }) => {
+  const val = column?.getFilterValue();
   return (
     <Select value={val} onValueChange={(value) => column.setFilterValue(value)}>
       <SelectTrigger>
@@ -89,14 +91,14 @@ const FilterCategory = ({ column }) => {
   );
 };
 
-const MultiFilterCategory = ({ column }) => {
+const MultiFilterCategory = ({ column }: { column: Column<TransactionDb> }) => {
   const val = column?.getFilterValue() ?? null;
   const options = [
+    { label: 'Uncategorized', value: 'Uncategorized' },
     ...transactionCategories.map((category) => ({
       label: category,
       value: category,
     })),
-    { label: 'Uncategorized', value: 'Uncategorized' },
   ];
 
   return (
@@ -119,8 +121,9 @@ const MultiFilterCategory = ({ column }) => {
   );
 };
 
-const FilterAmount = ({ column, reset }) => {
+const FilterAmount = ({ column, reset }: { column: Column<TransactionDb>; reset: () => void }) => {
   const [min, max] = column?.getFilterValue() ?? ['', ''];
+
   return (
     <div className="flex gap-2">
       <div className="flex gap-2">
@@ -151,7 +154,7 @@ const FilterAmount = ({ column, reset }) => {
   );
 };
 
-const FilterDates = ({ column }) => {
+const FilterDates = ({ column }: { column: Column<TransactionDb> }) => {
   const [start, end] = column?.getFilterValue();
   return (
     <div className="flex gap-2">

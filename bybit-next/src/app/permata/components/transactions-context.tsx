@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { TransactionDb } from '@/services/api';
-import { getUserTransactions } from '@/services/api';
 import { useSession } from 'next-auth/react';
+import { TransactionDb } from '@/app/api/transactions/route';
 
 interface TransactionsContextType {
   transactions: TransactionDb[];
@@ -36,10 +35,11 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const fetchTransactions = async () => {
     try {
-      const response = await getUserTransactions(Number(session?.user?.id));
-      setTransactions(response);
-      setFilteredTransactions(response);
-      return response;
+      const response = await fetch(`/api/transactions?userId=${session?.user?.id}`);
+      const data = await response.json() as TransactionDb[];
+      setTransactions(data);
+      setFilteredTransactions(data);
+      return data;
     } catch (error) {
       console.error('Error fetching transactions:', error);
       return [];

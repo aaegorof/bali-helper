@@ -2,67 +2,61 @@ import { Input } from "@/components/ui/input";
 import { useTransactionsContext } from "./transactions-context";
 import { useSession } from "next-auth/react";
 import XLSX from "xlsx";
-import { Transaction } from "@/services/api";
-import { TransactionDb } from "@/services/api";
-import { saveTransactions } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PermataRawTransaction, ReqTransactions, RespPostTransactions } from "@/app/api/transactions/route";
+import { useState } from "react";
 
-const parseCSV = (csvText: string): Transaction[] => {
+const parseCSV = (csvText: string): PermataRawTransaction[] => {
     const lines = csvText.split("\n");
-    const headers = lines[2].split(",").map((header: string) => header.trim());
-    const data: Transaction[] = [];
+    const headers: (keyof PermataRawTransaction)[] = lines[2].split(",").map((header: string) => header.trim() as keyof PermataRawTransaction);
+    const data: PermataRawTransaction[] = [];
   
     for (let i = 3; i < lines.length; i++) {
       const values = lines[i].split(",").map((value) => value.trim());
       if (values.length !== headers.length) continue; // Skip incomplete lines
   
-      const entry = {};
+      const entry: Partial<PermataRawTransaction> = {};
       for (let j = 0; j < headers.length; j++) {
         entry[headers[j]] = values[j];
       }
-      data.push(entry);
+      data.push(entry as PermataRawTransaction);
     }
   
     return data;
   };
   
-  const saveTransactionsToDatabase = async (transactions: Transaction[], userId: number) => {
+  const saveTransactionsToDatabase = async (transactions: PermataRawTransaction[], userId: number) => {
     try {
-      const transactionsToSave: TransactionDb[] = transactions.map((tr) => ({
-        posted_date: tr["Posted Date (mm/dd/yyyy)"],
-        description: tr.Description,
-        credit_debit: tr["Credit/Debit"],
-        amount: parseFloat(
-          tr.Amount.replace(/[^0-9.-]+/g, "")
-            ?.split(".")
-            ?.at(0)
-        ),
-      }));
-      const response = await saveTransactions(transactionsToSave, userId);
-      return response;
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        body: JSON.stringify({ transactions, userId } as ReqTransactions) ,
+      });
+      const data = await response.json() as RespPostTransactions;
+      return data;
     } catch (error) {
       console.error("Ошибка при сохранении транзакций:", error);
       throw error;
     }
   };
+
 const TransactionUploader = () => {
     const { data: session } = useSession();
     const currentUser = session?.user;
 
     const { setTransactions } = useTransactionsContext();
-
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
-        let allParsedData: Transaction[] = [];
+        let allParsedData: PermataRawTransaction[] = [];
     
         if (!currentUser) {
           console.error('No user logged in');
           return;
         }
     
-        for (const file of files) {
-          const fileExtension = file.name.split(".").pop().toLowerCase();
+        for (const file of files ?? []) {
+          const fileExtension = file.name.split(".").pop()?.toLowerCase();
     
           if (fileExtension === "csv") {
             const text = await file.text();
@@ -73,14 +67,21 @@ const TransactionUploader = () => {
             const workbook = XLSX.read(data, { type: "array" });
             const sheetName = workbook.SheetNames[0]; // Take the first sheet
             const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
-            allParsedData = allParsedData.concat(jsonData);
+            const jsonData = XLSX.utils.sheet_to_json(worksheet) as PermataRawTransaction[];
+            allParsedData = allParsedData.concat(jsonData)
           }
         }
-    
+    try {
+      setIsLoading(true);
         const res = await saveTransactionsToDatabase(allParsedData, Number(currentUser.id));
-        setTransactions(res.transactions);
+        setTransactions(res.data?.transactions ?? []);
+      } catch (error) {
+        console.error("Ошибка при сохранении транзакций:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
       };
+    }
     
   return (
     <Card>
@@ -110,9 +111,9 @@ const TransactionUploader = () => {
             className="cursor-pointer bg-accent"
             onChange={handleFileUpload}
             />
+            {isLoading && <p>Loading...</p>}
     </CardContent>
     </Card>
   );
 };
-
-export default TransactionUploader;
+export default TransactionUploader

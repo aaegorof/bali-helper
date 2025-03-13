@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -6,8 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { TransactionDb } from "@/services/api";
+} from '@/components/ui/table';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -22,15 +21,10 @@ import {
   useReactTable,
   Column,
   Row,
-} from "@tanstack/react-table";
-import {
-  FilterType,
-  FilterText,
-  FilterDates,
-  FilterAmount,
-  MultiFilterCategory,
-} from "./filters";
-import { Button } from "@/components/ui/button";
+  Table as TableType,
+} from '@tanstack/react-table';
+import { FilterType, FilterText, FilterDates, FilterAmount, MultiFilterCategory } from './filters';
+import { Button } from '@/components/ui/button';
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,8 +32,8 @@ import {
   ChevronsRight,
   ArrowUp,
   ArrowDown,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -47,11 +41,12 @@ import {
   SelectItem,
   SelectValue,
   SelectTrigger,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { BulkEditDialog } from "./bulk-edit-dialog";
-import { useTransactionsContext } from "./transactions-context";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { BulkEditDialog } from './bulk-edit-dialog';
+import { useTransactionsContext } from './transactions-context';
+import { cn } from '@/lib/utils';
+import { TransactionDb } from '@/app/api/transactions/route';
 
 declare module '@tanstack/table-core' {
   interface ColumnMeta<TData extends unknown, TValue> {
@@ -74,13 +69,13 @@ type TableColumnDef<TData> = ColumnDef<TData, any> & {
 };
 
 const defaultFilters: ColumnFiltersState = [
-  { id: "type", value: [true, true] },
-  { id: "date", value: ["", ""] },
-  { id: "amount", value: ["", ""] },
-  { id: "category", value: null },
+  { id: 'type', value: [true, true] },
+  { id: 'date', value: ['', ''] },
+  { id: 'amount', value: ['', ''] },
+  { id: 'category', value: null },
 ];
 
-const defaultSorting: SortingState = [{ id: "date", desc: true }];
+const defaultSorting: SortingState = [{ id: 'date', desc: true }];
 
 const TransactionsPermata = () => {
   const [filters, setFilters] = useState<ColumnFiltersState>(defaultFilters);
@@ -92,26 +87,25 @@ const TransactionsPermata = () => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
-  const { fetchTransactions, transactions: data, setFilteredTransactions } = useTransactionsContext();
+  const {
+    fetchTransactions,
+    transactions: data,
+    setFilteredTransactions,
+  } = useTransactionsContext();
 
   const multiIncludesFilter: FilterFn<any> = (row, columnId, filterValue) => {
     if (!filterValue) return true;
     const [Debit, Credit] = filterValue;
     const cellValue = row.getValue(columnId) as string;
 
-    return (
-      (cellValue === "Debit" && Debit) || (cellValue === "Credit" && Credit)
-    );
+    return (cellValue === 'Debit' && Debit) || (cellValue === 'Credit' && Credit);
   };
 
   const filterByDateRange: FilterFn<TransactionDb> = (row, columnId, filterValue) => {
     const [startDate, endDate] = filterValue;
     const cellValue = row.getValue(columnId) as string;
     if (startDate && endDate) {
-      return (
-        new Date(cellValue) >= new Date(startDate) &&
-        new Date(cellValue) <= new Date(endDate)
-      );
+      return new Date(cellValue) >= new Date(startDate) && new Date(cellValue) <= new Date(endDate);
     }
     if (startDate) {
       return new Date(cellValue) >= new Date(startDate);
@@ -125,7 +119,7 @@ const TransactionsPermata = () => {
 
   useEffect(() => {
     resetRowSelection();
-  }, [data])
+  }, [data]);
 
   const columns = useMemo<TableColumnDef<TransactionDb>[]>(
     () => [
@@ -138,70 +132,70 @@ const TransactionsPermata = () => {
           />
         ),
         meta: {
-          className: "w-4",
+          className: 'w-4',
         },
-        id: "select",
+        id: 'select',
         cell: ({ row }) => {
           return (
-            <Checkbox
-              checked={row.getIsSelected()}
-              onCheckedChange={(checked: boolean) => {
-                row.toggleSelected(!!checked);
-              }}
-            />
+            
+              <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(checked: boolean) => {
+                  row.toggleSelected(!!checked);
+                }}
+              />
+            
           );
         },
       },
       {
-        header: "Date",
-        id: "date",
-        accessorKey: "posted_date",
+        header: 'Date',
+        id: 'date',
+        accessorKey: 'posted_date',
         cell: ({ getValue }) => {
           const date = new Date(getValue() as string);
           const day = date.getDate();
-          const month = date.toLocaleString("default", { month: "short" });
+          const month = date.toLocaleString('default', { month: 'short' });
           const year = date.getFullYear();
           return `${day} ${month} ${year}`;
         },
         sortingFn: (a, b) => {
-          if(!a?.original?.posted_date || !b?.original?.posted_date) return 0;
+          if (!a?.original?.posted_date || !b?.original?.posted_date) return 0;
           const dateA = new Date(a?.original?.posted_date);
           const dateB = new Date(b?.original?.posted_date);
           return dateA.getTime() - dateB.getTime();
         },
         meta: {
           Filter: FilterDates,
-          className: "text-nowrap w-[8ch]",
+          className: 'text-nowrap w-[8ch]',
         },
         filterFn: filterByDateRange,
       },
       {
-        header: "Time",
-        id: "time",
-        accessorKey: "time",
+        header: 'Time',
+        id: 'time',
+        accessorKey: 'time',
         meta: {
-          className: "text-nowrap text-right w-[8ch]",
+          className: 'text-nowrap text-right w-[8ch]',
         },
         // cell: ({ getValue }) => new Date(getValue()).toLocaleTimeString(),
       },
       {
-        header: "Description",
-        accessorKey: "description",
+        header: 'Description',
+        accessorKey: 'description',
         meta: {
           Filter: FilterText,
-          className: "text-xs",
+          className: 'text-xs',
         },
       },
       {
-        header: "Type",
-        id: "type",
-        accessorKey: "credit_debit",
+        header: 'Type',
+        id: 'type',
+        accessorKey: 'credit_debit',
         cell: ({ getValue }) => {
           const value = getValue() as string;
           return (
-            <span
-              className={value === "Debit" ? "text-destructive" : "text-positive"}
-            >
+            <span className={value === 'Debit' ? 'text-destructive' : 'text-positive'}>
               {value}
             </span>
           );
@@ -212,9 +206,9 @@ const TransactionsPermata = () => {
         filterFn: multiIncludesFilter,
       },
       {
-        header: "Category",
-        id: "category",
-        accessorKey: "category",
+        header: 'Category',
+        id: 'category',
+        accessorKey: 'category',
         meta: {
           Filter: MultiFilterCategory,
         },
@@ -222,33 +216,34 @@ const TransactionsPermata = () => {
         filterFn: (row, columnId, filterValue) => {
           const cellValue = row.getValue(columnId) as string;
           if (!filterValue || filterValue.length === 0) return true;
-          if (filterValue.includes("Uncategorized") && filterValue.length === 1) return cellValue === "" || cellValue === 'Uncategorized';
-          return filterValue.includes(cellValue)
+          if (filterValue.includes('Uncategorized') && filterValue.length === 1)
+            return cellValue === '' || cellValue === 'Uncategorized';
+          return filterValue.includes(cellValue);
         },
       },
       {
-        header: "Amount",
-        accessorKey: "amount",
-        sortingFn: "alphanumeric",
+        header: 'Amount',
+        accessorKey: 'amount',
+        sortingFn: 'alphanumeric',
         meta: {
-          className: "text-nowrap text-right justify-end",
+          className: 'text-nowrap text-right justify-end',
           Filter: FilterAmount,
         },
-        filterFn: "inNumberRange",
+        filterFn: 'inNumberRange',
         cell: ({ getValue, row }) =>
-          row.original.credit_debit === "Debit" ? (
+          row.original.credit_debit === 'Debit' ? (
             <span className="text-destructive">
               {getValue()
                 .toString()
-                .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
             </span>
           ) : (
             <span className="text-positive">
               {getValue()
                 .toString()
-                .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
             </span>
-          )
+          ),
       },
     ],
     []
@@ -301,7 +296,7 @@ const TransactionsPermata = () => {
   } = table;
 
   useEffect(() => {
-    const data = [...getRowData().rows.map((row) => row.original)]
+    const data = [...getRowData().rows.map((row) => row.original)];
     setFilteredTransactions(data);
   }, [getRowData()]);
 
@@ -310,26 +305,30 @@ const TransactionsPermata = () => {
     resetRowSelection();
   };
 
-  function handleRowClick(rowIndex: number, row: Row<TransactionDb>, event: React.MouseEvent) {
-    
-    if (lastSelectedIndex !== null && event.shiftKey) {
-      const start = Math.min(lastSelectedIndex, rowIndex);
-        const end = Math.max(lastSelectedIndex, rowIndex);
-        
-        const newSelection = { ...rowSelection };
-        for (let i = start; i <= end; i++) {
-          const currentRow = table.getRowModel().rowsById[i]
-          
-          if (currentRow?.id) {
-            newSelection[currentRow.id] = true;
-          }
+  function handleRowClick(row: Row<TransactionDb>, event: React.MouseEvent) {
+    const flatTble = table.getSortedRowModel().flatRows;
+    const rowIndex = row.index;
+    const indexNum = flatTble.findLastIndex((v) => v.index === rowIndex);
+    const indexLastNum = flatTble.findLastIndex((v) => v.index === lastSelectedIndex);
+
+    if (indexLastNum !== null && indexLastNum !== -1 && event.shiftKey) {
+      const start = Math.min(indexLastNum, indexNum);
+      const end = Math.max(indexLastNum, indexNum);
+
+      const newSelection = { ...rowSelection };
+      for (let i = start; i <= end; i++) {
+        const currentRow = flatTble[i];
+
+        if (currentRow?.id) {
+          newSelection[currentRow.id] = true;
         }
-        
-        setRowSelection(newSelection);
-        setLastSelectedIndex(rowIndex);
-      } else {
-        row.toggleSelected();
-        setLastSelectedIndex(rowIndex);
+      }
+
+      setRowSelection(newSelection);
+      setLastSelectedIndex(rowIndex);
+    } else {
+      row.toggleSelected();
+      setLastSelectedIndex(rowIndex);
     }
   }
 
@@ -337,7 +336,7 @@ const TransactionsPermata = () => {
     <div className="overflow-x-auto">
       <div>
         {getHeaderGroups().map((headerGroup) => (
-          <div className="flex gap-4 items-center py-2" key={headerGroup.id}>
+          <div className="flex items-center gap-4 py-2" key={headerGroup.id}>
             <BulkEditDialog
               ids={getSelectedRowModel().rows.map((row) => row.original.id ?? 0)}
               transactions={getSelectedRowModel().rows.map((row) => row.original)}
@@ -347,7 +346,7 @@ const TransactionsPermata = () => {
               }}
             />
             {headerGroup.headers.map((header) => (
-              <div key={header.id + "filter"}>
+              <div key={header.id + 'filter'}>
                 {header.column.columnDef.meta?.Filter ? (
                   <header.column.columnDef.meta.Filter
                     column={header.column}
@@ -370,17 +369,19 @@ const TransactionsPermata = () => {
                     onClick={header.column.getToggleSortingHandler()}
                     key={header.id}
                   >
-                    <div className={cn("flex items-center gap-2 justify-inherit", header.column.columnDef.meta?.className)}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
+                    <div
+                      className={cn(
+                        'justify-inherit flex items-center gap-2',
+                        header.column.columnDef.meta?.className
                       )}
-                    <span>
-                      {{  
-                        asc: <ArrowUp className="w-4 h-4" />,
-                        desc: <ArrowDown className="w-4 h-4" />,
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </span>
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      <span>
+                        {{
+                          asc: <ArrowUp className="h-4 w-4" />,
+                          desc: <ArrowDown className="h-4 w-4" />,
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </span>
                     </div>
                   </TableHead>
                 ))}
@@ -391,12 +392,13 @@ const TransactionsPermata = () => {
         <TableBody>
           {table.getRowModel().rows.map((row) => {
             return (
-              <TableRow className='cursor-pointer' id={row.original.id?.toString() + "row"} onClick={(e) => handleRowClick(row.index, row, e)}>
+              <TableRow
+                className="cursor-pointer"
+                id={row.original.id?.toString() + 'row'}
+                onClick={(e) => handleRowClick(row, e)}
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    id={cell.id}
-                    className={cell.column.columnDef.meta?.className}
-                  >
+                  <TableCell id={cell.id} className={cell.column.columnDef.meta?.className}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -408,58 +410,31 @@ const TransactionsPermata = () => {
 
       <div className="flex items-center justify-end gap-2 py-4">
         <div>Count: {getRowCount()}</div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={firstPage}
-          disabled={!getCanPreviousPage()}
-        >
+        <Button variant="outline" size="sm" onClick={firstPage} disabled={!getCanPreviousPage()}>
           <ChevronsLeft className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={previousPage}
-          disabled={!getCanPreviousPage()}
-        >
+        <Button variant="outline" size="sm" onClick={previousPage} disabled={!getCanPreviousPage()}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        {Array.from(
-          { length: Math.min(5, getState().pagination.pageSize) },
-          (_, i) => {
-            const pageNumber = getState().pagination.pageIndex - 2 + i;
-            if (pageNumber < 0 || pageNumber >= getPageCount()) return null;
-            return (
-              <Button
-                key={pageNumber}
-                variant={
-                  pageNumber === getState().pagination.pageIndex
-                    ? "default"
-                    : "outline"
-                }
-                size="sm"
-                className="aspect-square"
-                onClick={() => setPageIndex(pageNumber)}
-              >
-                {pageNumber + 1}
-              </Button>
-            );
-          }
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={nextPage}
-          disabled={!getCanNextPage()}
-        >
+        {Array.from({ length: Math.min(5, getState().pagination.pageSize) }, (_, i) => {
+          const pageNumber = getState().pagination.pageIndex - 2 + i;
+          if (pageNumber < 0 || pageNumber >= getPageCount()) return null;
+          return (
+            <Button
+              key={pageNumber}
+              variant={pageNumber === getState().pagination.pageIndex ? 'default' : 'outline'}
+              size="sm"
+              className="aspect-square"
+              onClick={() => setPageIndex(pageNumber)}
+            >
+              {pageNumber + 1}
+            </Button>
+          );
+        })}
+        <Button variant="outline" size="sm" onClick={nextPage} disabled={!getCanNextPage()}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={lastPage}
-          disabled={!getCanNextPage()}
-        >
+        <Button variant="outline" size="sm" onClick={lastPage} disabled={!getCanNextPage()}>
           <ChevronsRight className="h-4 w-4" />
         </Button>
         <span>Page</span>
@@ -472,7 +447,7 @@ const TransactionsPermata = () => {
             const page = e.target.value ? Number(e.target.value) - 1 : 0;
             setPageIndex(page);
           }}
-          className="border p-1 rounded w-16 text-center"
+          className="w-16 rounded border p-1 text-center"
         />
         <Select
           value={String(getState().pagination.pageSize)}

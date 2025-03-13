@@ -1,17 +1,17 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
-import { anthropic } from "@ai-sdk/anthropic";
+import { anthropic } from '@ai-sdk/anthropic';
 import { cosineSimilarity, embed, generateText } from 'ai';
-import { transactionCategories } from '@/app/lib/categories';
+import { catKeywords, transactionCategories } from '@/app/permata/categories';
 import { openai } from '@ai-sdk/openai';
 
-// Исправляем путь к базе данных  
+// Исправляем путь к базе данных
 const DB_PATH = path.join(process.cwd(), '../transactions.db');
 
 // Initialize the Anthropic client using the new SDK
-const MODEL = "claude-3-5-sonnet-20241022";
+const MODEL = 'claude-3-5-sonnet-20241022';
 // const EMBEDDING_MODEL = "voyage-3-lite";
-const EMBEDDING_MODEL_OPENAI = "text-embedding-3-small";
+const EMBEDDING_MODEL_OPENAI = 'text-embedding-3-small';
 
 // const embeddingModel = voyage.textEmbeddingModel(EMBEDDING_MODEL);
 const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
@@ -95,7 +95,6 @@ async function initializeVectorTables(): Promise<void> {
         removeDuplicateEmbeddings()
           .then(() => resolve())
           .catch((error) => reject(error));
-
       } catch (error) {
         console.error('Ошибка при инициализации векторных таблиц:', error);
         reject(error);
@@ -107,11 +106,11 @@ async function initializeVectorTables(): Promise<void> {
 // Функция для создания embedding из описания транзакции с использованием @ai-sdk/anthropic
 async function createEmbedding(description: string): Promise<number[]> {
   try {
-    const {embedding} = await embed({
+    const { embedding } = await embed({
       model: embeddingModel,
       value: description,
     });
-    
+
     return embedding;
   } catch (error) {
     console.error('Ошибка при создании embedding:', error);
@@ -135,40 +134,43 @@ async function determineCategoryWithAI(description: string): Promise<string> {
     Пожалуйста, выбери ТОЛЬКО ОДНУ категорию из списка выше, которая лучше всего подходит для этой транзакции.
     Ответь только названием категории, без дополнительных пояснений.
     `;
-    
-    const {text} = await generateText({
+
+    const { text } = await generateText({
       model: anthropic(MODEL),
       maxTokens: 1500,
-      system: "Ты - помощник, который определяет категории банковских транзакций. Отвечай только названием категории из предложенного списка, без дополнительных пояснений.",
-      prompt: prompt
+      system:
+        'Ты - помощник, который определяет категории банковских транзакций. Отвечай только названием категории из предложенного списка, без дополнительных пояснений.',
+      prompt: prompt,
     });
-    
+
     // Извлекаем ответ и очищаем его от лишних пробелов
     const category = text.trim();
-    
+
     // Проверяем, что категория входит в список допустимых категорий
     if (transactionCategories.includes(category as (typeof transactionCategories)[number])) {
       return category;
     } else {
-      console.log(`AI предложил категорию "${category}", которая не входит в список допустимых категорий`);
-      return "";
+      console.log(
+        `AI предложил категорию "${category}", которая не входит в список допустимых категорий`
+      );
+      return '';
     }
   } catch (error) {
     console.error('Ошибка при определении категории с помощью AI:', error);
-    return "";
+    return '';
   }
 }
 
 // Функция для сохранения embedding в базу данных
 async function saveEmbedding(
   description: string,
-  category: string, 
+  category: string,
   embedding: number[]
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     // Сохраняем embedding как JSON строку
     const embeddingJson = JSON.stringify(embedding);
-    
+
     // Сначала проверяем существующую запись
     db.get(
       `SELECT category FROM transaction_embeddings WHERE description = ?`,
@@ -188,7 +190,7 @@ async function saveEmbedding(
                  usage_count = usage_count + 1
              WHERE description = ?`,
             [category, description],
-            function(err: Error | null) {
+            function (err: Error | null) {
               if (err) {
                 console.error('Ошибка при обновлении категории:', err);
                 return reject(err);
@@ -203,7 +205,7 @@ async function saveEmbedding(
              (description, category, embedding, last_used_at, usage_count)
              VALUES (?, ?, ?, CURRENT_TIMESTAMP, 1)`,
             [description, category, embeddingJson],
-            function(err: Error | null) {
+            function (err: Error | null) {
               if (err) {
                 console.error('Ошибка при сохранении embedding:', err);
                 return reject(err);
@@ -218,10 +220,13 @@ async function saveEmbedding(
 }
 
 // Функция для поиска похожих транзакций
-async function findSimilarTransactions(description: string, limit = 5): Promise<SimilarTransaction[]> {
+async function findSimilarTransactions(
+  description: string,
+  limit = 5
+): Promise<SimilarTransaction[]> {
   try {
     const queryEmbedding = await createEmbedding(description);
-    
+
     return new Promise((resolve, reject) => {
       // Получаем записи, сортируя по частоте использования и времени последнего использования
       db.all(
@@ -235,23 +240,21 @@ async function findSimilarTransactions(description: string, limit = 5): Promise<
             console.error('Ошибка при получении embeddings:', err);
             return reject(err);
           }
-          
+
           // Предварительно парсим все embeddings
-          const similarities = rows.map(row => {
+          const similarities = rows.map((row) => {
             const rowEmbedding = JSON.parse(row.embedding);
             return {
               description: row.description,
               category: row.category,
               similarity: cosineSimilarity(queryEmbedding, rowEmbedding),
-              usage_count: row.usage_count
+              usage_count: row.usage_count,
             };
           });
-          
+
           // Используем partial sort для оптимизации
-          const topK = similarities
-            .sort((a, b) => b.similarity - a.similarity)
-            .slice(0, limit);
-          
+          const topK = similarities.sort((a, b) => b.similarity - a.similarity).slice(0, limit);
+
           resolve(topK);
         }
       );
@@ -267,23 +270,98 @@ async function determineCategoryWithRAG(description: string): Promise<string> {
   try {
     // Ищем похожие транзакции
     const similarTransactions = await findSimilarTransactions(description, 3);
-    
+
     // Если нет похожих транзакций, возвращаем пустую строку
     if (similarTransactions.length === 0) {
-      return "";
+      return '';
     }
-    console.log(similarTransactions)
-    
+    console.log(similarTransactions);
+
     // Берем категорию самой похожей транзакции, если сходство выше порога
     const mostSimilar = similarTransactions[0];
     if (mostSimilar.similarity > 0.85) {
       return mostSimilar.category;
     }
-    
-    return "";
+
+    return '';
   } catch (error) {
     console.error('Ошибка при определении категории с помощью RAG:', error);
-    return "";
+    return '';
+  }
+}
+
+/**
+ * Counts the number of matching words between a string and an array of keywords
+ * @param description The string to check for matches
+ * @param keywords Array of keywords to match against
+ * @returns The number of matching keywords found in the description
+ */
+function countMatchingKeywords(description: string, keywords: string[]): number {
+  if (!description || !keywords.length) return 0;
+  
+  const lowerDesc = description.toLowerCase();
+  let matchCount = 0;
+  
+  for (const keyword of keywords) {
+    if (lowerDesc.includes(keyword.toLowerCase())) {
+      matchCount++;
+    }
+  }
+  
+  return matchCount;
+}
+
+
+function determineKeywordCategory(description: string): string {
+  if (!description) return "";
+
+  const lowerDesc = description.toLowerCase();
+  
+  // Находим группу с наибольшим количеством совпадений
+  let maxMatchCount = 0;
+  let bestMatchGroup = "";
+  
+  for (const [group, keywords] of Object.entries(catKeywords)) {
+    const matchCount = countMatchingKeywords(lowerDesc, keywords);
+    if (matchCount > maxMatchCount) {
+      maxMatchCount = matchCount;
+      bestMatchGroup = group;
+    }
+  }
+  
+  return bestMatchGroup;
+}
+
+
+async function determineCategory(description: string): Promise<string> {
+  if (!description) return "";
+
+  try {
+    // Сначала пробуем определить категорию с помощью AI
+    // const aiCategory = await determineCategoryWithAI(description);
+    
+    // // Если AI вернул категорию, используем ее
+    // if (aiCategory) {
+    //   console.log(`AI определил категорию "${aiCategory}" для "${description}"`);
+    //   return aiCategory;
+    // }
+    
+    // Затем пробуем определить категорию с помощью RAG
+    const ragCategory = await determineCategoryWithRAG(description);
+    
+    // Если RAG вернул категорию, используем ее
+    if (ragCategory) {
+      console.log(`RAG определил категорию "${ragCategory}" для "${description}"`);
+    }
+    // Иначе используем определение по ключевым словам
+    const keywordCategory = determineKeywordCategory(description);
+
+    return ragCategory || keywordCategory;
+
+  } catch (error) {
+    console.error('Ошибка при определении категории:', error);
+    // В случае ошибки используем определение по ключевым словам
+    return determineKeywordCategory(description);
   }
 }
 
@@ -294,5 +372,7 @@ export {
   saveEmbedding,
   findSimilarTransactions,
   determineCategoryWithAI,
-  determineCategoryWithRAG
-}; 
+  determineCategoryWithRAG,
+  determineKeywordCategory,
+  determineCategory,
+};

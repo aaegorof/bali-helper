@@ -19,5 +19,8 @@
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
   }
 }
