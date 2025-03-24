@@ -11,6 +11,7 @@ const menuItems = [
   { href: '/apy-calculation', label: 'APY Calculation' },
   { href: '/trading-analyser', label: 'Trading Analyser' },
   { href: '/permata', label: 'Permata' },
+  { href: '/notion', label: 'Notion' },
 ];
 
 const AppMenu = () => {
