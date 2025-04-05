@@ -1,0 +1,666 @@
+[
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.6084,
+    "qty": 164.36,
+    "timestamp": 1706416722605,
+    "orderId": "1607934349012112896"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.57,
+    "qty": 93.22,
+    "timestamp": 1706462278675,
+    "orderId": "1608310414184289792"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.55235,
+    "qty": 1.27,
+    "timestamp": 1709264259745,
+    "orderId": "1631821315923252736"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.55236,
+    "qty": 105.64,
+    "timestamp": 1709264259745,
+    "orderId": "1631821315923252736"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.55726,
+    "qty": 107.02,
+    "timestamp": 1709264000102,
+    "orderId": "1631819130397267456"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.57011,
+    "qty": 107.67,
+    "timestamp": 1709261927810,
+    "orderId": "1631801754234656256"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.547,
+    "qty": 107.78,
+    "timestamp": 1709261149084,
+    "orderId": "1631795221807502848"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.54218,
+    "qty": 0.32,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5422,
+    "qty": 7.56,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.54223,
+    "qty": 13.16,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5424,
+    "qty": 4.3,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5424,
+    "qty": 23.93,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5425,
+    "qty": 2.03,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5425,
+    "qty": 17.97,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5425,
+    "qty": 2.62,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.5425,
+    "qty": 2.53,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.54276,
+    "qty": 33.64,
+    "timestamp": 1709260568215,
+    "orderId": "1631790349125162496"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.54681,
+    "qty": 108.17,
+    "timestamp": 1709260358059,
+    "orderId": "1631788586208859648"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.54027,
+    "qty": 109.25,
+    "timestamp": 1709255730965,
+    "orderId": "1631749771322725888"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.54478,
+    "qty": 109.36,
+    "timestamp": 1709255492018,
+    "orderId": "1631747753099138560"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.63482,
+    "qty": 132.71,
+    "timestamp": 1709538893842,
+    "orderId": "1634125084539229696"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.53371,
+    "qty": 143.82,
+    "timestamp": 1711136829178,
+    "orderId": "1647528231131506944"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.53371,
+    "qty": 6.07,
+    "timestamp": 1711136757203,
+    "orderId": "1647528231131506944"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.5238,
+    "qty": 60.83,
+    "timestamp": 1710917461757,
+    "orderId": "1645688058668214528"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.5238,
+    "qty": 12.01,
+    "timestamp": 1710917427102,
+    "orderId": "1645688058668214528"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.5238,
+    "qty": 41.7,
+    "timestamp": 1710917411700,
+    "orderId": "1645688058668214528"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.58399,
+    "qty": 66.35,
+    "timestamp": 1710829412579,
+    "orderId": "1644950769499465984"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.50527,
+    "qty": 28.82,
+    "timestamp": 1712850482950,
+    "orderId": "1661904736590588160"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.50526,
+    "qty": 169.07,
+    "timestamp": 1712850482950,
+    "orderId": "1661904736590588160"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.51954,
+    "qty": 98.38,
+    "timestamp": 1712505840200,
+    "orderId": "1659010558365886720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.51954,
+    "qty": 17.1,
+    "timestamp": 1712505736971,
+    "orderId": "1659010558365886720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.412,
+    "qty": 129.63,
+    "timestamp": 1714019346057,
+    "orderId": "1671051455928559872"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.412,
+    "qty": 1.71,
+    "timestamp": 1714019334120,
+    "orderId": "1671051455928559872"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.412,
+    "qty": 115.57,
+    "timestamp": 1714017347132,
+    "orderId": "1671051455928559872"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35492,
+    "qty": 386.14,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35571,
+    "qty": 6.99,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35596,
+    "qty": 8.0,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.356,
+    "qty": 14.12,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.356,
+    "qty": 4.66,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35722,
+    "qty": 6.99,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35723,
+    "qty": 4.19,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35729,
+    "qty": 7.04,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.35873,
+    "qty": 6.99,
+    "timestamp": 1715962638396,
+    "orderId": "1688011388653758720"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32383,
+    "qty": 124.26,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32382,
+    "qty": 43.44,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.3237,
+    "qty": 65.12,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32346,
+    "qty": 13.24,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32338,
+    "qty": 75.06,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32337,
+    "qty": 31.03,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.32292,
+    "qty": 92.15,
+    "timestamp": 1716425711455,
+    "orderId": "1691895927021070592"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.23997,
+    "qty": 5.31,
+    "timestamp": 1718837001746,
+    "orderId": "1712049825136339200"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.23997,
+    "qty": 198.19,
+    "timestamp": 1718837001719,
+    "orderId": "1712049825136339200"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.23997,
+    "qty": 18.74,
+    "timestamp": 1718836977816,
+    "orderId": "1712049825136339200"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.19714,
+    "qty": 48.11,
+    "timestamp": 1722595327159,
+    "orderId": "1692437306012952832"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.19714,
+    "qty": 110.1,
+    "timestamp": 1722595327131,
+    "orderId": "1692437306012952832"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.19714,
+    "qty": 142.74,
+    "timestamp": 1722595324088,
+    "orderId": "1692437306012952832"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.19714,
+    "qty": 143.54,
+    "timestamp": 1722595319592,
+    "orderId": "1692437306012952832"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.07612,
+    "qty": 656.85,
+    "timestamp": 1724538801910,
+    "orderId": "1758196012515944704"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.05071,
+    "qty": 1183.19,
+    "timestamp": 1726179658308,
+    "orderId": "1773672663311804672"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04618,
+    "qty": 1299.26,
+    "timestamp": 1728592248208,
+    "orderId": "1793956234391808256"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.05055,
+    "qty": 263.07,
+    "timestamp": 1728387824047,
+    "orderId": "1792241398293293312"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.05053,
+    "qty": 52.96,
+    "timestamp": 1728387823794,
+    "orderId": "1792241398293293312"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.05053,
+    "qty": 53.33,
+    "timestamp": 1728387823794,
+    "orderId": "1792241398293293312"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Sell",
+    "price": 0.055,
+    "qty": 1863.66,
+    "timestamp": 1731098823317,
+    "orderId": "1807221765592934656"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 168.86,
+    "timestamp": 1733169039557,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 210.53,
+    "timestamp": 1733168918640,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 179.62,
+    "timestamp": 1733168888415,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 208.6,
+    "timestamp": 1733168858183,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 29.72,
+    "timestamp": 1733168827956,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.0493,
+    "qty": 43.17,
+    "timestamp": 1733168767500,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04929,
+    "qty": 173.69,
+    "timestamp": 1733168696847,
+    "orderId": "1832346268241062144"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 895.03,
+    "timestamp": 1734545761950,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 183.04,
+    "timestamp": 1734545752778,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 71.7,
+    "timestamp": 1734545734639,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 191.68,
+    "timestamp": 1734545722543,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 169.25,
+    "timestamp": 1734545359740,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 162.34,
+    "timestamp": 1734545329509,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 191.71,
+    "timestamp": 1734545299271,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 4.86,
+    "timestamp": 1734545295619,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 162.34,
+    "timestamp": 1734545269038,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 96.0,
+    "timestamp": 1734545255364,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 175.8,
+    "timestamp": 1734545247556,
+    "orderId": "1843893400777353472"
+  },
+  {
+    "symbol": "SQRUSDT",
+    "side": "Buy",
+    "price": 0.04055,
+    "qty": 162.34,
+    "timestamp": 1734545238804,
+    "orderId": "1843893400777353472"
+  }
+]

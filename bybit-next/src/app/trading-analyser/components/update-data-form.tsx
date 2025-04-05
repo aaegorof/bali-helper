@@ -1,95 +1,161 @@
-"use client"
+'use client';
 
-import React, { useState } from 'react';
+import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input, InputLabel } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { TRADING_SYMBOLS } from '@/lib/constants';
+import { useSession } from 'next-auth/react';
+import React, { useState } from 'react';
 
 export default function UpdateDataForm() {
-  const [apiKey, setApiKey] = useState('');
-  const [apiSecret, setApiSecret] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [symbol, setSymbol] = useState(TRADING_SYMBOLS[0]);
+  const [limit, setLimit] = useState(100);
+  const [startTime, setStartTime] = useState('2023-09-01T00:00');
+  const [endTime, setEndTime] = useState('2025-02-05T00:00');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!apiKey || !apiSecret) {
-      setError('API Key and Secret are required');
-      return;
-    }
-    
-    setLoading(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const { data: session } = useSession();
+  const userId = Number(session?.user?.id);
+
+  const { refreshWalletBalances, fetchTrades } = useTradingContext();
+
+  const fetchAndSaveSpotTrades = async (
+    symbol: string,
+    userId: number,
+    startDate: string,
+    endDate: string,
+    limit: number
+  ) => {
+    setIsLoading(true);
     setError(null);
-    setSuccess(false);
-    
+    setSuccessMessage(null);
+
     try {
-      // In a real application, you would send this to your backend
-      // For now, we'll just simulate a successful update
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Store in localStorage (not secure, just for demo)
-      localStorage.setItem('bybit_api_key', apiKey);
-      localStorage.setItem('bybit_api_secret', apiSecret);
-      
-      setSuccess(true);
-      // Clear form after successful submission
-      setApiKey('');
-      setApiSecret('');
-    } catch (err) {
-      console.error('Error updating API credentials:', err);
-      setError('Failed to update API credentials. Please try again.');
+      const response = await fetch(`/trading-analyser/api/user/trades/${symbol}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startDate,
+          endDate,
+          userId,
+          limit,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch spot trades');
+      }
+
+      setSuccessMessage(data.message || `Successfully processed spot trades for ${symbol}`);
+
+      // Refresh data in context after successful fetch
+      refreshWalletBalances();
+      fetchTrades(symbol);
+    } catch (err: any) {
+      setError(err.message || 'Error loading data');
+      console.error(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
+  };
+
+  const handleSymbolChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSymbol(e.target.value);
+  };
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLimit(Number(e.target.value));
+  };
+
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStartTime(e.target.value);
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEndTime(e.target.value);
+  };
+
+  const handleSpotTradesSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchAndSaveSpotTrades(symbol, userId, startTime, endTime, limit);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Update API Credentials</CardTitle>
+        <CardTitle>Get data from Bybit API</CardTitle>
+        <p className="text-xs text-gray-500">
+          Fetch historical spot trades from Bybit and save them to the database. This will allow you
+          to analyze your trading data later.
+        </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <InputLabel label="API Key">
+        {isLoading && <div className="mb-4 text-blue-500 font-medium">Loading data...</div>}
+        {error && <div className="mb-4 text-red-500 font-medium">{error}</div>}
+        {successMessage && <div className="mb-4 text-green-500 font-medium">{successMessage}</div>}
+
+        <form onSubmit={handleSpotTradesSubmit} className="space-y-4">
+          <InputLabel label="Symbol">
             <Input
               type="text"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your Bybit API Key"
+              value={symbol}
+              onChange={handleSymbolChange}
+              placeholder="Enter symbol"
             />
+            <div className="flex gap-2 flex-wrap mt-2">
+              {TRADING_SYMBOLS.map((ticker) => (
+                <button
+                  key={ticker}
+                  type="button"
+                  onClick={() => setSymbol(ticker)}
+                  className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                    symbol === ticker
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  {ticker}
+                </button>
+              ))}
+            </div>
           </InputLabel>
-          
-          <InputLabel label="API Secret">
+
+          <InputLabel label="Start Time">
+            <Input type="datetime-local" value={startTime} onChange={handleStartTimeChange} />
+          </InputLabel>
+
+          <InputLabel label="End Time">
+            <Input type="datetime-local" value={endTime} onChange={handleEndTimeChange} />
+          </InputLabel>
+
+          <InputLabel label="Limit per request">
             <Input
-              type="password"
-              value={apiSecret}
-              onChange={(e) => setApiSecret(e.target.value)}
-              placeholder="Enter your Bybit API Secret"
+              type="number"
+              value={limit}
+              onChange={handleLimitChange}
+              placeholder="Enter limit"
+              min={1}
+              max={1000}
             />
-          </InputLabel>
-          
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Updating...' : 'Update Credentials'}
-          </Button>
-          
-          {error && (
-            <p className="text-destructive text-sm mt-2">{error}</p>
-          )}
-          
-          {success && (
-            <p className="text-green-500 text-sm mt-2">
-              API credentials updated successfully!
+            <p className="text-xs text-gray-500 mt-1">
+              Note: Bybit API allows max 1000 records per request. The data will be fetched in
+              weekly chunks.
             </p>
-          )}
-          
-          <div className="text-sm text-muted-foreground mt-4">
-            <p>Your API credentials are used to fetch your trading data from Bybit.</p>
-            <p className="mt-1">For security, create API keys with read-only permissions.</p>
-          </div>
+          </InputLabel>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Fetching Data...' : 'Fetch & Save Spot Trades'}
+          </Button>
         </form>
       </CardContent>
     </Card>
   );
-} 
+}

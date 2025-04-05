@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
 import { TransactionDb } from '@/app/api/transactions/route';
+import { useSession } from 'next-auth/react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TransactionsContextType {
   transactions: TransactionDb[];
@@ -23,10 +23,10 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     let totalD = 0;
     let totalC = 0;
     filteredTransactions.forEach((trs) => {
-      if (trs.credit_debit === "Credit") {
+      if (trs.credit_debit === 'Credit') {
         totalC += Number(trs.amount);
       }
-      if (trs.credit_debit === "Debit") {
+      if (trs.credit_debit === 'Debit') {
         totalD += Number(trs.amount);
       }
     });
@@ -36,7 +36,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   const fetchTransactions = async () => {
     try {
       const response = await fetch(`/api/transactions?userId=${session?.user?.id}`);
-      const data = await response.json() as TransactionDb[];
+      const data = (await response.json()) as TransactionDb[];
       setTransactions(data);
       setFilteredTransactions(data);
       return data;
@@ -73,4 +73,4 @@ export function useTransactionsContext() {
     throw new Error('useTransactionsContext must be used within a TransactionsProvider');
   }
   return context;
-} 
+}

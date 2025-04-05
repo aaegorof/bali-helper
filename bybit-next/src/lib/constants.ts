@@ -26,4 +26,5 @@ export const TRADING_SYMBOLS = [
   "SOLUSDT",
   "BNBUSDT",
   "XRPUSDT",
+  "MNTUSDT"
 ]; 

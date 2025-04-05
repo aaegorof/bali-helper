@@ -1,0 +1,17 @@
+{
+  "name": "trading-analyser",
+  "version": "1.0.0",
+  "description": "Trading analyzer module for Bybit",
+  "private": true,
+  "dependencies": {
+    "bybit-api": "^3.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.1.0",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "sqlite3": "^5.1.6"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build"
+  }
+}

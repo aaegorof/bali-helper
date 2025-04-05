@@ -1,0 +1,298 @@
+[
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.045,
+    "qty": 30.0,
+    "timestamp": 1699038392915,
+    "orderId": "1544658598418978304"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.13,
+    "qty": 132.74,
+    "timestamp": 1699848847055,
+    "orderId": "1552787125001524736"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.07,
+    "qty": 74.76,
+    "timestamp": 1700215768518,
+    "orderId": "1555885967024592384"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.0,
+    "qty": 100.0,
+    "timestamp": 1701082121919,
+    "orderId": "1563182755523859968"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.25,
+    "qty": 31.79,
+    "timestamp": 1702423605633,
+    "orderId": "1571977175975073280"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.175,
+    "qty": 95.38,
+    "timestamp": 1702014754124,
+    "orderId": "1570997212278953472"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.6,
+    "qty": 50.1,
+    "timestamp": 1703725805710,
+    "orderId": "1581416701537555968"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.25,
+    "qty": 80.0,
+    "timestamp": 1703612489340,
+    "orderId": "1584410545904424448"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.4,
+    "qty": 50.1,
+    "timestamp": 1703545407822,
+    "orderId": "1583435225160226304"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.32,
+    "qty": 100.2,
+    "timestamp": 1703242964742,
+    "orderId": "1581292733883225600"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.621,
+    "qty": 39.37,
+    "timestamp": 1704283945144,
+    "orderId": "1590043409018787328"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.82,
+    "qty": 23.97,
+    "timestamp": 1704240984978,
+    "orderId": "1589526960449787392"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 2.1,
+    "qty": 42.87,
+    "timestamp": 1704388524173,
+    "orderId": "1590277141147424256"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.585,
+    "qty": 19.7,
+    "timestamp": 1706015928428,
+    "orderId": "1604572337859204608"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.9,
+    "qty": 19.68,
+    "timestamp": 1706590288062,
+    "orderId": "1607925462322124288"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 1.826,
+    "qty": 43.98,
+    "timestamp": 1707232771815,
+    "orderId": "1614779960013362688"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 2.053,
+    "qty": 21.99,
+    "timestamp": 1707759797062,
+    "orderId": "1619200968224937472"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.82,
+    "qty": 48.39,
+    "timestamp": 1708538550705,
+    "orderId": "1619434924077749760"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.958,
+    "qty": 60.59,
+    "timestamp": 1708444485132,
+    "orderId": "1624944297554220544"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.99,
+    "qty": 64.97,
+    "timestamp": 1708114150192,
+    "orderId": "1622173398002308608"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.751,
+    "qty": 85.66,
+    "timestamp": 1708704293073,
+    "orderId": "1618311144995558912"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 2.12,
+    "qty": 122.03,
+    "timestamp": 1709615710197,
+    "orderId": "1634761496879961600"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.87,
+    "qty": 70.0,
+    "timestamp": 1709450838959,
+    "orderId": "1632736498082387456"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.9,
+    "qty": 82.78,
+    "timestamp": 1709450836223,
+    "orderId": "1632589324711368192"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 2.06,
+    "qty": 91.44,
+    "timestamp": 1709232024952,
+    "orderId": "1630531645692188160"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Sell",
+    "price": 2.05,
+    "qty": 98.47,
+    "timestamp": 1709232020340,
+    "orderId": "1629417064190187008"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.823,
+    "qty": 82.28,
+    "timestamp": 1710493835123,
+    "orderId": "1642135702886246656"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.97,
+    "qty": 54.39,
+    "timestamp": 1710430266685,
+    "orderId": "1641602491068279040"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 1.093,
+    "qty": 65.23,
+    "timestamp": 1712947456551,
+    "orderId": "1662718188229847296"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.967,
+    "qty": 103.41,
+    "timestamp": 1715580772131,
+    "orderId": "1684808062265026816"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.551,
+    "qty": 90.74,
+    "timestamp": 1727818840108,
+    "orderId": "1787468417193044224"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.504,
+    "qty": 158.73,
+    "timestamp": 1729898552191,
+    "orderId": "1777824456748919040"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.5,
+    "qty": 128.09,
+    "timestamp": 1729898532577,
+    "orderId": "1788423516845336832"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.8,
+    "qty": 187.5,
+    "timestamp": 1734630551673,
+    "orderId": "1837574310303459584"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.725,
+    "qty": 19.0,
+    "timestamp": 1735569314708,
+    "orderId": "1852382860481489152"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.725,
+    "qty": 280.02,
+    "timestamp": 1735569314708,
+    "orderId": "1852382860481489152"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "side": "Buy",
+    "price": 0.62,
+    "qty": 200.0,
+    "timestamp": 1737962384604,
+    "orderId": "1845078369461692672"
+  }
+]

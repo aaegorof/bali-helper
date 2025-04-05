@@ -35,7 +35,7 @@ const DebounceInput = React.forwardRef<
   React.ComponentProps<"input"> & { delay?: number }
 >(({ onChange, delay = 300, ...props }, ref) => {
   const [value, setValue] = React.useState(props.defaultValue || "");
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout>(null);
 
   React.useEffect(() => {
     return () => {
@@ -132,7 +132,7 @@ const DebounceNumberInput = React.forwardRef<
     delay?: number;
   }
 >(({ onChange, delay = 300, ...props }, ref) => {
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout>(null);
   const [value, setValue] = React.useState<number | null>(props.value ?? null);
 
   React.useEffect(() => {

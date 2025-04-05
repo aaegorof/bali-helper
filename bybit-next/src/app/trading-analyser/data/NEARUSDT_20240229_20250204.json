@@ -1,0 +1,338 @@
+[
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 7.0216,
+    "qty": 2.91,
+    "timestamp": 1713952457058,
+    "orderId": "1671027163392207104"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.8701,
+    "qty": 2.92,
+    "timestamp": 1713937959488,
+    "orderId": "1671027143922247936"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.1737,
+    "qty": 3.31,
+    "timestamp": 1713647124445,
+    "orderId": "1668514984977852672"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.0405,
+    "qty": 3.32,
+    "timestamp": 1713638484105,
+    "orderId": "1668514961582024960"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 5.8273,
+    "qty": 7.01,
+    "timestamp": 1713627076485,
+    "orderId": "1668260632937720064"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 5.651,
+    "qty": 3.54,
+    "timestamp": 1713608161722,
+    "orderId": "1668202443546388736"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 5.753,
+    "qty": 3.48,
+    "timestamp": 1713601226504,
+    "orderId": "1668202429839403264"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.8546,
+    "qty": 2.54,
+    "timestamp": 1714766242145,
+    "orderId": "1677879164717590784"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.8546,
+    "qty": 0.44,
+    "timestamp": 1714766242075,
+    "orderId": "1677879164717590784"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.7067,
+    "qty": 2.99,
+    "timestamp": 1714754781993,
+    "orderId": "1677879154693204224"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.2102,
+    "qty": 3.29,
+    "timestamp": 1714699946717,
+    "orderId": "1677208144520243456"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.0762,
+    "qty": 3.3,
+    "timestamp": 1714674789244,
+    "orderId": "1677208123422894336"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 8.1922,
+    "qty": 0.36,
+    "timestamp": 1716665606973,
+    "orderId": "1693814917788166400"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 8.1922,
+    "qty": 2.13,
+    "timestamp": 1716665606973,
+    "orderId": "1693814917788166400"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 8.0155,
+    "qty": 2.5,
+    "timestamp": 1716654471265,
+    "orderId": "1693814903401703680"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 7.8938,
+    "qty": 5.18,
+    "timestamp": 1716563416106,
+    "orderId": "1692804140000176384"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 7.6551,
+    "qty": 2.62,
+    "timestamp": 1716533926077,
+    "orderId": "1692657059172280576"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 7.7933,
+    "qty": 1.94,
+    "timestamp": 1716516443826,
+    "orderId": "1692657045314300160"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 7.7932,
+    "qty": 0.63,
+    "timestamp": 1716516443826,
+    "orderId": "1692657045314300160"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 7.8204,
+    "qty": 2.61,
+    "timestamp": 1716514027629,
+    "orderId": "1692549541955725568"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 7.6517,
+    "qty": 2.62,
+    "timestamp": 1716503626843,
+    "orderId": "1692549528508786944"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.8489,
+    "qty": 14.04,
+    "timestamp": 1717783402478,
+    "orderId": "1703285064798136577"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 5.696,
+    "qty": 13.03,
+    "timestamp": 1718376439573,
+    "orderId": "1708259820517550336"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.0952,
+    "qty": 4.27,
+    "timestamp": 1721216202631,
+    "orderId": "1731931298811177216"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.2993,
+    "qty": 3.18,
+    "timestamp": 1721198297530,
+    "orderId": "1731841986048387328"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.4078,
+    "qty": 3.13,
+    "timestamp": 1721187650525,
+    "orderId": "1731841967215962368"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 5.2514,
+    "qty": 3.89,
+    "timestamp": 1720911462787,
+    "orderId": "1729494126279616768"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 5.1381,
+    "qty": 3.9,
+    "timestamp": 1720907764392,
+    "orderId": "1729493751384336640"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.3883,
+    "qty": 10.56,
+    "timestamp": 1721406866771,
+    "orderId": "1732081505402185984"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 4.6544,
+    "qty": 2.0,
+    "timestamp": 1724421721436,
+    "orderId": "1758924977408928000"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 4.6544,
+    "qty": 2.39,
+    "timestamp": 1724421721335,
+    "orderId": "1758924977408928000"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 4.5468,
+    "qty": 4.07,
+    "timestamp": 1724416195360,
+    "orderId": "1758924964238813440"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 4.5465,
+    "qty": 0.33,
+    "timestamp": 1724416195360,
+    "orderId": "1758924964238813440"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 4.8434,
+    "qty": 12.38,
+    "timestamp": 1727820236764,
+    "orderId": "1787467828824467712"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 4.0964,
+    "qty": 15.1,
+    "timestamp": 1730393051061,
+    "orderId": "1809062463795456256"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 6.1464,
+    "qty": 13.63,
+    "timestamp": 1731738421061,
+    "orderId": "1820343641177417984"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 7.7044,
+    "qty": 20.45,
+    "timestamp": 1733666151266,
+    "orderId": "1836418628447463680"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.1751,
+    "qty": 16.82,
+    "timestamp": 1734545028448,
+    "orderId": "1843891774511474944"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 6.1751,
+    "qty": 7.45,
+    "timestamp": 1734545028448,
+    "orderId": "1843891774511474944"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 5.1387,
+    "qty": 31.25,
+    "timestamp": 1734630881429,
+    "orderId": "1843892541909723392"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Sell",
+    "price": 5.9212,
+    "qty": 13.51,
+    "timestamp": 1736168640911,
+    "orderId": "1857511622999107840"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "side": "Buy",
+    "price": 3.9,
+    "qty": 34.82,
+    "timestamp": 1738516860735,
+    "orderId": "1868053048367343872"
+  }
+]

@@ -8,6 +8,8 @@ import './globals.css';
 import { ensureDatabaseInitialized } from './lib/init';
 import AppMenu from '@/components/app-menu';
 
+
+
 const satoshi = localFont({
   variable: '--font-satoshi',
   src: [

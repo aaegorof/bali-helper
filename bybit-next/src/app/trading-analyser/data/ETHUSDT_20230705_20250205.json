@@ -1,0 +1,322 @@
+[
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 1626.01,
+    "qty": 0.03075,
+    "timestamp": 1694331668958,
+    "orderId": "1506549176501278208"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 1597.72,
+    "qty": 0.0751,
+    "timestamp": 1695844904236,
+    "orderId": "1519251602945611264"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 1810.0,
+    "qty": 0.03751,
+    "timestamp": 1698248006044,
+    "orderId": "1539040768998774272"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 2000.0,
+    "qty": 0.05,
+    "timestamp": 1700435285048,
+    "orderId": "1556676902541071872"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 1960.0,
+    "qty": 0.025,
+    "timestamp": 1700323968044,
+    "orderId": "1556676981276546560"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 2100.0,
+    "qty": 0.025,
+    "timestamp": 1701405375483,
+    "orderId": "1561309411274921472"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2225.0,
+    "qty": 0.04494,
+    "timestamp": 1703568941988,
+    "orderId": "1582194605812880896"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2365.0,
+    "qty": 0.06382,
+    "timestamp": 1704208356939,
+    "orderId": "1589344950775191040"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2206.62,
+    "qty": 0.08066,
+    "timestamp": 1704284338908,
+    "orderId": "1590046712142239232"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2300.0,
+    "qty": 0.06521,
+    "timestamp": 1704282962285,
+    "orderId": "1589345017548510720"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2345.0,
+    "qty": 0.03928,
+    "timestamp": 1704280464857,
+    "orderId": "1590014038421804544"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2345.0,
+    "qty": 0.00419,
+    "timestamp": 1704280464854,
+    "orderId": "1590014038421804544"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2345.0,
+    "qty": 0.02063,
+    "timestamp": 1704280464451,
+    "orderId": "1590014038421804544"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2532.6,
+    "qty": 0.01974,
+    "timestamp": 1705259160859,
+    "orderId": "1598224017775662592"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 2450.0,
+    "qty": 0.02244,
+    "timestamp": 1704901171967,
+    "orderId": "1585441193419085312"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3448.1,
+    "qty": 0.10144,
+    "timestamp": 1709669156452,
+    "orderId": "1635217835678766592"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3351.6,
+    "qty": 0.02982,
+    "timestamp": 1709668760225,
+    "orderId": "1635214511877395968"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3665.91,
+    "qty": 0.02727,
+    "timestamp": 1709662501154,
+    "orderId": "1635161976902784512"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 3385.78,
+    "qty": 0.01753,
+    "timestamp": 1709229805084,
+    "orderId": "1631532289278350848"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3418.31,
+    "qty": 0.01755,
+    "timestamp": 1709139563829,
+    "orderId": "1630775290764727808"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3700.0,
+    "qty": 0.1,
+    "timestamp": 1710471194733,
+    "orderId": "1639566032660338176"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3292.37,
+    "qty": 0.04555,
+    "timestamp": 1712071675168,
+    "orderId": "1655371623391652096"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2900.0,
+    "qty": 0.048,
+    "timestamp": 1714547337008,
+    "orderId": "1672159338883803392"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3317.61,
+    "qty": 0.07527,
+    "timestamp": 1719238658990,
+    "orderId": "1715492641225140480"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2850.68,
+    "qty": 0.05075,
+    "timestamp": 1720403303677,
+    "orderId": "1723434202009266432"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2850.51,
+    "qty": 0.00093,
+    "timestamp": 1720403303677,
+    "orderId": "1723434202009266432"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2850.49,
+    "qty": 0.00093,
+    "timestamp": 1720403303677,
+    "orderId": "1723434202009266432"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3120.31,
+    "qty": 0.03938,
+    "timestamp": 1720105995278,
+    "orderId": "1722768385349347584"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3289.4,
+    "qty": 0.0331,
+    "timestamp": 1720011600235,
+    "orderId": "1721976441245362432"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3399.63,
+    "qty": 0.00294,
+    "timestamp": 1721325895004,
+    "orderId": "1733001645950068993"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2229.72,
+    "qty": 0.06723,
+    "timestamp": 1722862777370,
+    "orderId": "1745893949660555520"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2353.64,
+    "qty": 0.00213,
+    "timestamp": 1722833225638,
+    "orderId": "1745646051765086464"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2353.64,
+    "qty": 9e-05,
+    "timestamp": 1722833225638,
+    "orderId": "1745646051765086464"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2353.51,
+    "qty": 0.03356,
+    "timestamp": 1722833225638,
+    "orderId": "1745646051765086464"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2248.28,
+    "qty": 0.11119,
+    "timestamp": 1725644671678,
+    "orderId": "1767346228401891584"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Sell",
+    "price": 3400.0,
+    "qty": 0.08324,
+    "timestamp": 1732249541053,
+    "orderId": "1818566154558728448"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3128.9,
+    "qty": 0.04793,
+    "timestamp": 1734696221690,
+    "orderId": "1845160075350862080"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 3000.0,
+    "qty": 0.02,
+    "timestamp": 1736778837156,
+    "orderId": "1833246724299516160"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2200.0,
+    "qty": 0.08,
+    "timestamp": 1738548459190,
+    "orderId": "1833246724299516163"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "side": "Buy",
+    "price": 2705.33,
+    "qty": 0.04,
+    "timestamp": 1738547147185,
+    "orderId": "1833246724299516161"
+  }
+]

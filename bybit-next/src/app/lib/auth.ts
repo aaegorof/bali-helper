@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { db } from './db'
+import { getDb } from './db'
 import { createSession } from './session'
 
 export const SignupFormSchema = z.object({
@@ -28,6 +28,7 @@ export async function signup(state: FormState, formData: FormData) {
   const { email } = validatedFields.data
 
   try {
+    const db = getDb();
     // Check if user exists
     const existingUser = await new Promise((resolve, reject) => {
       db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
@@ -81,6 +82,7 @@ export async function login(state: FormState, formData: FormData) {
 
   try {
     // Find user
+    const db = getDb();
     const user: any = await new Promise((resolve, reject) => {
       db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
         if (err) reject(err)

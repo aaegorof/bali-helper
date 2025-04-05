@@ -1,6 +1,6 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
 import { initializeVectorTables } from '@/app/lib/vectorDb';
+import path from 'path';
+import sqlite3 from 'sqlite3';
 
 // Используем глобальную переменную для хранения подключения к БД
 let dbInstance: sqlite3.Database | null = null;
@@ -70,6 +70,20 @@ async function initializeTables(): Promise<void> {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )`);
 
+        // Таблица спот-сделок
+        db.run(`CREATE TABLE IF NOT EXISTS spottrades (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    side TEXT NOT NULL,
+                    price REAL NOT NULL,
+                    quantity REAL NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    order_id TEXT NOT NULL,
+                    user_id INTEGER,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(symbol, order_id)
+                )`);
+
         // Индексы
         db.run(`CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id)`);
         db.run(
@@ -78,6 +92,9 @@ async function initializeTables(): Promise<void> {
         db.run(
           `CREATE INDEX IF NOT EXISTS idx_transactions_hash ON transactions(transaction_hash)`
         );
+        db.run(`CREATE INDEX IF NOT EXISTS idx_spottrades_user_id ON spottrades(user_id)`);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_spottrades_symbol ON spottrades(symbol)`);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_spottrades_timestamp ON spottrades(timestamp)`);
 
         // Внешние ключи
         db.run(`PRAGMA foreign_keys = ON`);
@@ -111,11 +128,26 @@ async function isDatabaseInitialized(): Promise<boolean> {
           console.error('Ошибка при проверке состояния БД:', err);
           resolve(false);
         }
-        resolve(!!row);
+        
+        if (!row) {
+          resolve(false);
+        } else {
+          // Дополнительно проверяем наличие таблицы spottrades
+          db.get(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='spottrades'",
+            (err, spotTradesRow) => {
+              if (err) {
+                console.error('Ошибка при проверке таблицы spottrades:', err);
+                resolve(false);
+              }
+              resolve(!!spotTradesRow);
+            }
+          );
+        }
       }
     );
   });
 }
 
 // Экспортируем все функции
-export { getDb, closeDb, initializeTables, isDatabaseInitialized };
+export { closeDb, getDb, initializeTables, isDatabaseInitialized };

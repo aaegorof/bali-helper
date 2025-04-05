@@ -1,13 +1,20 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { FundingRate, getFundingRates } from '@/app/types/api';
 import { Button } from '@/components/ui/button';
-import { Input, InputLabel } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { DEFAULT_SYMBOLS } from '@/lib/constants';
-import { FundingRate, getFundingRates } from '@/services/api';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function FundingRates() {
   const [symbols, setSymbols] = useState<string[]>(DEFAULT_SYMBOLS);
@@ -22,10 +29,10 @@ export default function FundingRates() {
 
   const fetchFundingRates = async () => {
     if (symbols.length === 0) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const rates = await getFundingRates(symbols);
       setFundingRates(rates);
@@ -39,19 +46,19 @@ export default function FundingRates() {
 
   const addSymbol = () => {
     if (!newSymbol) return;
-    
+
     const formattedSymbol = newSymbol.toUpperCase();
     if (symbols.includes(formattedSymbol)) {
       setError('Symbol already exists in the list');
       return;
     }
-    
+
     setSymbols([...symbols, formattedSymbol]);
     setNewSymbol('');
   };
 
   const removeSymbol = (symbolToRemove: string) => {
-    setSymbols(symbols.filter(symbol => symbol !== symbolToRemove));
+    setSymbols(symbols.filter((symbol) => symbol !== symbolToRemove));
   };
 
   const formatTimestamp = (timestamp: number) => {
@@ -66,7 +73,7 @@ export default function FundingRates() {
           <Button variant="outline">Back to Home</Button>
         </Link>
       </div>
-      
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Add Symbol</CardTitle>
@@ -87,7 +94,7 @@ export default function FundingRates() {
           {error && <p className="text-destructive mt-2">{error}</p>}
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Current Funding Rates</CardTitle>
@@ -111,11 +118,7 @@ export default function FundingRates() {
                   </TableCell>
                   <TableCell>{formatTimestamp(rate.timestamp)}</TableCell>
                   <TableCell>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => removeSymbol(rate.symbol)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => removeSymbol(rate.symbol)}>
                       Remove
                     </Button>
                   </TableCell>
@@ -141,4 +144,4 @@ export default function FundingRates() {
       </Card>
     </main>
   );
-} 
+}
