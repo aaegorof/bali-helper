@@ -1,67 +1,44 @@
-import { AveragePrice, WalletBalance, Trade } from '@/app/types/api';
+import { CoinAnalisys, Trade } from './api/types';
 
-export const calculateAverages = (trades: Trade[]) => {
-  const symbolAverages: { [key: string]: AveragePrice } = {};
-
+export const analyzeCoinTrade = (trades: Trade[]) => {
+  const tradeAnalyze: { [key: string]: CoinAnalisys } = {};
   trades.forEach((trade) => {
-    if (!symbolAverages[trade.symbol]) {
-      symbolAverages[trade.symbol] = {
+    if (!tradeAnalyze[trade.symbol]) {
+      tradeAnalyze[trade.symbol] = {
         buyAvg: 0,
         sellAvg: 0,
         totalBuyVolume: 0,
         totalSellVolume: 0,
+        totalBuy: 0,
+        totalSell: 0,
+        pnl: 0,
+        pnlPercentage: 0,
+        leftFromTrading: 0,
       };
     }
+    let pairStat = tradeAnalyze[trade.symbol];
 
     const volume = trade.price * trade.qty;
 
     if (trade.side.toUpperCase() === 'BUY') {
-      const currentTotal =
-        symbolAverages[trade.symbol].buyAvg * symbolAverages[trade.symbol].totalBuyVolume;
-      symbolAverages[trade.symbol].totalBuyVolume += trade.qty;
-      symbolAverages[trade.symbol].buyAvg =
-        (currentTotal + volume) / symbolAverages[trade.symbol].totalBuyVolume;
+      pairStat.totalBuy += volume;
+      const currentTotal = pairStat.buyAvg * pairStat.totalBuyVolume;
+      pairStat.totalBuyVolume += trade.qty;
+
+      pairStat.buyAvg = (currentTotal + volume) / pairStat.totalBuyVolume;
     } else {
-      const currentTotal =
-        symbolAverages[trade.symbol].sellAvg * symbolAverages[trade.symbol].totalSellVolume;
-      symbolAverages[trade.symbol].totalSellVolume += trade.qty;
-      symbolAverages[trade.symbol].sellAvg =
-        (currentTotal + volume) / symbolAverages[trade.symbol].totalSellVolume;
+      pairStat.totalSell += volume;
+      const costBasis = trade.qty * pairStat.buyAvg;
+
+      pairStat.pnl += trade.qty * trade.price - costBasis;
+      const currentTotal = pairStat.sellAvg * pairStat.totalSellVolume;
+      pairStat.totalSellVolume += trade.qty;
+      pairStat.sellAvg = (currentTotal + volume) / pairStat.totalSellVolume;
     }
+
+    pairStat.pnlPercentage = (pairStat.pnl / (pairStat.totalSellVolume * pairStat.buyAvg)) * 100;
+    pairStat.leftFromTrading = pairStat.totalBuyVolume - pairStat.totalSellVolume;
   });
 
-  return symbolAverages;
+  return tradeAnalyze;
 };
-
-
-export const calculateProfitLoss = (average: AveragePrice, coinBalance: WalletBalance) => {
-    const tradePercentage = (average.sellAvg- average.buyAvg)/average.buyAvg * 100
-    const totalBuy = average.totalBuyVolume * average.buyAvg;
-    const totalSold = average.totalSellVolume * average.sellAvg;
-    const profitLoss = totalSold - totalBuy;
-    const tokensLeft = average.totalBuyVolume - average.totalSellVolume
-    const profitLossPercentage = totalBuy > 0 ? (profitLoss / totalBuy) * 100 : 0;
-    // Находим текущий баланс и цену для выбранной монеты
-    const currentValue = coinBalance 
-      ? coinBalance.total * (coinBalance?.current_price ?? 0)
-      : 0;
-  
-    const walletVal = (coinBalance?.usd_value ?? 0)
-    
-    const unrealisedProfit = profitLoss + walletVal
-    
-    const unrealisedProfitPercentage = (unrealisedProfit / totalBuy) * 100
-    
-    const potentialProfit = (tokensLeft - coinBalance.total) * coinBalance?.current_price
-    
-  
-    return {
-      profitLoss,
-      profitLossPercentage,
-      currentValue,
-      unrealisedProfit,
-      unrealisedProfitPercentage,
-      tradePercentage,
-      potentialProfit,
-    };
-  };

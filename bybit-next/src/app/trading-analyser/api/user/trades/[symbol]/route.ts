@@ -1,7 +1,9 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { analyzeCoinTrade } from '@/app/trading-analyser/helpers';
+import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import bybitService from '../../../services/bybit';
 import { SpotTradeDbService } from '../../../services/db-service';
-import { calculateAverages } from '@/app/trading-analyser/helpers';
 
 /**
  * Fetches spot trades for a given symbol and date range and saves them to the database
@@ -72,29 +74,40 @@ export async function GET(
   try {
     const { symbol } = await params;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+
+    // Получаем пользователя из сессии вместо параметра запроса
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized: User not authenticated' }, { status: 401 });
+    }
+
+    // Преобразуем ID пользователя из строки в число
+    const userId = parseInt(session.user.id, 10);
+
+    if (isNaN(userId)) {
+      return NextResponse.json({ error: 'Invalid user ID format' }, { status: 400 });
+    }
+
     const startTime = searchParams.get('startTime');
     const endTime = searchParams.get('endTime');
     const limit = searchParams.get('limit');
 
-    if (!userId || !symbol) {
-      return NextResponse.json(
-        { error: 'Missing required parameters: userId, symbol' },
-        { status: 400 }
-      );
+    if (!symbol) {
+      return NextResponse.json({ error: 'Missing required parameter: symbol' }, { status: 400 });
     }
 
     const trades = await SpotTradeDbService.getTradesBySymbol(
-      Number(userId),
+      userId,
       symbol,
       startTime ? Number(startTime) : undefined,
       endTime ? Number(endTime) : undefined,
       limit ? Number(limit) : 1000
     );
 
-    const averages = calculateAverages(trades);
+    const analyze = analyzeCoinTrade(trades);
 
-    return NextResponse.json({ trades, averages }, { status: 200 });
+    return NextResponse.json({ trades, analyze }, { status: 200 });
   } catch (error: any) {
     console.error('Error fetching spot trades:', error);
     return NextResponse.json(

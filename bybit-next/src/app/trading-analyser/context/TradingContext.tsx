@@ -1,6 +1,6 @@
 'use client';
 
-import { AveragePrice, Trade, WalletBalance } from '@/app/types/api';
+import { CoinAnalisys, Trade, WalletBalance } from '@/app/trading-analyser/api/types';
 import { useSession } from 'next-auth/react';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -15,7 +15,7 @@ interface TradingContextType {
   selectedPair: string;
   setSelectedPair: (pair: string) => void;
   trades: Trade[];
-  tradeAverages: Record<string, AveragePrice>;
+  tradeAnalyze: Record<string, CoinAnalisys>;
   isLoadingTrades: boolean;
   fetchTrades: (symbol?: string, limit?: number) => Promise<void>;
 
@@ -26,8 +26,26 @@ interface TradingContextType {
 const TradingContext = createContext<TradingContextType | undefined>(undefined);
 
 export const TradingProvider = ({ children }: { children: ReactNode }) => {
-  const { data: session } = useSession();
-  const userId = Number(session?.user?.id);
+  const { data: session, status } = useSession();
+
+  // Более надежное преобразование ID, обрабатывающее строковые и числовые идентификаторы
+  let userId: number | undefined = undefined;
+  if (session?.user?.id) {
+    try {
+      // Пробуем преобразовать в число безопасно
+      const parsed = parseInt(String(session.user.id), 10);
+      userId = !isNaN(parsed) ? parsed : undefined;
+
+      if (userId === undefined) {
+        console.error('TradingContext: Failed to parse user ID:', session.user.id);
+      }
+    } catch (error) {
+      console.error('TradingContext: Error parsing user ID:', error);
+    }
+  } else if (status === 'authenticated') {
+    console.error('TradingContext: Session is authenticated but user ID is missing');
+  }
+
   // Wallet and Prices State
   const [walletBalances, setWalletBalances] = useState<WalletBalance[]>([]);
   const [isLoadingBalances, setIsLoadingBalances] = useState(false);
@@ -36,7 +54,7 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
   const [tradingPairs, setTradingPairs] = useState<string[]>([]);
   const [selectedPair, setSelectedPair] = useState<string>('');
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [tradeAverages, setTradeAverages] = useState<Record<string, AveragePrice>>({});
+  const [tradeAnalyze, setTradeAnalyze] = useState<Record<string, CoinAnalisys>>({});
   const [isLoadingTrades, setIsLoadingTrades] = useState(false);
 
   // General State
@@ -44,7 +62,10 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch wallet balances and current prices
   const refreshWalletBalances = async () => {
-    if (!userId) return;
+    if (!userId || status !== 'authenticated') {
+      console.log('Skipping wallet balances fetch: Not authenticated or missing userId');
+      return;
+    }
 
     setIsLoadingBalances(true);
     setError(null);
@@ -68,7 +89,10 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch trading pairs for the user
   const fetchTradingPairs = async () => {
-    if (!userId) return;
+    if (!userId || status !== 'authenticated') {
+      console.log('Skipping trading pairs fetch: Not authenticated or missing userId');
+      return;
+    }
 
     try {
       const response = await fetch(`/trading-analyser/api/user/pairs?userId=${userId}`);
@@ -92,7 +116,10 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch trade history for a specific symbol
   const fetchTrades = async (symbol?: string, limit: number = 100) => {
-    if (!userId) return;
+    if (!userId || status !== 'authenticated') {
+      console.log('Skipping trades fetch: Not authenticated or missing userId');
+      return;
+    }
 
     const pairToFetch = symbol || selectedPair;
     if (!pairToFetch) return;
@@ -102,7 +129,7 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const response = await fetch(
-        `/trading-analyser/api/user/trades/${pairToFetch}?limit=${limit}&userId=${userId}`,
+        `/trading-analyser/api/user/trades/${pairToFetch}?limit=${limit}`,
         {
           method: 'GET',
           headers: {
@@ -114,10 +141,10 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
       if (!response.ok) {
         throw new Error(`Failed to fetch trades for ${pairToFetch}`);
       }
-
       const data = await response.json();
+
       setTrades(data.trades || []);
-      setTradeAverages(data.averages || {});
+      setTradeAnalyze(data.analyze || {});
     } catch (err: any) {
       console.error('Error fetching trades:', err);
       setError(err.message || `Failed to fetch trades for ${pairToFetch}`);
@@ -128,18 +155,18 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
 
   // Initial data loading
   useEffect(() => {
-    if (userId) {
+    if (userId && status === 'authenticated') {
       refreshWalletBalances();
       fetchTradingPairs();
     }
-  }, [userId]);
+  }, [userId, status]);
 
   // When selected pair changes, fetch trades for that pair
   useEffect(() => {
-    if (selectedPair && userId) {
+    if (selectedPair && userId && status === 'authenticated') {
       fetchTrades(selectedPair);
     }
-  }, [selectedPair, userId]);
+  }, [selectedPair, userId, status]);
 
   const value = {
     // Wallet and Prices
@@ -152,7 +179,7 @@ export const TradingProvider = ({ children }: { children: ReactNode }) => {
     selectedPair,
     setSelectedPair,
     trades,
-    tradeAverages,
+    tradeAnalyze,
     isLoadingTrades,
     fetchTrades,
 

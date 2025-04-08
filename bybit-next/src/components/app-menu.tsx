@@ -15,7 +15,8 @@ const menuItems = [
 ];
 
 const AppMenu = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
   return (
     <nav className="bg-accent text-accent-foreground mb-4 p-4">
       <div className="container mx-auto flex items-center justify-center gap-8">
@@ -25,7 +26,7 @@ const AppMenu = () => {
           </Link>
         ))}
         <div className="ml-auto flex gap-2">
-          <UserSwitcher session={session} />
+          <UserSwitcher session={session} status={status} />
           <ModeToggle />
         </div>
       </div>

@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import TradeHistory from './components/trade-history';
 import UpdateDataForm from './components/update-data-form';
 import WalletBalance from './components/wallet-balance';
+import TradingSummary from './components/summary';
 
 export default function TradingAnalyser() {
   return (
@@ -21,7 +22,9 @@ export default function TradingAnalyser() {
           <Suspense fallback={<div>Loading wallet balance...</div>}>
             <WalletBalance />
           </Suspense>
-          {/* <TradingSummary /> */}
+          <Suspense fallback={<div>Loading trading summary...</div>}>
+            <TradingSummary />
+          </Suspense>
         </div>
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1fr_2fr] mt-6">
           <UpdateDataForm />

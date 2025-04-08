@@ -1,14 +1,13 @@
+import AppMenu from '@/components/app-menu';
 import { Providers } from '@/components/providers';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Toaster } from 'sonner';
+import { authOptions } from './api/auth/[...nextauth]/route';
 import './globals.css';
 import { ensureDatabaseInitialized } from './lib/init';
-import AppMenu from '@/components/app-menu';
-
-
 
 const satoshi = localFont({
   variable: '--font-satoshi',
@@ -38,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en" suppressHydrationWarning>

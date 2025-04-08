@@ -1,7 +1,6 @@
-import NextAuth from 'next-auth';
-import { AuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { getDb } from '@/app/lib/db';
+import NextAuth, { AuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { z } from 'zod';
 
 if (!process.env.NEXTAUTH_SECRET) {
@@ -21,12 +20,13 @@ declare module 'next-auth' {
   }
 }
 
-const authOptions: AuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Email',
       credentials: {
         email: { label: 'Email', type: 'email', placeholder: 'your@email.com' },
+        userId: { label: 'User ID', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email) return null;
@@ -37,36 +37,42 @@ const authOptions: AuthOptions = {
         if (!validatedEmail.success) return null;
 
         try {
-          // Find or create user
+          // Используем userId из credentials, если он предоставлен
+          if (credentials.userId) {
+            return {
+              id: credentials.userId,
+              email: credentials.email,
+            };
+          }
+
+          // Иначе ищем пользователя в базе данных
           const user: any = await new Promise((resolve, reject) => {
             getDb().get(
               'SELECT id, email FROM users WHERE email = ?',
               [credentials.email],
-              async (err: Error | null, row: any) => {
-                if (err) reject(err);
-                if (row) {
-                  resolve(row);
-                } else {
-                  // Create new user if doesn't exist
-                  getDb().run(
-                    'INSERT INTO users (email) VALUES (?)',
-                    [credentials.email],
-                    function (err: Error | null) {
-                      if (err) reject(err);
-                        resolve({ id: this.lastID, email: credentials.email });
-                    }
-                  );
+              (err: Error | null, row: any) => {
+                if (err) {
+                  console.error('NextAuth DB error:', err);
+                  reject(err);
                 }
+                resolve(row);
               }
             );
           });
 
+          if (!user) {
+            console.error('NextAuth: User not found for email', credentials.email);
+            return null;
+          }
+          // Преобразуем id в строку, чтобы NextAuth правильно его обрабатывал
+          const userId = String(user.id);
+
           return {
-            id: String(user.id),
+            id: userId,
             email: user.email,
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('NextAuth authorize error:', error);
           return null;
         }
       },
@@ -76,22 +82,38 @@ const authOptions: AuthOptions = {
     signIn: '/login', // Using our custom login page
   },
   callbacks: {
-    async jwt({ token, user}) {
-
+    async jwt({ token, user, account }) {
+      // При первоначальной аутентификации сохраняем ID пользователя
       if (user) {
         token.id = user.id;
       }
+
+      // Проверяем, что ID всегда присутствует в токене
+      if (!token.id) {
+        console.error('NextAuth jwt: ID missing in token:', token);
+      }
+
       return token;
     },
+
     async session({ session, token }) {
+      // Проверяем, есть ли ID в токене
+      if (!token.id) {
+        console.error('NextAuth session: ID missing in token, cannot set session user ID');
+      }
+
+      // Всегда устанавливаем ID пользователя из токена в сессию
       if (session.user) {
         session.user.id = token.id as string;
       }
+
       return session;
     },
   },
+  debug: true, // Включаем режим отладки для NextAuth
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
   },
 };
 const handler = NextAuth(authOptions);

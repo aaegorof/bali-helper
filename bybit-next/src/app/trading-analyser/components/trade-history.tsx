@@ -3,6 +3,7 @@
 import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputLabel } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -20,8 +21,8 @@ export default function TradeHistory() {
     return new Date(timestamp).toLocaleString();
   };
 
-  const handlePairChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedPair(e.target.value);
+  const handlePairChange = (value: string) => {
+    setSelectedPair(value);
   };
 
   if (!tradingPairs.length && !isLoadingTrades) {
@@ -43,19 +44,19 @@ export default function TradeHistory() {
         {error && <p className="text-destructive mb-4">{error}</p>}
 
         <InputLabel label="Select Trading Pair">
-          <select
-            value={selectedPair}
-            onChange={handlePairChange}
-            className="w-full p-2 border rounded"
-            disabled={isLoadingTrades}
-          >
-            <option value="">Select a pair</option>
-            {tradingPairs.map((pair) => (
-              <option key={pair} value={pair}>
-                {pair}
-              </option>
-            ))}
-          </select>
+          <Select value={selectedPair} onValueChange={handlePairChange} disabled={isLoadingTrades}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a pair" />
+            </SelectTrigger>
+            <SelectContent>
+
+              {tradingPairs.map((pair) => (
+                <SelectItem key={pair} value={pair}>
+                  {pair}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </InputLabel>
 
         <Table>
@@ -73,7 +74,9 @@ export default function TradeHistory() {
             {trades?.map((trade) => (
               <TableRow key={trade.orderId}>
                 <TableCell>{trade.symbol}</TableCell>
-                <TableCell className={trade.side === 'BUY' ? 'text-green-500' : 'text-red-500'}>
+                <TableCell
+                  className={trade.side.toUpperCase() === 'BUY' ? 'text-green-500' : 'text-red-500'}
+                >
                   {trade.side}
                 </TableCell>
                 <TableCell>{trade.price.toFixed(2)}</TableCell>

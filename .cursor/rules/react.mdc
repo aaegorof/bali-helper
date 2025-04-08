@@ -29,6 +29,10 @@ Use semantic HTML tags and proper attributes (e.g., alt for <img>).
 
 3. Context Awareness
 
+Check the types from TypeScript especialy using third party libraries
+
+Dont use any in Typescript
+
 When adding new code, take the current project structure into account.
 
 Avoid modifying a component’s API unless necessary.

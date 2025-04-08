@@ -12,5 +12,5 @@ export default withAuth({
 })
 
 export const config = {
-  matcher: ["/permata/:path*", "/trading-analyser/:path*"]
-} 
+  matcher: ['/permata/:path*', '/trading-analyser/:path*'],
+};

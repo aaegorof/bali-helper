@@ -13,6 +13,18 @@ export interface Trade {
   orderId: string;
 }
 
+export interface CoinAnalisys {
+  buyAvg: number;
+  sellAvg: number;
+  totalBuyVolume: number;
+  totalSellVolume: number;
+  totalBuy: number;
+  totalSell: number;
+  pnl: number;
+  pnlPercentage: number;
+  leftFromTrading: number;
+}
+
 export interface WalletBalance {
   coin: string;
   total: number;

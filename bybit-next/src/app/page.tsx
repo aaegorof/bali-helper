@@ -12,8 +12,19 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { data: session } = useSession();
-  if (!session) {
+  const { data: session, status } = useSession();
+
+  // Показываем индикатор загрузки, пока сессия загружается
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Показываем форму входа, если пользователь не аутентифицирован
+  if (status === 'unauthenticated' || !session) {
     return (
       <div className="flex justify-center items-center">
         <LoginForm />
