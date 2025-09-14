@@ -1,29 +1,58 @@
-"use client"
+'use client';
 
-import React, { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { Input, InputLabel } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { calculateAPR } from './helpers';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input, InputLabel } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { calculateAPR, formatCurrency } from './helpers';
 
 const DEFAULT_VALUES = {
   initial: 3000,
   apy: 12,
   months: 18,
-  monthly: 2000
+  monthly: 2000,
 };
 
 export default function APYCalculation() {
   const [initial, setInitial] = useState(DEFAULT_VALUES.initial);
   const [monthly, setMonthly] = useState(DEFAULT_VALUES.monthly);
-  const [apy, setApy] = useState(DEFAULT_VALUES.apy); 
+  const [apy, setApy] = useState(DEFAULT_VALUES.apy);
   const [months, setMonths] = useState(DEFAULT_VALUES.months);
 
-  const result = useMemo(
+  const calculations = useMemo(
     () => calculateAPR(initial, monthly, apy, months),
     [initial, monthly, apy, months]
+  );
+
+  const formattedCalculations = useMemo(
+    () =>
+      calculations.map((val) => ({
+        month: val.month,
+        balancesWithInvestment: formatCurrency(val.balancesWithInvestment),
+        balancesWithoutInvestment: formatCurrency(val.balancesWithoutInvestment),
+        monthIncome: formatCurrency(val.monthIncome),
+        diff: formatCurrency(val.diff),
+      })),
+    [calculations]
   );
 
   return (
@@ -34,50 +63,44 @@ export default function APYCalculation() {
           <Button variant="outline">Back to Home</Button>
         </Link>
       </div>
-      
+
       <Card>
         <CardHeader>
-          <CardTitle>
-            Forecasting Invest Plan APY calculation
-          </CardTitle>
+          <CardTitle>Forecasting Invest Plan APY calculation</CardTitle>
         </CardHeader>
 
-        <CardContent className='grid gap-8 items-start grid-cols-1 md:grid-cols-[300px_1fr]'>
+        <CardContent className="grid gap-8 items-start grid-cols-1 md:grid-cols-[300px_1fr]">
           <div className="grid gap-4 p-4 bg-muted rounded-lg">
-            <InputLabel label='Initial Investment, $'>
+            <InputLabel label="Initial Investment, $">
               <Input
                 onChange={(v) => setInitial(Number(v.target.value))}
                 value={initial}
-                type='number'
+                type="number"
                 step={100}
               />
             </InputLabel>
-            <InputLabel label='Predicted APR, %'>
-              <Input
-                onChange={(v) => setApy(Number(v.target.value))}
-                value={apy}
-                type='number'
-              />
+            <InputLabel label="Predicted APR, %">
+              <Input onChange={(v) => setApy(Number(v.target.value))} value={apy} type="number" />
             </InputLabel>
-            <InputLabel label='Monthly Deposit, $'>
+            <InputLabel label="Monthly Deposit, $">
               <Input
                 onChange={(v) => setMonthly(Number(v.target.value))}
                 value={monthly}
-                type='number'
+                type="number"
                 step={100}
               />
             </InputLabel>
-            <InputLabel label='Number of Months'>
+            <InputLabel label="Number of Months">
               <Input
                 onChange={(v) => setMonths(Number(v.target.value))}
                 value={months}
-                type='number'
+                type="number"
               />
             </InputLabel>
           </div>
-        
+
           <Table>
-            <TableHeader className='text-right'>
+            <TableHeader className="text-right">
               <TableRow>
                 <TableHead>Month</TableHead>
                 <TableHead>With Investment</TableHead>
@@ -86,8 +109,8 @@ export default function APYCalculation() {
                 <TableHead>The difference</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className='text-right'>
-              {result.map((val, ind) => (
+            <TableBody className="text-right">
+              {formattedCalculations.map((val, ind) => (
                 <TableRow key={val.balancesWithInvestment + ind}>
                   <TableCell>{ind + 1}</TableCell>
                   <TableCell>{val.balancesWithInvestment}</TableCell>
@@ -100,6 +123,62 @@ export default function APYCalculation() {
           </Table>
         </CardContent>
       </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>График доходности</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-96 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={calculations} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="month"
+                  label={{ value: 'Месяц', position: 'insideBottom', offset: 0, fontSize: 12 }}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis
+                  label={{
+                    value: 'Сумма ($)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fontSize: 12,
+                    textAnchor: 'middle',
+                    offset: -10,
+                  }}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    name === 'balancesWithInvestment' ? 'С инвестициями' : 'Без инвестиций',
+                  ]}
+                  labelFormatter={(label) => `Месяц ${label}`}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line
+                  type="monotone"
+                  dataKey="balancesWithInvestment"
+                  stroke="#8884d8"
+                  strokeWidth={3}
+                  name="С инвестициями"
+                  dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="balancesWithoutInvestment"
+                  stroke="#82ca9d"
+                  strokeWidth={3}
+                  name="Без инвестиций"
+                  dot={{ fill: '#82ca9d', strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </main>
   );
-} 
+}
