@@ -266,7 +266,7 @@ async function findSimilarTransactions(
 }
 
 // Функция для определения категории с помощью RAG
-async function determineCategoryWithRAG(description: string): Promise<string> {
+async function determineCategoryWithRAG(description: string, similarityThreshold = 0.85): Promise<string> {
   try {
     // Ищем похожие транзакции
     const similarTransactions = await findSimilarTransactions(description, 3);
@@ -279,7 +279,7 @@ async function determineCategoryWithRAG(description: string): Promise<string> {
 
     // Берем категорию самой похожей транзакции, если сходство выше порога
     const mostSimilar = similarTransactions[0];
-    if (mostSimilar.similarity > 0.85) {
+    if (mostSimilar.similarity > similarityThreshold) {
       return mostSimilar.category;
     }
 

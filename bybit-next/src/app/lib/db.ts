@@ -1,4 +1,4 @@
-import { initializeVectorTables } from '@/app/lib/vectorDb';
+import { initializeVectorTables } from '@/app/permata/lib/vectorDb';
 import path from 'path';
 import sqlite3 from 'sqlite3';
 
@@ -128,7 +128,7 @@ async function isDatabaseInitialized(): Promise<boolean> {
           console.error('Ошибка при проверке состояния БД:', err);
           resolve(false);
         }
-        
+
         if (!row) {
           resolve(false);
         } else {

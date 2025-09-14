@@ -1,4 +1,4 @@
-import { determineCategoryWithRAG, determineKeywordCategory } from '@/app/lib/vectorDb';
+import { determineCategoryWithRAG, determineKeywordCategory } from '@/app/permata/lib/vectorDb';
 import { ApiResponse } from '@/app/types/api';
 import { NextResponse } from 'next/server';
 import { TransactionDb } from '../transactions/route';

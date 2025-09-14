@@ -1,32 +1,34 @@
-import { NextResponse } from 'next/server';
 import { getDb } from '@/app/lib/db';
 import { ensureDatabaseInitialized } from '@/app/lib/init';
+import {
+  createTransactionHash,
+  parseTimeFromDescription,
+} from '@/app/permata/lib/TransactionParseResult';
+import { createEmbedding, determineCategory, saveEmbedding } from '@/app/permata/lib/vectorDb';
 import { ApiResponse } from '@/app/types/api';
-import { parseTimeFromDescription } from '@/app/lib/helpers';
-import { createTransactionHash } from '@/app/lib/helpers';
-import { createEmbedding, determineCategory, saveEmbedding } from '@/app/lib/vectorDb';
+import { NextResponse } from 'next/server';
 
 // Типы
 export interface PermataRawTransaction {
-    [key: string]: string; // Allow any string key
-    "Posted Date (mm/dd/yyyy)": string;
-    Description: string;
-    "Credit/Debit": string;
-    Amount: string;
+  [key: string]: string; // Allow any string key
+  'Posted Date (mm/dd/yyyy)': string;
+  Description: string;
+  'Credit/Debit': string;
+  Amount: string;
 }
 
 export interface TransactionDb {
-    id?: number;
-    posted_date?: string;
-    description?: string;
-    credit_debit?: string;
-    amount: number;
-    category?: string;
-    time?: string;
-    transaction_hash?: string;
-    user_id?: number;
-    created_at?: string;
-  }
+  id?: number;
+  posted_date?: string;
+  description?: string;
+  credit_debit?: string;
+  amount: number;
+  category?: string;
+  time?: string;
+  transaction_hash?: string;
+  user_id?: number;
+  created_at?: string;
+}
 
 // GET /api/transactions
 export async function GET(request: Request) {
@@ -80,54 +82,56 @@ export async function GET(request: Request) {
   });
 }
 
-
 export type ReqTransactions = {
   transactions: PermataRawTransaction[];
   userId: number;
-}
+};
 
-export type RespPostTransactions = ApiResponse<{message: string, transactions: TransactionDb[]}>
+export type RespPostTransactions = ApiResponse<{ message: string; transactions: TransactionDb[] }>;
 
-
-async function prepareTransactions(transactions: PermataRawTransaction[]): Promise<TransactionDb[]> {
-  const cleanTransactions = await Promise.all(transactions.map(async (tr) => {
-    const { time, cleanDescription } = parseTimeFromDescription(tr.Description || '');
-    const category = await determineCategory(cleanDescription);
-    return {
-      posted_date: tr["Posted Date (mm/dd/yyyy)"] ?? '',
-      description: cleanDescription,
-      credit_debit: tr["Credit/Debit"],
-      category,
-      time: time ?? '',
-      amount: parseFloat(
-          tr.Amount.replace(/[^0-9.-]+/g, "")
-            ?.split(".")
-            ?.at(0) ?? "0"
+async function prepareTransactions(
+  transactions: PermataRawTransaction[]
+): Promise<TransactionDb[]> {
+  const cleanTransactions = await Promise.all(
+    transactions.map(async (tr) => {
+      const { time, cleanDescription } = parseTimeFromDescription(tr.Description || '');
+      const category = await determineCategory(cleanDescription);
+      return {
+        posted_date: tr['Posted Date (mm/dd/yyyy)'] ?? '',
+        description: cleanDescription,
+        credit_debit: tr['Credit/Debit'],
+        category,
+        time: time ?? '',
+        amount: parseFloat(
+          tr.Amount.replace(/[^0-9.-]+/g, '')
+            ?.split('.')
+            ?.at(0) ?? '0'
         ),
-    }
-  }))
+      };
+    })
+  );
 
   return cleanTransactions.map((cleanTr) => {
     const transactionHash = createTransactionHash(cleanTr);
     return {
-    ...cleanTr,
-    transaction_hash: transactionHash,
-  }
-  })
+      ...cleanTr,
+      transaction_hash: transactionHash,
+    };
+  });
 }
 
 // POST /api/transactions
-export async function POST(request: Request): Promise<NextResponse<RespPostTransactions>>{
+export async function POST(request: Request): Promise<NextResponse<RespPostTransactions>> {
   await ensureDatabaseInitialized();
 
   try {
-    const body = await request.json() as ReqTransactions;
-    const { transactions, userId } = body; 
+    const body = (await request.json()) as ReqTransactions;
+    const { transactions, userId } = body;
 
     if (!userId) {
       return NextResponse.json<RespPostTransactions>({
         success: false,
-        error: 'User ID is required'
+        error: 'User ID is required',
       });
     }
 
@@ -225,7 +229,12 @@ export async function DELETE(request: Request) {
           );
           return;
         }
-        resolve(NextResponse.json({ success: true, data: { message: 'Transactions deleted successfully' } }));
+        resolve(
+          NextResponse.json({
+            success: true,
+            data: { message: 'Transactions deleted successfully' },
+          })
+        );
       });
     });
   } catch (error: any) {

@@ -1,7 +1,7 @@
 import { getDb } from '@/app/lib/db';
-import { parseTimeFromDescription } from '@/app/lib/helpers';
-import { createEmbedding, saveEmbedding } from '@/app/lib/vectorDb';
 import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { parseTimeFromDescription } from '@/app/permata/lib/TransactionParseResult';
+import { createEmbedding, saveEmbedding } from '@/app/permata/lib/vectorDb';
 import { ApiResponse } from '@/app/types/api';
 import { NextResponse } from 'next/server';
 
