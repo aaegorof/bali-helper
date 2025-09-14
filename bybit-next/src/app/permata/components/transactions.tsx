@@ -1,4 +1,15 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -7,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   FilterFn,
@@ -17,39 +30,25 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
+  Row,
   SortingState,
   useReactTable,
-  Column,
-  Row,
-  Table as TableType,
 } from '@tanstack/react-table';
-import { FilterType, FilterText, FilterDates, FilterAmount, MultiFilterCategory } from './filters';
-import { Button } from '@/components/ui/button';
 import {
+  ArrowDown,
+  ArrowUp,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ArrowUp,
-  ArrowDown,
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectValue,
-  SelectTrigger,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BulkEditDialog } from './bulk-edit-dialog';
+import { FilterAmount, FilterDates, FilterText, FilterType, MultiFilterCategory } from './filters';
 import { useTransactionsContext } from './transactions-context';
-import { cn } from '@/lib/utils';
-import { TransactionDb } from '@/app/api/transactions/route';
 
 declare module '@tanstack/table-core' {
-  interface ColumnMeta<TData extends unknown, TValue> {
+  interface ColumnMeta<TData, TValue> {
     className?: string;
     Filter?: React.ComponentType<{
       column: Column<TData, TValue>;
@@ -58,11 +57,11 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type TableColumnDef<TData> = ColumnDef<TData, any> & {
+type TableColumnDef<TData> = ColumnDef<TData> & {
   meta?: {
     className?: string;
     Filter?: React.ComponentType<{
-      column: Column<TData, any>;
+      column: Column<TData>;
       reset: () => void;
     }>;
   };
@@ -137,14 +136,12 @@ const TransactionsPermata = () => {
         id: 'select',
         cell: ({ row }) => {
           return (
-            
-              <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(checked: boolean) => {
-                  row.toggleSelected(!!checked);
-                }}
-              />
-            
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(checked: boolean) => {
+                row.toggleSelected(!!checked);
+              }}
+            />
           );
         },
       },
@@ -298,7 +295,7 @@ const TransactionsPermata = () => {
   useEffect(() => {
     const data = [...getRowData().rows.map((row) => row.original)];
     setFilteredTransactions(data);
-  }, [getRowData()]);
+  }, [getRowData(), setFilteredTransactions, getRowData]);
 
   const onResetFilters = () => {
     setFilters(defaultFilters);
@@ -394,11 +391,16 @@ const TransactionsPermata = () => {
             return (
               <TableRow
                 className="cursor-pointer"
+                key={row.original.id?.toString() + 'row'}
                 id={row.original.id?.toString() + 'row'}
                 onClick={(e) => handleRowClick(row, e)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell id={cell.id} className={cell.column.columnDef.meta?.className}>
+                  <TableCell
+                    id={cell.id}
+                    key={cell.id}
+                    className={cell.column.columnDef.meta?.className}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

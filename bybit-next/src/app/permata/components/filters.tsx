@@ -1,21 +1,20 @@
-import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
+import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { transactionCategories } from '@/app/permata/categories';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/datepicker';
+import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { FilterX } from 'lucide-react';
-import { transactionCategories } from '@/app/permata/categories';
-import { MultiSelect } from '@/components/ui/multi-select';
-import { DatePicker } from '@/components/ui/datepicker';
-import { TransactionDb } from '@/app/api/transactions/route';
 import { Column } from '@tanstack/react-table';
+import { FilterX } from 'lucide-react';
 
 const FilterType = ({ column }: { column: Column<TransactionDb> }) => {
   const val = column?.getFilterValue() ?? [true, true];
@@ -51,8 +50,8 @@ const FilterType = ({ column }: { column: Column<TransactionDb> }) => {
   );
 };
 
-const FilterText = ({ column }: { column: Column<TransactionDb, string> }) => {
-  const val = column?.getFilterValue() ?? '';
+const FilterText = ({ column }: { column: Column<TransactionDb> }) => {
+  const val = column?.getFilterValue() as string | undefined;
   return (
     <DebounceInput
       type="search"
@@ -66,7 +65,7 @@ const FilterText = ({ column }: { column: Column<TransactionDb, string> }) => {
 };
 
 const FilterCategory = ({ column }: { column: Column<TransactionDb> }) => {
-  const val = column?.getFilterValue();
+  const val = column?.getFilterValue() as string | undefined;
   return (
     <Select value={val} onValueChange={(value) => column.setFilterValue(value)}>
       <SelectTrigger>
@@ -92,7 +91,7 @@ const FilterCategory = ({ column }: { column: Column<TransactionDb> }) => {
 };
 
 const MultiFilterCategory = ({ column }: { column: Column<TransactionDb> }) => {
-  const val = column?.getFilterValue() ?? null;
+  const val = column?.getFilterValue() as string[] | null;
   const options = [
     { label: 'Uncategorized', value: 'Uncategorized' },
     ...transactionCategories.map((category) => ({
@@ -164,4 +163,4 @@ const FilterDates = ({ column }: { column: Column<TransactionDb> }) => {
   );
 };
 
-export { FilterType, FilterText, FilterDates, FilterAmount, FilterCategory, MultiFilterCategory };
+export { FilterAmount, FilterCategory, FilterDates, FilterText, FilterType, MultiFilterCategory };

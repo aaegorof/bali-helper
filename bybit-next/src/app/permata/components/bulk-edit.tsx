@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -7,13 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { useCallback, useState } from 'react';
 
-import { toast } from 'sonner';
+import { UpdateCategoriesResponse } from '@/app/permata/api/update/route';
 import { transactionCategories } from '@/app/permata/categories';
-import { UpdateCategoriesResponse } from '@/app/api/transactions/update/route';
-
-
+import { toast } from 'sonner';
 
 type BulkEditProps = {
   ids: number[];
@@ -24,30 +22,30 @@ const BulkEdit = ({ ids, onSave }: BulkEditProps) => {
   const [category, setCategory] = useState('');
 
   const save = useCallback(async () => {
-    const res = await fetch('/api/transactions/update', {
+    const res = await fetch('/permata/api/update', {
       method: 'POST',
       body: JSON.stringify({ ids, category }),
-    })
-    const data = await res.json() as UpdateCategoriesResponse
+    });
+    const data = (await res.json()) as UpdateCategoriesResponse;
     if (data.success) {
       toast.success(`Category updated for ${data.data?.updatedCount} transactions`);
       onSave();
-        } else {
+    } else {
       toast.error(`Failed to update categories: ${data.error}`);
     }
   }, [ids, category]);
 
-  const remove = useCallback(async () => {
-    const res = await fetch('/api/transactions', {
+  const remove = async (ids: number[]) => {
+    const res = await fetch('/permata/api', {
       method: 'DELETE',
       body: JSON.stringify({ ids }),
-    })
-    const data = await res.json() 
+    });
+    const data = await res.json();
     if (data.success) {
       toast.success(data?.data?.message);
       onSave();
     }
-  }, [ids]);
+  };
 
   return (
     <div className="grid gap-4">
@@ -66,11 +64,11 @@ const BulkEdit = ({ ids, onSave }: BulkEditProps) => {
         </SelectContent>
       </Select>
       <div className="flex justify-end gap-2">
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           onClick={() => {
-            if (confirm("Are you sure you want to remove these transactions?")) {
-              remove()
+            if (confirm('Are you sure you want to remove these transactions?')) {
+              remove(ids)
                 .then(() => {
                   toast.success(`Successfully removed ${ids.length} transactions`);
                   onSave();

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { TransactionDb } from '@/app/api/transactions/route';
-import { RespSuggestCategories } from '@/app/api/transactions/suggest/route';
-import { UpdateCategoriesResponse } from '@/app/api/transactions/update/route';
+import { RespSuggestCategories } from '@/app/permata/api/suggest/route';
+import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { UpdateCategoriesResponse } from '@/app/permata/api/update/route';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -39,15 +39,20 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
 
   const onClickSuggest = async () => {
     toast.success(`Suggesting categories...`);
-    setLoading(new Map().set('sug', true));
-    const resp = await fetch(`/api/transactions/suggest`, {
+    setLoading(loading.set('sug', true));
+
+    const resp = await fetch(`/permata/api/suggest`, {
       method: 'POST',
       body: JSON.stringify({ transactions }),
     });
 
-    setLoading(new Map().set('sug', false));
-    const data = (await resp.json()) as RespSuggestCategories;
+    setLoading(loading.set('sug', false));
 
+    const data = (await resp.json()) as RespSuggestCategories;
+    if (!data.categories.some((cat) => cat.category || cat.keywordCategory)) {
+      toast.error('No suggestions for categories found');
+      return;
+    }
     setTransForEdit((prev) => {
       const newMap = new Map(prev);
       data.categories.forEach((cat) => {
@@ -57,30 +62,38 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
     });
   };
 
-  const onClickUpdate = async (ids: number[], category: string) => {
-    setLoading(new Map().set('upd', true));
-    const resp = await fetch(`/api/transactions/update`, {
+  const onClickUpdate = async (idsToUpdate: number[], category: string) => {
+    setLoading(loading.set('upd', true));
+
+    const resp = await fetch(`/permata/api/update`, {
       method: 'POST',
-      body: JSON.stringify({ ids, category }),
+      body: JSON.stringify({ ids: idsToUpdate, category }),
     });
+
     const data = (await resp.json()) as UpdateCategoriesResponse;
+
     if (data.success) {
       toast.success(`Category updated for ${data.data?.updatedCount} transactions`);
       setTransForEdit((prev) => {
         const newMap = new Map(prev);
-        ids.forEach((id) => {
-          newMap.delete(id);
-        });
+        if (prev) {
+          idsToUpdate.forEach((id) => {
+            newMap.delete(id);
+          });
+        }
         return newMap;
       });
-      onSave?.();
+      setLoading(loading.set('upd', false));
+
+      if (idsToUpdate.length === ids.length) {
+        onSave?.();
+      }
     }
-    setLoading(new Map().set('upd', false));
   };
 
   const remove = useCallback(async () => {
     setLoading(new Map().set('upd', true));
-    const res = await fetch('/api/transactions', {
+    const res = await fetch('/permata/api', {
       method: 'DELETE',
       body: JSON.stringify({ ids }),
     });
@@ -98,8 +111,6 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
     }
   }, [open, transactions]);
 
-
-
   return (
     <Dialog
       open={open}
@@ -113,65 +124,70 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
           Bulk Edit ({ids.length})
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[40rem] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[60rem] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Bulk Edit Transactions ({ids.length})</DialogTitle>
+          <DialogTitle>Bulk Edit Transactions ({transForEdit?.size})</DialogTitle>
         </DialogHeader>
-        <Button variant="outline" onClick={onClickSuggest} disabled={loading.get('sug')}>
-          Suggest Categories{' '}
-          {loading.get('sug') && <LoaderPinwheel className="w-4 h-4 ml-2 animate-spin" />}
-        </Button>
+
         {transForEdit && transForEdit?.size > 0 && (
-          <div className="flex flex-col">
+          <ul className="list-disc pl-2">
             {Array.from(transForEdit?.entries() || []).map(([id, trans]) => (
-              <div key={id} className="flex items-center gap-2 text-xs">
-                <div>{trans.description}</div>
-                {trans.suggested?.category && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      onClickUpdate([id], trans.suggested?.category || '');
-                    }}
-                    disabled={loading.get('upd')}
-                  >
-                    {trans.suggested.category}
-                  </Button>
-                )}
-                {trans?.suggested?.keywordCategory && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      onClickUpdate([id], trans?.suggested?.keywordCategory!);
-                    }}
-                    disabled={loading.get('upd')}
-                  >
-                    {trans.suggested?.keywordCategory}
-                  </Button>
-                )}
-                {/* <div><Button variant="outline" onClick={() => {
-                onClickUpdate(s.id, s.category)
-              }}>Update</Button></div> */}
-              </div>
+              <li key={id} className="list-item">
+                <div className="flex items-center gap-2 text-xs ">
+                  <div>{trans.description}</div>
+                  <div className="inline-flex items-center gap-2 ml-auto">
+                    {trans.suggested?.category && (
+                      <Button
+                        size="none"
+                        variant="link"
+                        onClick={() => {
+                          onClickUpdate([id], trans.suggested?.category || '');
+                        }}
+                        disabled={loading.get('upd')}
+                      >
+                        {trans.suggested.category}
+                      </Button>
+                    )}
+                    {trans?.suggested?.keywordCategory &&
+                      trans?.suggested?.keywordCategory !== trans?.suggested?.category && (
+                        <Button
+                          size="none"
+                          variant="link"
+                          onClick={() => {
+                            onClickUpdate([id], trans?.suggested?.keywordCategory);
+                          }}
+                          disabled={loading.get('upd')}
+                        >
+                          {trans.suggested?.keywordCategory}
+                        </Button>
+                      )}
+                  </div>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
         <div className="grid gap-4">
-          <Select onValueChange={(value) => setCategory(value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {transactionCategories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select onValueChange={(value) => setCategory(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {transactionCategories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={onClickSuggest} disabled={loading.get('sug')}>
+              Suggest Categories{' '}
+              {loading.get('sug') && <LoaderPinwheel className="w-4 h-4 ml-2 animate-spin" />}
+            </Button>
+          </div>
           <div className="flex justify-end gap-2">
             <Button
               disabled={loading.get('upd')}

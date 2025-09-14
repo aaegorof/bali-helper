@@ -12,6 +12,8 @@ const menuItems = [
   { href: '/trading-analyser', label: 'Trading Analyser' },
   { href: '/permata', label: 'Permata' },
   { href: '/notion', label: 'Notion' },
+  { href: '/hexagons', label: 'Hexagons' },
+  { href: '/mantlescanner', label: 'Mantle Scanner' },
 ];
 
 const AppMenu = () => {

@@ -34,3 +34,4 @@ venv/*
 
 # Data files
 data/*.json
+bybit-next/env.example

@@ -2,7 +2,7 @@ import {
   PermataRawTransaction,
   ReqTransactions,
   RespPostTransactions,
-} from '@/app/api/transactions/route';
+} from '@/app/permata/api/transactions/route';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useSession } from 'next-auth/react';
@@ -36,7 +36,7 @@ const saveTransactionsToDatabase = async (
   userId: number
 ) => {
   try {
-    const response = await fetch('/api/transactions', {
+    const response = await fetch('/permata/api', {
       method: 'POST',
       body: JSON.stringify({ transactions, userId } as ReqTransactions),
     });
@@ -104,8 +104,7 @@ const TransactionUploader = () => {
             transactions to the database.
           </p>
           <p>
-            After uploading, you will see ulpoaded transactions. If you want to see all
-            transactions, you can click on the "All Transactions" button.
+            After uploading, you will see ulpoaded transactions.
           </p>
           <p>
             Transactions will be unique by hash, so if you upload the same file multiple times, it

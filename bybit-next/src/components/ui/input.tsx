@@ -21,8 +21,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
 Input.displayName = "Input"
 
 
-const InputLabel = ({children, label}: {children: React.ReactNode, label: string}) => {
-    return <div className="grid gap-2">
+const InputLabel = ({children, label, className}: {children: React.ReactNode, label: string, className?: string}) => {
+    return <div className={cn("grid gap-2", className)}>
       <Label>{label}</Label>
       {children}
     </div>
