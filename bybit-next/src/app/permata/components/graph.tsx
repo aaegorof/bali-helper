@@ -1,52 +1,50 @@
-import React, { useEffect, useState } from "react";
+import { TRANSACTION_COLORS } from '@/lib/constants';
+import { formatNumberToKMil } from '@/lib/utils';
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-  } from "chart.js";
-  import { Bar } from "react-chartjs-2";
-import { formatNumberToKMil } from "@/lib/utils";
-import { TRANSACTION_COLORS } from "@/lib/constants";
-import { useTransactionsContext } from "./transactions-context";
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from 'chart.js';
+import { useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { useTransactionsContext } from './transactions-context';
 
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-  );
-
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type Props = {
   className?: string;
 };
+type ChartData = {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+  }[];
+};
 
 const GraphPermata = ({ className }: Props) => {
-  const [monthlyData, setMonthlyData] = useState(null);
+
+  const [monthlyData, setMonthlyData] = useState<ChartData | null>(null);
   const { filteredTransactions: data } = useTransactionsContext();
   useEffect(() => {
     // Prepare Data for Chart
-    const monthly = {};
+    const monthly: Record<string, { debit: number; credit: number }> = {};
 
     data.forEach((transaction) => {
-      const date = new Date(transaction.posted_date);
-      const monthYear = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}`; // YYYY-MM
+      const date = new Date(transaction.posted_date!);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
 
       if (!monthly[monthYear]) {
         monthly[monthYear] = { debit: 0, credit: 0 };
       }
 
       const amount = transaction.amount;
-      if (transaction.credit_debit === "Debit") {
+      if (transaction.credit_debit === 'Debit') {
         monthly[monthYear].debit += amount;
       } else {
         monthly[monthYear].credit += amount;
@@ -61,12 +59,12 @@ const GraphPermata = ({ className }: Props) => {
       labels,
       datasets: [
         {
-          label: "Debit",
+          label: 'Debit',
           data: debitData,
           backgroundColor: TRANSACTION_COLORS.debit.background,
         },
         {
-          label: "Credit",
+          label: 'Credit',
           data: creditData,
           backgroundColor: TRANSACTION_COLORS.credit.background,
         },
@@ -78,19 +76,19 @@ const GraphPermata = ({ className }: Props) => {
     responsive: true,
     plugins: {
       legend: {
-        position: "bottom" as const,
+        position: 'bottom' as const,
         labels: {
           usePointStyle: true,
-          pointStyle: "circle",
+          pointStyle: 'circle',
         },
       },
       title: {
         display: true,
-        text: "Monthly Debit and Credit",
+        text: 'Monthly Debit and Credit',
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -99,9 +97,9 @@ const GraphPermata = ({ className }: Props) => {
               label += formatNumberToKMil(context.parsed.y);
             }
             return label;
-          }
-        }
-      }
+          },
+        },
+      },
     },
   };
   return (
@@ -115,4 +113,4 @@ const GraphPermata = ({ className }: Props) => {
   );
 };
 
-export default GraphPermata
+export default GraphPermata;

@@ -11,9 +11,7 @@ export function Providers({ children, session }: { children: React.ReactNode; se
       refetchOnWindowFocus={true} // Обновлять сессию при фокусе окна
       refetchWhenOffline={false} // Не обновлять в режиме офлайн
     >
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider>{children}</ThemeProvider>
     </SessionProvider>
   );
 }

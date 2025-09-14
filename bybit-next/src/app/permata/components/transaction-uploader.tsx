@@ -100,12 +100,10 @@ const TransactionUploader = () => {
       <CardContent className="flex flex-col gap-8">
         <div className="text-xs">
           <p>
-            You can upload a file from Permata Bank export, it will automatically save these
+            You can upload a file from <a href="https://www.permatanet.com/pnet/" target="_blank">Permata Bank export</a>, it will automatically save these
             transactions to the database.
           </p>
-          <p>
-            After uploading, you will see ulpoaded transactions.
-          </p>
+          <p>After uploading, you will see ulpoaded transactions.</p>
           <p>
             Transactions will be unique by hash, so if you upload the same file multiple times, it
             will not add the same transactions again.
