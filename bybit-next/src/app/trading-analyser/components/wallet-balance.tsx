@@ -56,16 +56,16 @@ export default function WalletBalance() {
               value: (balance: any) => balance.coin,
             },
             {
-              name: 'Total',
-              key: 'total',
-              className: 'text-right',
-              value: (balance: any) => formatNumberWithLeadingZeros(balance.total),
-            },
-            {
               name: 'Price (USD)',
               key: 'price',
               className: 'text-right',
               value: (balance: any) => formatNumberWithLeadingZeros(balance.current_price),
+            },
+            {
+              name: 'Total',
+              key: 'total',
+              className: 'text-right',
+              value: (balance: any) => formatNumberWithLeadingZeros(balance.total),
             },
             {
               name: 'Value (USD)',

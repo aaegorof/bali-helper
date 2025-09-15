@@ -1,14 +1,15 @@
 'use client';
 
+import { formatNumberWithLeadingZeros, preciseCalc } from '@/app/lib/helpers';
 import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
-
+import Loader from '@/components/ui/loader';
 const TradingSummary = () => {
   const { tradeAnalyze, walletBalances, selectedPair } = useTradingContext();
 
   const currentBalance = walletBalances.find(
     (balance) => balance.coin === selectedPair.replace('USDT', '')
   );
-  if (!currentBalance) return null;
+  if (!currentBalance) return <Loader>Trying to fetch balance...</Loader>;
 
   return Object.entries(tradeAnalyze).map(([symbol, stats], index) => {
     const {
@@ -23,18 +24,35 @@ const TradingSummary = () => {
       leftFromTrading,
     } = stats;
 
-    const unrealisedProfit =
-      (currentBalance.current_price - buyAvg) * (totalBuyVolume - totalSellVolume);
-    const unrealisedProfitPercentage = (unrealisedProfit / totalBuy) * 100;
-    const priceDelta = ((sellAvg - buyAvg) * 100) / buyAvg;
-    const potentialProfit = leftFromTrading * currentBalance.current_price;
-    const roi = ((potentialProfit + pnl - totalBuy) / totalBuy) * 100;
+
+    const tradeDif = preciseCalc.subtract(totalBuyVolume, totalSellVolume);
+    const unrealisedProfit = preciseCalc.multiply(
+      preciseCalc.subtract(currentBalance.current_price, buyAvg),
+      tradeDif > 0 ? tradeDif : 0
+    );
+    const unrealisedProfitPercentage = preciseCalc.multiply(
+      preciseCalc.divide(unrealisedProfit, totalBuy),
+      100
+    );
+    const priceDelta = preciseCalc.multiply(
+      preciseCalc.divide(preciseCalc.subtract(sellAvg, buyAvg), buyAvg),
+      100
+    );
+    const potentialProfit = preciseCalc.multiply(leftFromTrading, currentBalance.current_price);
+    const roi = preciseCalc.multiply(
+      preciseCalc.divide(
+        preciseCalc.subtract(preciseCalc.add(potentialProfit, pnl), totalBuy),
+        totalBuy
+      ),
+      100
+    );
+
     return (
       <div key={`${symbol}-${index}`} className="space-y-6 p-6 border-b last:border-b-0">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold text-xl">Summary: {symbol}</h3>
           <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-            <span className="text-sm">Price Delta: </span>
+            <span className="text-sm">Trade Price Delta: </span>
             <span className={`font-medium ${priceDelta > 0 ? 'text-green-600' : 'text-red-600'}`}>
               {priceDelta.toFixed(2)}%
             </span>
@@ -47,15 +65,17 @@ const TradingSummary = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Average Buy Price:</span>
-                <span className="font-medium text-green-600">{buyAvg.toFixed(2)} USDT</span>
+                <span className="font-medium text-green-600">
+                  {formatNumberWithLeadingZeros(buyAvg, 2)} USDT
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Volume:</span>
-                <span>{totalBuyVolume.toFixed(4)}</span>
+                <span>{formatNumberWithLeadingZeros(totalBuyVolume, 4)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Total Bought:</span>
-                <span>{totalBuy.toFixed(2)} USDT</span>
+                <span>{formatNumberWithLeadingZeros(totalBuy, 2)} USDT</span>
               </div>
             </div>
           </div>
@@ -65,15 +85,17 @@ const TradingSummary = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Average Sell Price:</span>
-                <span className="font-medium text-red-600">{sellAvg.toFixed(2)} USDT</span>
+                <span className="font-medium text-red-600">
+                  {formatNumberWithLeadingZeros(sellAvg, 2)} USDT
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Volume:</span>
-                <span>{totalSellVolume.toFixed(4)}</span>
+                <span>{formatNumberWithLeadingZeros(totalSellVolume, 4)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Total Sold:</span>
-                <span>{totalSell.toFixed(2)} USDT</span>
+                <span>{formatNumberWithLeadingZeros(totalSell, 2)} USDT</span>
               </div>
             </div>
           </div>
@@ -88,23 +110,8 @@ const TradingSummary = () => {
                 {pnl.toFixed(2)} USDT ({pnlPercentage.toFixed(2)}%)
               </span>
             </div>
-
             {currentBalance && (
               <>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Current Balance:</span>
-                  <span>
-                    {currentBalance.total.toFixed(6)} {symbol}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Current Price:</span>
-                  <span>{currentBalance.current_price?.toFixed(6)} USDT</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Potential Value:</span>
-                  <span>{potentialProfit.toFixed(2)} USDT</span>
-                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700 dark:text-gray-300">Unrealized P/L:</span>
                   <span
@@ -113,6 +120,30 @@ const TradingSummary = () => {
                     {unrealisedProfit.toFixed(2)} USDT ({unrealisedProfitPercentage.toFixed(2)}%)
                   </span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Current Balance:</span>
+                  <span>
+                    {currentBalance.total.toFixed(6)} {symbol.replace('USDT', '')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Current Price:</span>
+                  <span>{formatNumberWithLeadingZeros(currentBalance.current_price, 2)} USDT</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Leftovers:</span>
+                  <span className={`${leftFromTrading < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {formatNumberWithLeadingZeros(leftFromTrading, 6)} {symbol.replace('USDT', '')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Potential Value:</span>
+                  <span className={`${potentialProfit < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {potentialProfit.toFixed(2)} USDT{' '}
+                    {potentialProfit < 0 && <span className="text-red-600">(Sold Extra)</span>}
+                  </span>
+                </div>
+
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700 dark:text-gray-300">ROI:</span>
                   <span className={`font-medium ${roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>

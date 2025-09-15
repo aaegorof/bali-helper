@@ -23,11 +23,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.log('Using userId (after parsing):', userId);
 
     const pairs = await SpotTradeDbService.getUserSymbols(userId);
+
+    try {
     const balances = await bybit.getWalletBalance(pairs);
+    console.log('balances', balances);
     const currentPrices = await bybit.getCurrentPrices(
       pairs.map((pair) => pair.replace('USDT', ''))
     );
-    // Convert Bybit API format to our WalletBalance interface format
     const formattedBalances: WalletBalance[] = balances
       .map((account) => {
         return account.coin.map((coin) => ({
@@ -43,6 +45,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     console.log('Returning balances for user:', userId);
     return NextResponse.json(formattedBalances);
+  } catch (error) {
+    console.error('Error fetching wallet balance:', error);
+    return NextResponse.json({ error: error}, { status: 500 });
+  }
+    // Convert Bybit API format to our WalletBalance interface format
+    
   } catch (error) {
     console.error('Error fetching wallet balance:', error);
     return NextResponse.json({ error: 'Failed to fetch wallet balance' }, { status: 500 });

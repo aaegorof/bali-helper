@@ -11,8 +11,18 @@ import React, { useState } from 'react';
 export default function UpdateDataForm() {
   const [symbol, setSymbol] = useState(TRADING_SYMBOLS[0]);
   const [limit, setLimit] = useState(100);
-  const [startTime, setStartTime] = useState('2023-09-01T00:00');
-  const [endTime, setEndTime] = useState('2025-02-05T00:00');
+
+  // Calculate default dates
+  const now = new Date();
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(now.getFullYear() - 1);
+
+  const formatDate = (date: Date) => {
+    return date.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:mm
+  };
+
+  const [startTime, setStartTime] = useState(formatDate(oneYearAgo));
+  const [endTime, setEndTime] = useState(formatDate(now));
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

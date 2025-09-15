@@ -1,3 +1,4 @@
+import { preciseCalc } from '../lib/helpers';
 import { CoinAnalisys, Trade } from './api/types';
 
 export const analyzeCoinTrade = (trades: Trade[]) => {
@@ -18,26 +19,44 @@ export const analyzeCoinTrade = (trades: Trade[]) => {
     }
     let pairStat = tradeAnalyze[trade.symbol];
 
-    const volume = trade.price * trade.qty;
+    const volume = preciseCalc.multiply(trade.price, trade.qty);
 
     if (trade.side.toUpperCase() === 'BUY') {
-      pairStat.totalBuy += volume;
-      const currentTotal = pairStat.buyAvg * pairStat.totalBuyVolume;
-      pairStat.totalBuyVolume += trade.qty;
+      pairStat.totalBuy = preciseCalc.add(pairStat.totalBuy, volume);
+      const currentTotal = preciseCalc.multiply(pairStat.buyAvg, pairStat.totalBuyVolume);
+      pairStat.totalBuyVolume = preciseCalc.add(pairStat.totalBuyVolume, trade.qty);
 
-      pairStat.buyAvg = (currentTotal + volume) / pairStat.totalBuyVolume;
+      pairStat.buyAvg = preciseCalc.divide(
+        preciseCalc.add(currentTotal, volume),
+        pairStat.totalBuyVolume
+      );
     } else {
-      pairStat.totalSell += volume;
-      const costBasis = trade.qty * pairStat.buyAvg;
+      pairStat.totalSell = preciseCalc.add(pairStat.totalSell, volume);
+      const costBasis = preciseCalc.multiply(trade.qty, pairStat.buyAvg);
 
-      pairStat.pnl += trade.qty * trade.price - costBasis;
-      const currentTotal = pairStat.sellAvg * pairStat.totalSellVolume;
-      pairStat.totalSellVolume += trade.qty;
-      pairStat.sellAvg = (currentTotal + volume) / pairStat.totalSellVolume;
+      const tradePnl = preciseCalc.subtract(
+        preciseCalc.multiply(trade.qty, trade.price),
+        costBasis
+      );
+      pairStat.pnl = preciseCalc.add(pairStat.pnl, tradePnl);
+
+      const currentTotal = preciseCalc.multiply(pairStat.sellAvg, pairStat.totalSellVolume);
+      pairStat.totalSellVolume = preciseCalc.add(pairStat.totalSellVolume, trade.qty);
+      pairStat.sellAvg = preciseCalc.divide(
+        preciseCalc.add(currentTotal, volume),
+        pairStat.totalSellVolume
+      );
     }
 
-    pairStat.pnlPercentage = (pairStat.pnl / (pairStat.totalSellVolume * pairStat.buyAvg)) * 100;
-    pairStat.leftFromTrading = pairStat.totalBuyVolume - pairStat.totalSellVolume;
+    pairStat.pnl = preciseCalc.subtract(pairStat.totalSell, preciseCalc.multiply(pairStat.totalSellVolume, pairStat.buyAvg));
+    pairStat.pnlPercentage = preciseCalc.multiply(
+      preciseCalc.divide(pairStat.pnl, pairStat.totalBuy),
+      100
+    );
+    pairStat.leftFromTrading = preciseCalc.subtract(
+      pairStat.totalBuyVolume,
+      pairStat.totalSellVolume
+    );
   });
 
   return tradeAnalyze;

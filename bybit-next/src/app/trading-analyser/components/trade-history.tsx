@@ -1,9 +1,16 @@
 'use client';
 
+import { formatNumberWithLeadingZeros } from '@/app/lib/helpers';
 import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputLabel } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -12,6 +19,37 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+const formatHelper = () => {
+  // Get parts from a sample date using the current locale
+  const parts = new Intl.DateTimeFormat(navigator.language, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).formatToParts(new Date());
+
+  // Build the format string based on the parts order
+  const formatParts = parts.map((part) => {
+    switch (part.type) {
+      case 'month':
+        return 'MM';
+      case 'day':
+        return 'DD';
+      case 'year':
+        return 'YYYY';
+      case 'hour':
+        return 'HH';
+      case 'minute':
+        return 'mm';
+      default:
+        return part.value;
+    }
+  });
+
+  return formatParts.join('');
+};
 
 export default function TradeHistory() {
   const { tradingPairs, selectedPair, setSelectedPair, trades, isLoadingTrades, error } =
@@ -43,13 +81,12 @@ export default function TradeHistory() {
       <CardContent>
         {error && <p className="text-destructive mb-4">{error}</p>}
 
-        <InputLabel label="Select Trading Pair">
+        <InputLabel label="Select Trading Pair" className="max-w-[180px]">
           <Select value={selectedPair} onValueChange={handlePairChange} disabled={isLoadingTrades}>
             <SelectTrigger>
               <SelectValue placeholder="Select a pair" />
             </SelectTrigger>
             <SelectContent>
-
               {tradingPairs.map((pair) => (
                 <SelectItem key={pair} value={pair}>
                   {pair}
@@ -66,7 +103,10 @@ export default function TradeHistory() {
               <TableHead>Side</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Quantity</TableHead>
-              <TableHead>Time</TableHead>
+              <TableHead>Total Value, $</TableHead>
+              <TableHead>
+                Timestamp <span className="text-xs text-muted-foreground">({formatHelper()})</span>
+              </TableHead>
               <TableHead>Order ID</TableHead>
             </TableRow>
           </TableHeader>
@@ -79,8 +119,15 @@ export default function TradeHistory() {
                 >
                   {trade.side}
                 </TableCell>
-                <TableCell>{trade.price.toFixed(2)}</TableCell>
-                <TableCell>{trade.qty.toFixed(8)}</TableCell>
+                <TableCell className="text-right">
+                  {formatNumberWithLeadingZeros(trade.price, 2)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatNumberWithLeadingZeros(trade.qty, 3)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatNumberWithLeadingZeros(trade.price * trade.qty, 2)}
+                </TableCell>
                 <TableCell>{formatTimestamp(trade.timestamp)}</TableCell>
                 <TableCell className="font-mono text-xs">{trade.orderId}</TableCell>
               </TableRow>

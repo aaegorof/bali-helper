@@ -1,0 +1,94 @@
+---
+description: To implement for any react app
+globs: 
+alwaysApply: false
+---
+1. General Principles
+
+Follow best practices for Next.js and React.js.
+
+Adhere to project formatting rules (Prettier, ESLint).
+
+Consider the project context when editing and avoid unnecessary code removal.
+
+Confirm with the user before deleting significant code sections.
+
+Prefer using existing UI components from the project.
+
+If a component can be reused in multiple places, create it as a separate component.
+
+Consider where component state should be stored; it may be better to use context or leverage the latest React features where necessary.
+
+2. Code Style and Linters
+
+Use the linter settings specified in the project (.eslintrc, .prettierrc).
+
+Automatically format code with Prettier.
+
+Use semantic HTML tags and proper attributes (e.g., alt for <img>).
+
+3. Context Awareness
+
+Check the types from TypeScript especialy using third party libraries
+
+Dont use any in Typescript
+
+When adding new code, take the current project structure into account.
+
+Avoid modifying a component’s API unless necessary.
+
+Maintain the logic and structure of the code if it does not contradict the task.
+
+Be mindful of existing dependencies and avoid adding unnecessary ones.
+
+4. Code Optimization
+
+Use useMemo and useCallback for performance-heavy computations.
+
+Monitor dependencies in useEffect to prevent unnecessary re-renders.
+
+Ensure proper state handling in asynchronous operations (loading, error, success).
+
+5. Code Editing
+
+Modify only the code required for the task.
+
+Maintain the logic and style of the existing code.
+
+Ask the user before removing significant parts of the code.
+
+Ensure that dependencies and component connections remain intact when making changes.
+
+6. API and Server Components
+
+Follow best practices for getServerSideProps and getStaticProps in Next.js.
+
+Use fetch or axios according to the project's standards.
+
+Minimize the number of server requests and cache data where possible.
+
+7. State Management
+
+Avoid storing unnecessary data in useState if it can be derived dynamically.
+
+Ensure state immutability when updating it.
+
+Consider moving state management to context if it benefits the architecture.
+
+8. UX/UI Improvements
+
+Maintain readability and accessibility (aria-* attributes, contrast, text clarity).
+
+Use a declarative approach and avoid deeply nested conditions.
+
+Ensure responsive design (flexbox, grid).
+
+9. Documentation
+
+Add comments for complex parts of the code.
+
+Use JSDoc to describe functions and data types if required by the project.
+
+Leave TODO comments for future improvements.
+
+

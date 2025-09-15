@@ -6,7 +6,7 @@ import { catKeywords, transactionCategories } from '@/app/permata/categories';
 import { openai } from '@ai-sdk/openai';
 
 // Исправляем путь к базе данных
-const DB_PATH = path.join(process.cwd(), '../transactions.db');
+const DB_PATH = path.join(process.cwd(), 'transactions.db');
 
 // Initialize the Anthropic client using the new SDK
 const MODEL = 'claude-3-5-sonnet-20241022';

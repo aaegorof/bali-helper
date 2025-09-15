@@ -1,6 +1,5 @@
 import { RestClientV5 } from 'bybit-api';
 import { FundingRate, Trade } from '../types';
-import SpotTradeDbService from './db-service';
 
 export class BybitService {
   private client: RestClientV5;
@@ -41,7 +40,6 @@ export class BybitService {
   }
 
   async getWalletBalance(pairs: string[]) {
-    
     const symbols = new Set<string>();
     try {
       pairs.forEach((pair) => {
@@ -55,7 +53,7 @@ export class BybitService {
         accountType: 'UNIFIED',
         coin: symbolsList.join(','),
       });
-
+      console.log('response getWalletBalance', response);
       return response.result.list;
     } catch (e) {
       console.error('Error in getWalletBalance:', e);
