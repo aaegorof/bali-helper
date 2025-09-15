@@ -1,9 +1,0 @@
-.next
-node_modules
-public
-build
-dist
-coverage
-*.log
-.env*
-package-lock.json 
