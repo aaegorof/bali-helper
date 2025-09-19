@@ -1,6 +1,7 @@
 import { getDb } from '@/app/lib/db';
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { z } from 'zod';
 
 if (!process.env.NEXTAUTH_SECRET) {
@@ -12,16 +13,29 @@ declare module 'next-auth' {
     user: {
       id: string;
       email?: string | null;
+      name?: string | null;
     };
   }
   interface User {
     id: string;
     email?: string | null;
+    name?: string | null;
   }
+}
+
+// Иначе ищем пользователя в базе данных
+export interface DbUser {
+  id: number;
+  email: string;
+  name?: string | null;
 }
 
 export const authOptions: AuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: 'Email',
       credentials: {
@@ -45,12 +59,11 @@ export const authOptions: AuthOptions = {
             };
           }
 
-          // Иначе ищем пользователя в базе данных
-          const user: any = await new Promise((resolve, reject) => {
+          const user = await new Promise<DbUser | undefined>((resolve, reject) => {
             getDb().get(
               'SELECT id, email FROM users WHERE email = ?',
               [credentials.email],
-              (err: Error | null, row: any) => {
+              (err: Error | null, row: DbUser | undefined) => {
                 if (err) {
                   console.error('NextAuth DB error:', err);
                   reject(err);
@@ -82,7 +95,37 @@ export const authOptions: AuthOptions = {
     signIn: '/login', // Using our custom login page
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google' || account?.provider === 'github') {
+        try {
+          const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to create/update user in database');
+            return false;
+          }
+
+          const dbUser = await response.json();
+          user.id = String(dbUser.id);
+          return true;
+        } catch (error) {
+          console.error('Error in signIn callback:', error);
+          return false;
+        }
+      }
+      return true;
+    },
+
+    async jwt({ token, user }) {
       // При первоначальной аутентификации сохраняем ID пользователя
       if (user) {
         token.id = user.id;

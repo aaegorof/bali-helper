@@ -1,10 +1,12 @@
 import { getDb } from '@/app/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { DbUser } from '../[...nextauth]/route';
 
 // Валидация тела запроса
 const userSchema = z.object({
   email: z.string().email('Недействительный email'),
+  name: z.string().optional(),
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -20,14 +22,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { email } = validationResult.data;
+    const { email, name } = validationResult.data;
 
     // Ищем пользователя в базе
-    const user: any = await new Promise((resolve, reject) => {
+    const user: DbUser | undefined = await new Promise((resolve, reject) => {
       getDb().get(
-        'SELECT id, email FROM users WHERE email = ?',
+        'SELECT id, email, name FROM users WHERE email = ?',
         [email],
-        async (err: Error | null, row: any) => {
+        async (err: Error | null, row: DbUser | undefined) => {
           if (err) reject(err);
 
           if (row) {
@@ -36,11 +38,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           } else {
             // Создаем нового пользователя
             getDb().run(
-              'INSERT INTO users (email) VALUES (?)',
-              [email],
+              'INSERT INTO users (email, name) VALUES (?, ?)',
+              [email, name],
               function (err: Error | null) {
                 if (err) reject(err);
-                resolve({ id: this.lastID, email: email });
+                resolve({ id: this.lastID, email: email, name: name });
               }
             );
           }
@@ -48,12 +50,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     });
 
-    // Логирование найденного/созданного пользователя
-    console.log('User lookup/create result:', user);
-
     return NextResponse.json({
-      id: user.id,
-      email: user.email,
+      id: user?.id,
+      email: user?.email,
+      name: user?.name,
     });
   } catch (error) {
     console.error('Error in user API:', error);

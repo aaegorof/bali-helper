@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
+import { SocialButtons } from './social-buttons';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -37,7 +38,6 @@ export function LoginForm() {
       }
 
       const userData = await userResponse.json();
-      console.log('User data before signIn:', userData);
 
       // 2. Затем логиним пользователя через NextAuth
       const result = await signIn('credentials', {
@@ -68,6 +68,7 @@ export function LoginForm() {
         <CardDescription>Введите email для входа в систему</CardDescription>
       </CardHeader>
       <CardContent>
+        <SocialButtons callbackUrl={callbackUrl} />
         <form onSubmit={handleSubmit}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
@@ -83,7 +84,7 @@ export function LoginForm() {
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Загрузка...' : 'Войти'}
+              {isLoading ? 'Загрузка...' : 'Войти через Email'}
             </Button>
           </div>
         </form>
