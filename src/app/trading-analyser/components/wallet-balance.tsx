@@ -4,6 +4,7 @@ import { formatNumberWithLeadingZeros } from '@/app/lib/helpers';
 import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -12,14 +13,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function WalletBalance() {
-  const { walletBalances, isLoadingBalances, refreshWalletBalances, error } = useTradingContext();
-
+  const { walletBalances, isLoadingBalances, refreshWalletBalances, error, setSelectedPair } =
+    useTradingContext();
+  const [isHiddenZeroValue, setIsHiddenZeroValue] = useState(true);
   const balances = useMemo(() => {
-    return walletBalances.sort((a, b) => b.usd_value - a.usd_value);
-  }, [walletBalances]);
+    return walletBalances
+      .sort((a, b) => b.usd_value - a.usd_value)
+      .filter((balance) => !isHiddenZeroValue || balance.usd_value > 1);
+  }, [walletBalances, isHiddenZeroValue]);
 
   const totalUsdValue = useMemo(() => {
     return balances.reduce<number>((acc, balance) => acc + balance.usd_value, 0);
@@ -29,6 +33,16 @@ export default function WalletBalance() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Wallet Balance</CardTitle>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="isHiddenZeroValue"
+            checked={isHiddenZeroValue}
+            onCheckedChange={() => setIsHiddenZeroValue(!isHiddenZeroValue)}
+          />
+          <label htmlFor="isHiddenZeroValue" className="cursor-pointer text-sm">
+            Hide Small Values
+          </label>
+        </div>
         <Button
           onClick={refreshWalletBalances}
           disabled={isLoadingBalances}
@@ -38,7 +52,7 @@ export default function WalletBalance() {
           {isLoadingBalances ? 'Loading...' : 'Refresh'}
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[500px] overflow-y-auto">
         {error && <p className="text-destructive mb-4">{error}</p>}
 
         <div className="mb-4">
@@ -88,7 +102,13 @@ export default function WalletBalance() {
               </TableHeader>
               <TableBody>
                 {balances.map((balance) => (
-                  <TableRow key={balance.coin}>
+                  <TableRow
+                    key={balance.coin}
+                    onClick={() => {
+                      setSelectedPair(balance.coin + 'USDT');
+                    }}
+                    className="cursor-pointer"
+                  >
                     {columns.map((column) => (
                       <TableCell key={`${balance.coin}-${column.key}`} className={column.className}>
                         {column.value(balance)}

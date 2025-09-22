@@ -1,15 +1,16 @@
 'use client';
 
+import { TRADING_SYMBOLS } from '@/app/lib/constants';
 import { useTradingContext } from '@/app/trading-analyser/context/TradingContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input, InputLabel } from '@/components/ui/input';
-import { TRADING_SYMBOLS } from '@/lib/constants';
 import { useSession } from 'next-auth/react';
 import React, { useState } from 'react';
 
 export default function UpdateDataForm() {
-  const [symbol, setSymbol] = useState(TRADING_SYMBOLS[0]);
+  const { selectedPair, setSelectedPair } = useTradingContext();
+
   const [limit, setLimit] = useState(100);
 
   // Calculate default dates
@@ -77,10 +78,6 @@ export default function UpdateDataForm() {
     }
   };
 
-  const handleSymbolChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSymbol(e.target.value);
-  };
-
   const handleLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLimit(Number(e.target.value));
   };
@@ -95,7 +92,7 @@ export default function UpdateDataForm() {
 
   const handleSpotTradesSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchAndSaveSpotTrades(symbol, userId, startTime, endTime, limit);
+    fetchAndSaveSpotTrades(selectedPair, userId, startTime, endTime, limit);
   };
 
   return (
@@ -116,8 +113,8 @@ export default function UpdateDataForm() {
           <InputLabel label="Symbol">
             <Input
               type="text"
-              value={symbol}
-              onChange={handleSymbolChange}
+              value={selectedPair}
+              onChange={(e) => setSelectedPair(e.target.value)}
               placeholder="Enter symbol"
             />
             <div className="flex gap-2 flex-wrap mt-2">
@@ -125,9 +122,9 @@ export default function UpdateDataForm() {
                 <button
                   key={ticker}
                   type="button"
-                  onClick={() => setSymbol(ticker)}
+                  onClick={() => setSelectedPair(ticker)}
                   className={`px-2 py-1 text-xs rounded-md transition-colors ${
-                    symbol === ticker
+                    selectedPair === ticker
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   }`}

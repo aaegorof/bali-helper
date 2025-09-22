@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_SYMBOLS } from '@/app/lib/constants';
 import { FundingRate, getFundingRates } from '@/app/types/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DEFAULT_SYMBOLS } from '@/lib/constants';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 

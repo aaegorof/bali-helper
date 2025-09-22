@@ -17,25 +17,25 @@ export const analyzeCoinTrade = (trades: Trade[]) => {
         leftFromTrading: 0,
       };
     }
-    let pairStat = tradeAnalyze[trade.symbol];
+    const pairStat = tradeAnalyze[trade.symbol];
 
-    const volume = preciseCalc.multiply(trade.price, trade.qty);
+    const tradeValue = preciseCalc.multiply(trade.price, trade.qty);
 
     if (trade.side.toUpperCase() === 'BUY') {
-      pairStat.totalBuy = preciseCalc.add(pairStat.totalBuy, volume);
+      pairStat.totalBuy = preciseCalc.add(pairStat.totalBuy, tradeValue);
       const currentTotal = preciseCalc.multiply(pairStat.buyAvg, pairStat.totalBuyVolume);
       pairStat.totalBuyVolume = preciseCalc.add(pairStat.totalBuyVolume, trade.qty);
 
       pairStat.buyAvg = preciseCalc.divide(
-        preciseCalc.add(currentTotal, volume),
+        preciseCalc.add(currentTotal, tradeValue),
         pairStat.totalBuyVolume
       );
     } else {
-      pairStat.totalSell = preciseCalc.add(pairStat.totalSell, volume);
+      pairStat.totalSell = preciseCalc.add(pairStat.totalSell, tradeValue);
       const costBasis = preciseCalc.multiply(trade.qty, pairStat.buyAvg);
 
       const tradePnl = preciseCalc.subtract(
-        preciseCalc.multiply(trade.qty, trade.price),
+        tradeValue,
         costBasis
       );
       pairStat.pnl = preciseCalc.add(pairStat.pnl, tradePnl);
@@ -43,7 +43,7 @@ export const analyzeCoinTrade = (trades: Trade[]) => {
       const currentTotal = preciseCalc.multiply(pairStat.sellAvg, pairStat.totalSellVolume);
       pairStat.totalSellVolume = preciseCalc.add(pairStat.totalSellVolume, trade.qty);
       pairStat.sellAvg = preciseCalc.divide(
-        preciseCalc.add(currentTotal, volume),
+        preciseCalc.add(currentTotal, tradeValue),
         pairStat.totalSellVolume
       );
     }

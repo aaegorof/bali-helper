@@ -53,7 +53,6 @@ export class BybitService {
         accountType: 'UNIFIED',
         coin: symbolsList.join(','),
       });
-      console.log('response getWalletBalance', response);
       return response.result.list;
     } catch (e) {
       console.error('Error in getWalletBalance:', e);

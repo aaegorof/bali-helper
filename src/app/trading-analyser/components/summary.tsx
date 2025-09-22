@@ -24,24 +24,18 @@ const TradingSummary = () => {
       leftFromTrading,
     } = stats;
 
-
-    const tradeDif = preciseCalc.subtract(totalBuyVolume, totalSellVolume);
-    const unrealisedProfit = preciseCalc.multiply(
-      preciseCalc.subtract(currentBalance.current_price, buyAvg),
-      tradeDif > 0 ? tradeDif : 0
-    );
-    const unrealisedProfitPercentage = preciseCalc.multiply(
-      preciseCalc.divide(unrealisedProfit, totalBuy),
-      100
-    );
-    const priceDelta = preciseCalc.multiply(
-      preciseCalc.divide(preciseCalc.subtract(sellAvg, buyAvg), buyAvg),
-      100
-    );
-    const potentialProfit = preciseCalc.multiply(leftFromTrading, currentBalance.current_price);
+    const priceDelta =
+      totalSellVolume > 0
+        ? preciseCalc.multiply(
+            preciseCalc.divide(preciseCalc.subtract(sellAvg, buyAvg), buyAvg),
+            100
+          )
+        : 0;
+    const potentialProfit =
+      leftFromTrading > 0 ? preciseCalc.multiply(leftFromTrading, currentBalance.current_price) : 0;
     const roi = preciseCalc.multiply(
       preciseCalc.divide(
-        preciseCalc.subtract(preciseCalc.add(potentialProfit, pnl), totalBuy),
+        preciseCalc.subtract(preciseCalc.add(potentialProfit, totalSell), totalBuy),
         totalBuy
       ),
       100
@@ -66,7 +60,7 @@ const TradingSummary = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Average Buy Price:</span>
                 <span className="font-medium text-green-600">
-                  {formatNumberWithLeadingZeros(buyAvg, 2)} USDT
+                  {formatNumberWithLeadingZeros(buyAvg, 4)} USDT
                 </span>
               </div>
               <div className="flex justify-between">
@@ -86,7 +80,7 @@ const TradingSummary = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Average Sell Price:</span>
                 <span className="font-medium text-red-600">
-                  {formatNumberWithLeadingZeros(sellAvg, 2)} USDT
+                  {formatNumberWithLeadingZeros(sellAvg, 4)} USDT
                 </span>
               </div>
               <div className="flex justify-between">
@@ -113,23 +107,12 @@ const TradingSummary = () => {
             {currentBalance && (
               <>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Unrealized P/L:</span>
-                  <span
-                    className={`font-medium ${unrealisedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
-                  >
-                    {unrealisedProfit.toFixed(2)} USDT ({unrealisedProfitPercentage.toFixed(2)}%)
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-gray-700 dark:text-gray-300">Current Balance:</span>
                   <span>
                     {currentBalance.total.toFixed(6)} {symbol.replace('USDT', '')}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Current Price:</span>
-                  <span>{formatNumberWithLeadingZeros(currentBalance.current_price, 2)} USDT</span>
-                </div>
+
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700 dark:text-gray-300">Leftovers:</span>
                   <span className={`${leftFromTrading < 0 ? 'text-red-600' : 'text-green-600'}`}>
@@ -137,7 +120,11 @@ const TradingSummary = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Potential Value:</span>
+                  <span className="text-gray-700 dark:text-gray-300">Current Price:</span>
+                  <span>{formatNumberWithLeadingZeros(currentBalance.current_price, 2)} USDT</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Unrealized P/L:</span>
                   <span className={`${potentialProfit < 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {potentialProfit.toFixed(2)} USDT{' '}
                     {potentialProfit < 0 && <span className="text-red-600">(Sold Extra)</span>}
