@@ -1,4 +1,5 @@
 import { getDb } from '@/app/lib/db';
+import bcrypt from 'bcryptjs';
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
@@ -28,6 +29,7 @@ export interface DbUser {
   id: number;
   email: string;
   name?: string | null;
+  password_hash?: string;
 }
 
 export const authOptions: AuthOptions = {
@@ -40,10 +42,10 @@ export const authOptions: AuthOptions = {
       name: 'Email',
       credentials: {
         email: { label: 'Email', type: 'email', placeholder: 'your@email.com' },
-        userId: { label: 'User ID', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
         const emailSchema = z.string().email();
         const validatedEmail = emailSchema.safeParse(credentials.email);
@@ -51,17 +53,9 @@ export const authOptions: AuthOptions = {
         if (!validatedEmail.success) return null;
 
         try {
-          // Используем userId из credentials, если он предоставлен
-          if (credentials.userId) {
-            return {
-              id: credentials.userId,
-              email: credentials.email,
-            };
-          }
-
           const user = await new Promise<DbUser | undefined>((resolve, reject) => {
             getDb().get(
-              'SELECT id, email FROM users WHERE email = ?',
+              'SELECT id, email, password_hash FROM users WHERE email = ?',
               [credentials.email],
               (err: Error | null, row: DbUser | undefined) => {
                 if (err) {
@@ -77,6 +71,19 @@ export const authOptions: AuthOptions = {
             console.error('NextAuth: User not found for email', credentials.email);
             return null;
           }
+
+          // Verify password
+          if (!user.password_hash) {
+            console.error('NextAuth: User has no password set', credentials.email);
+            return null;
+          }
+
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password_hash);
+          if (!isValidPassword) {
+            console.error('NextAuth: Invalid password for email', credentials.email);
+            return null;
+          }
+
           // Преобразуем id в строку, чтобы NextAuth правильно его обрабатывал
           const userId = String(user.id);
 

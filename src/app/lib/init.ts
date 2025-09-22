@@ -1,4 +1,5 @@
-import { isDatabaseInitialized, initializeTables } from './db';
+import { initializeTables, isDatabaseInitialized } from './db';
+import { addPasswordField } from './migrations/add-password-field';
 
 let isInitializing = false;
 let isInitialized = false;
@@ -23,6 +24,7 @@ export async function ensureDatabaseInitialized() {
     if (!initialized) {
       console.log('Инициализация базы данных...');
       await initializeTables();
+      await addPasswordField();
       console.log('База данных успешно инициализирована');
     } else {
       console.log('База данных уже инициализирована');

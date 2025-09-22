@@ -1,4 +1,5 @@
 import { getDb } from '@/app/lib/db';
+import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { DbUser } from '../[...nextauth]/route';
@@ -7,6 +8,7 @@ import { DbUser } from '../[...nextauth]/route';
 const userSchema = z.object({
   email: z.string().email('Недействительный email'),
   name: z.string().optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { email, name } = validationResult.data;
+    const { email, name, password } = validationResult.data;
 
     // Ищем пользователя в базе
     const user: DbUser | undefined = await new Promise((resolve, reject) => {
@@ -36,13 +38,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             // Пользователь найден
             resolve(row);
           } else {
+            // Hash password if provided
+            const password_hash = password ? await bcrypt.hash(password, 10) : null;
+
             // Создаем нового пользователя
             getDb().run(
-              'INSERT INTO users (email, name) VALUES (?, ?)',
-              [email, name],
+              'INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)',
+              [email, name, password_hash],
               function (err: Error | null) {
                 if (err) reject(err);
-                resolve({ id: this.lastID, email: email, name: name });
+                resolve({ id: this.lastID, email: email, name: name, password_hash });
               }
             );
           }

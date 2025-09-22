@@ -1,3 +1,4 @@
+import { cn } from '@/app/lib/utils';
 import { TransactionDb } from '@/app/permata/api/transactions/route';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
 import {
   Column,
   ColumnDef,

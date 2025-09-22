@@ -1,40 +1,47 @@
-import * as React from "react"
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
-import { Label } from "./label"
+import { cn } from '@/app/lib/utils';
+import { Label } from './label';
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
           className
         )}
         ref={ref}
         {...props}
       />
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = 'Input';
 
-
-const InputLabel = ({children, label, className}: {children: React.ReactNode, label: string, className?: string}) => {
-    return <div className={cn("grid gap-2", className)}>
+const InputLabel = ({
+  children,
+  label,
+  className,
+}: {
+  children: React.ReactNode;
+  label: string;
+  className?: string;
+}) => {
+  return (
+    <div className={cn('grid gap-2', className)}>
       <Label>{label}</Label>
       {children}
     </div>
-} 
-
-
+  );
+};
 
 const DebounceInput = React.forwardRef<
   HTMLInputElement,
-  React.ComponentProps<"input"> & { delay?: number }
+  React.ComponentProps<'input'> & { delay?: number }
 >(({ onChange, delay = 300, ...props }, ref) => {
-  const [value, setValue] = React.useState(props.defaultValue || "");
+  const [value, setValue] = React.useState(props.defaultValue || '');
   const timeoutRef = React.useRef<NodeJS.Timeout>(null);
 
   React.useEffect(() => {
@@ -53,7 +60,7 @@ const DebounceInput = React.forwardRef<
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -63,40 +70,32 @@ const DebounceInput = React.forwardRef<
     }, delay);
   };
 
-  return (
-    <Input
-      {...props}
-      value={value}
-      onChange={handleChange}
-      ref={ref}
-    />
-  );
+  return <Input {...props} value={value} onChange={handleChange} ref={ref} />;
 });
-DebounceInput.displayName = "DebounceInput";
-
+DebounceInput.displayName = 'DebounceInput';
 
 const NumberInput = React.forwardRef<
   HTMLInputElement,
-  Omit<React.ComponentProps<"input">, "type" | "onChange"> & {
+  Omit<React.ComponentProps<'input'>, 'type' | 'onChange'> & {
     onChange?: (value: number | null) => void;
     value?: number | null;
   }
 >(({ className, onChange, value, ...props }, ref) => {
   // Форматирование числа для отображения
   const formatNumber = (num: number | null) => {
-    if (num === null) return "";
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    if (num === null) return '';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   };
 
   // Очистка строки от всего, кроме цифр
   const cleanNumber = (str: string) => {
-    return str.replace(/[^\d.-]/g, "");
+    return str.replace(/[^\d.-]/g, '');
   };
 
   // Обработка изменения значения
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = cleanNumber(e.target.value);
-    
+
     // Если поле пустое, передаем null
     if (!cleaned) {
       onChange?.(null);
@@ -104,7 +103,7 @@ const NumberInput = React.forwardRef<
     }
 
     const num = parseFloat(cleaned);
-    
+
     // Проверяем, является ли значение числом
     if (!isNaN(num)) {
       onChange?.(num);
@@ -119,15 +118,15 @@ const NumberInput = React.forwardRef<
       value={formatNumber(value ?? null)}
       onChange={handleChange}
       ref={ref}
-      className={cn("text-right", className)}
+      className={cn('text-right', className)}
     />
   );
 });
-NumberInput.displayName = "NumberInput";
+NumberInput.displayName = 'NumberInput';
 
 const DebounceNumberInput = React.forwardRef<
   HTMLInputElement,
-  Omit<React.ComponentProps<typeof NumberInput>, "onChange"> & {
+  Omit<React.ComponentProps<typeof NumberInput>, 'onChange'> & {
     onChange?: (value: number | null) => void;
     delay?: number;
   }
@@ -151,7 +150,7 @@ const DebounceNumberInput = React.forwardRef<
 
   const handleChange = (newValue: number | null) => {
     setValue(newValue);
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -161,15 +160,8 @@ const DebounceNumberInput = React.forwardRef<
     }, delay);
   };
 
-  return (
-    <NumberInput
-      {...props}
-      value={value ?? undefined}
-      onChange={handleChange}
-      ref={ref}
-    />
-  );
+  return <NumberInput {...props} value={value ?? undefined} onChange={handleChange} ref={ref} />;
 });
-DebounceNumberInput.displayName = "DebounceNumberInput";
+DebounceNumberInput.displayName = 'DebounceNumberInput';
 
-export { Input, InputLabel, DebounceInput, NumberInput, DebounceNumberInput }
+export { DebounceInput, DebounceNumberInput, Input, InputLabel, NumberInput };

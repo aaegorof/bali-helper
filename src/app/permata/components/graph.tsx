@@ -1,5 +1,5 @@
-import { TRANSACTION_COLORS } from '@/lib/constants';
-import { formatNumberToKMil } from '@/lib/utils';
+import { TRANSACTION_COLORS } from '@/app/lib/constants';
+import { formatNumberToKMil } from '@/app/lib/utils';
 import {
   BarElement,
   CategoryScale,
@@ -28,7 +28,6 @@ type ChartData = {
 };
 
 const GraphPermata = ({ className }: Props) => {
-
   const [monthlyData, setMonthlyData] = useState<ChartData | null>(null);
   const { filteredTransactions: data } = useTransactionsContext();
   useEffect(() => {

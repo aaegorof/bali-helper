@@ -1,5 +1,6 @@
 'use client';
 
+import { cn, formatNumberToKMil } from '@/app/lib/utils';
 import {
   Accordion,
   AccordionContent,
@@ -7,7 +8,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { cn, formatNumberToKMil } from '@/lib/utils';
 import {
   ArcElement,
   BarElement,

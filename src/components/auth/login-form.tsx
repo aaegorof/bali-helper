@@ -10,6 +10,7 @@ import { SocialButtons } from './social-buttons';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -28,7 +29,7 @@ export function LoginForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!userResponse.ok) {
@@ -42,12 +43,13 @@ export function LoginForm() {
       // 2. Затем логиним пользователя через NextAuth
       const result = await signIn('credentials', {
         email: email,
-        userId: String(userData.id),
+        password: password,
         callbackUrl,
         redirect: false,
       });
 
       if (result?.error) {
+        console.error('Login error:', result.error);
         setError('Failed to sign in. Please check your email.');
       } else if (result?.url) {
         router.push(result.url);
@@ -71,16 +73,29 @@ export function LoginForm() {
         <SocialButtons callbackUrl={callbackUrl} />
         <form onSubmit={handleSubmit}>
           <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
             <Button type="submit" disabled={isLoading}>
