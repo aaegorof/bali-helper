@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:supabase": "ts-node ./src/app/lib/migrations/run-supabase-migration.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
@@ -22,6 +23,8 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
     "@tanstack/react-table": "^8.20.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^7.0.1",
@@ -33,6 +36,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.2.2",
     "jose": "^6.0.8",
     "lucide-react": "^0.473.0",
     "next": "^15.2.4",
@@ -58,6 +62,7 @@
     "@types/react-dom": "^19",
     "@types/sqlite3": "^3.1.11",
     "autoprefixer": "^10.4.20",
+    "csv-writer": "^1.6.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "^15.2.4",
     "eslint-config-prettier": "^10.1.1",
@@ -65,6 +70,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   },
   "workspaces": [

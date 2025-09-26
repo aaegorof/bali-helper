@@ -4,7 +4,7 @@ import 'server-only';
 import { authOptions } from '../api/auth/[...nextauth]/route';
 import { getDb } from './db';
 
-interface DbUser {
+export interface DbUser {
   id: number;
   email: string;
   created_at?: string;

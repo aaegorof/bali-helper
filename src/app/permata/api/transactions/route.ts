@@ -1,5 +1,6 @@
 import { getDb } from '@/app/lib/db';
 import { ensureDatabaseInitialized } from '@/app/lib/init';
+import { createClient } from '@/app/lib/supabase/server';
 import {
   createTransactionHash,
   parseTimeFromDescription,
@@ -33,6 +34,7 @@ export interface TransactionDb {
 // GET /api/transactions
 export async function GET(request: Request) {
   await ensureDatabaseInitialized();
+  const supabase = await createClient();
 
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
@@ -69,6 +71,16 @@ export async function GET(request: Request) {
   }
 
   query += ` ORDER BY posted_date DESC`;
+
+  if (userId?.length && userId?.length > 10) {
+    return NextResponse.json(
+      await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('posted_date', { ascending: false })
+    );
+  }
 
   return new Promise((resolve) => {
     getDb().all(query, params, (err: Error | null, rows: TransactionDb[]) => {

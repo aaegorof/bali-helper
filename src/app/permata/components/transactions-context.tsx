@@ -1,3 +1,4 @@
+import { useAuth } from '@/app/lib/auth';
 import { TransactionDb } from '@/app/permata/api/transactions/route';
 import { useSession } from 'next-auth/react';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
@@ -18,6 +19,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   const [transactions, setTransactions] = useState<TransactionDb[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<TransactionDb[]>(transactions);
   const { data: session } = useSession();
+  const { user } = useAuth();
 
   const [totalDebit, totalCredit] = useMemo(() => {
     let totalD = 0;
@@ -35,8 +37,8 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`/permata/api/transactions?userId=${session?.user?.id}`);
-      const data = (await response.json()) as TransactionDb[];
+      const response = await fetch(`/permata/api/transactions?userId=${user?.id}`);
+      const {data} = (await response.json()) as { data: TransactionDb[] };
       setTransactions(data);
       setFilteredTransactions(data);
       return data;
@@ -48,7 +50,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     fetchTransactions();
-  }, [session?.user?.id]);
+  }, [user]);
 
   return (
     <TransactionsContext.Provider

@@ -17,7 +17,7 @@ const EMBEDDING_MODEL_OPENAI = 'text-embedding-3-small';
 const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
 
 // Интерфейсы для типизации
-interface TransactionEmbedding {
+export interface TransactionEmbedding {
   description: string;
   category: string;
   embedding: string;
@@ -25,7 +25,7 @@ interface TransactionEmbedding {
   usage_count: number;
 }
 
-interface SimilarTransaction {
+export interface SimilarTransaction {
   description: string;
   category: string;
   similarity: number;

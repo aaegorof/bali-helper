@@ -10,15 +10,6 @@ export const TRANSACTION_COLORS = {
 } as const;
 
 
-// Символы для Funding Rates
-export const DEFAULT_SYMBOLS = [
-  "BTCUSDT",
-  "ETHUSDT",
-  "SOLUSDT",
-  "BNBUSDT",
-  "XRPUSDT",
-];
-
 // Символы для Trading Analyser
 export const TRADING_SYMBOLS = [
   "BTCUSDT",

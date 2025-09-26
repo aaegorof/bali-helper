@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+      "supabase": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@supabase/mcp-server-supabase",
+          "--read-only",
+          "--project-ref="https://gdfomommnisgotgwrufs.supabase.co"    
+        ],
+        "env": {
+          "SUPABASE_ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkZm9tb21uaXNnb3Rnd3J1ZnNzLnN1cGFibGUuY28iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcyNzE4MzQ0MiwiZXhwIjoyMDQyNzU5NDQyfQ.vNguZ_YQ1w3d0B2tKkZD9a4Q2JUWt1RgCK0v8J44vcc"
+        }
+      }
+    }
+  }

@@ -30,18 +30,18 @@ const ANALYSIS_TABS = [
 ] as const;
 
 export default function Permata() {
-  const router = useRouter();
+  // const router = useRouter();
   const [activeTab, setActiveTab] = useState(ANALYSIS_TABS[0].id);
-  const { data: session } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.push('/?callbackUrl=/permata');
-    },
-  });
+  // const { data: session } = useSession({
+  //   required: true,
+  //   onUnauthenticated() {
+  //     router.push('/?callbackUrl=/permata');
+  //   },
+  // });
 
-  if (!session) {
-    return null;
-  }
+  // if (!session) {
+  //   return null;
+  // }
 
   // if (status === "loading") {
   //   return (

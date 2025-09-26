@@ -7,7 +7,9 @@ import localFont from 'next/font/local';
 import { Toaster } from 'sonner';
 import { authOptions } from './api/auth/[...nextauth]/route';
 import './globals.css';
+import { AuthProvider } from './lib/auth';
 import { ensureDatabaseInitialized } from './lib/init';
+import { createClient } from './lib/supabase/server';
 
 const satoshi = localFont({
   variable: '--font-satoshi',
@@ -38,15 +40,22 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
+  const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${satoshi.variable} ${inter.className}`}>
-        <Providers session={session}>
-          <AppMenu />
-          {children}
-          <Toaster />
-        </Providers>
+        <AuthProvider user={user ?? null}>
+          <Providers session={session}>
+            <AppMenu />
+            {children}
+            <Toaster />
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );

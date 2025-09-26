@@ -11,6 +11,7 @@ import {
 } from 'chart.js';
 import { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
+import { useMonthlyStats } from '../hooks/useMonthlyStats';
 import { useTransactionsContext } from './transactions-context';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -30,11 +31,13 @@ type ChartData = {
 const GraphPermata = ({ className }: Props) => {
   const [monthlyData, setMonthlyData] = useState<ChartData | null>(null);
   const { filteredTransactions: data } = useTransactionsContext();
+  const { monthlyStats } = useMonthlyStats();
+  console.log(monthlyStats);
   useEffect(() => {
     // Prepare Data for Chart
     const monthly: Record<string, { debit: number; credit: number }> = {};
 
-    data.forEach((transaction) => {
+    data?.forEach((transaction) => {
       const date = new Date(transaction.posted_date!);
       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
 

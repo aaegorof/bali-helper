@@ -1,5 +1,4 @@
 'use client';
-import { LoginForm } from '@/components/auth/login-form';
 import {
   Card,
   CardContent,
@@ -8,41 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { data: session, status } = useSession();
-
-  // Показываем индикатор загрузки, пока сессия загружается
-  if (status === 'loading') {
-    return (
-      <div className="flex justify-center items-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  // Показываем форму входа, если пользователь не аутентифицирован
-  if (status === 'unauthenticated' || !session) {
-    return (
-      <div className="flex justify-center items-center">
-        <LoginForm />
-      </div>
-    );
-  }
-
   return (
     <main className="container mx-auto">
       <h1>Home page</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-        <ModuleCard
-          title="Funding Rates"
-          description="Monitor and analyze funding rates for Bybit perpetual contracts"
-          href="/funding-rates"
-        />
-
         <ModuleCard
           title="APY Calculation"
           description="Calculate and forecast investment returns based on APY"
