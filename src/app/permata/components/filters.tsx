@@ -157,8 +157,19 @@ const FilterDates = ({ column }: { column: Column<TransactionDb> }) => {
   const [start, end] = column?.getFilterValue();
   return (
     <div className="flex gap-2">
-      <DatePicker date={start} setDate={(date) => column.setFilterValue(([a, b]) => [date, b])} />
-      <DatePicker date={end} setDate={(date) => column.setFilterValue(([a, b]) => [a, date])} />
+      <DatePicker
+        date={start}
+        setDate={(date) => column.setFilterValue(([a, b]) => [date, b])}
+        label="Start date"
+      />
+      <DatePicker
+        date={end}
+        setDate={(date) => column.setFilterValue(([a, b]) => [a, date])}
+        label="End date"
+      />
+      {/* <DateRangePicker dates={column?.getFilterValue() as Date[]} setDates={(dates) => {
+          console.log(dates);
+          column.setFilterValue(dates)}} /> */}
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import { determineCategoryWithRAG, determineKeywordCategory } from '@/app/permata/lib/vectorDb';
 import { ApiResponse } from '@/app/types/api';
 import { NextResponse } from 'next/server';
-import { TransactionDb } from '../transactions/route';
+import { TransactionDb } from '../../transactions/route';
+import { NextRequest } from 'next/server';
 
 interface SuggestCategoriesRequestBody {
   transactions: TransactionDb[];
@@ -14,8 +15,11 @@ export type RespSuggestCategories = {
     aiCategory?: string;
   }[];
 };
+
+
+
 export async function POST(
-  req: Request
+  req: NextRequest
 ): Promise<NextResponse<ApiResponse<RespSuggestCategories>>> {
   const { transactions } = (await req.json()) as SuggestCategoriesRequestBody;
 
@@ -47,12 +51,12 @@ export async function POST(
       success: true,
       categories,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error suggesting category:', err);
     return NextResponse.json<ApiResponse<RespSuggestCategories>>({
       success: false,
       error: 'Error suggesting category',
-      details: err.message,
+      details: err instanceof Error ? err.message : 'Unknown error',
     });
   }
 }

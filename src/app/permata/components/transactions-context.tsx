@@ -1,6 +1,5 @@
 import { useAuth } from '@/app/lib/auth';
-import { TransactionDb } from '@/app/permata/api/transactions/route';
-import { useSession } from 'next-auth/react';
+import { RespGetTransactions, TransactionDb } from '@/app/permata/api/transactions/route';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TransactionsContextType {
@@ -18,7 +17,6 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(u
 export function TransactionsProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<TransactionDb[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<TransactionDb[]>(transactions);
-  const { data: session } = useSession();
   const { user } = useAuth();
 
   const [totalDebit, totalCredit] = useMemo(() => {
@@ -37,11 +35,11 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`/permata/api/transactions?userId=${user?.id}`);
-      const {data} = (await response.json()) as { data: TransactionDb[] };
-      setTransactions(data);
-      setFilteredTransactions(data);
-      return data;
+      const response  = await fetch(`/permata/api/transactions?userId=${user?.id}`)
+      const {data} = (await response.json()) as RespGetTransactions
+      setTransactions(data?.transactions || []);
+      setFilteredTransactions(data?.transactions || []);
+      return data?.transactions || [];
     } catch (error) {
       console.error('Error fetching transactions:', error);
       return [];

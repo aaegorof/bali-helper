@@ -9,29 +9,38 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface DatePickerProps {
-  date: Date;
-  setDate: (date: Date) => void;
-  label?: string;
+  dates: Date[];
+  setDates: (dates: Date[]) => void;
 }
 
-export function DatePicker({ date, setDate, label }: DatePickerProps) {
+export function DateRangePicker({ dates, setDates }: DatePickerProps) {
+  const [start, end] = dates;
+  const _setDates = (dates: Date[]) => {
+    if (dates?.length === 2) {
+      const [date1, date2] = dates;
+      if (date1 > date2) {
+        dates = [date2, date1];
+      }
+      setDates(dates);
+    }
+  };
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant={'outline'}
           className={cn(
-            'w-[180px] justify-between text-left font-normal',
-            !date && 'text-muted-foreground'
+            'w-[280px] justify-between text-left font-normal',
+            !dates && 'text-muted-foreground'
           )}
         >
-          {date ? format(date, 'PP') : <span>{label ? label : 'Pick a date'}</span>}
-          {date && (
+          {start && end ? format(start, 'PP') + ' - ' + format(end, 'PP') : <span>Date range</span>}
+          {start && end && (
             <X
               className="mr-2 h-4 w-4"
               onClick={(e) => {
                 e.stopPropagation();
-                setDate(null);
+                setDates([]);
               }}
             />
           )}
@@ -39,7 +48,7 @@ export function DatePicker({ date, setDate, label }: DatePickerProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} required />
+        <Calendar mode="multiple" selected={dates} onSelect={_setDates} required max={2} />
       </PopoverContent>
     </Popover>
   );

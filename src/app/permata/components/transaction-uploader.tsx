@@ -1,12 +1,13 @@
+import { useAuth } from '@/app/lib/auth';
 import {
   PermataRawTransaction,
-  ReqTransactions,
+  ReqPostTransactions,
   RespPostTransactions,
 } from '@/app/permata/api/transactions/route';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useSession } from 'next-auth/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { useTransactionsContext } from './transactions-context';
 
@@ -33,15 +34,21 @@ const parseCSV = (csvText: string): PermataRawTransaction[] => {
 
 const saveTransactionsToDatabase = async (
   transactions: PermataRawTransaction[],
-  userId: number
+  userId: string
 ) => {
   try {
-    const response = await fetch('/permata/api', {
+    const response = await fetch('/permata/api/transactions', {
       method: 'POST',
-      body: JSON.stringify({ transactions, userId } as ReqTransactions),
+      body: JSON.stringify({ transactions, userId } as ReqPostTransactions),
     });
-    const data = (await response.json()) as RespPostTransactions;
-    return data;
+    
+    const resp = (await response.json()) as RespPostTransactions;
+    if(resp.success){
+      toast.success(resp.data?.message);
+    } else {
+      toast.error('Error saving transactions:' + resp.details);
+    }
+    return resp;
   } catch (error) {
     console.error('Ошибка при сохранении транзакций:', error);
     throw error;
@@ -49,8 +56,8 @@ const saveTransactionsToDatabase = async (
 };
 
 const TransactionUploader = () => {
-  const { data: session } = useSession();
-  const currentUser = session?.user;
+  // const { data: session } = useSession();
+  const { user: currentUser } = useAuth();
 
   const { setTransactions } = useTransactionsContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -82,8 +89,8 @@ const TransactionUploader = () => {
     }
     try {
       setIsLoading(true);
-      const res = await saveTransactionsToDatabase(allParsedData, Number(currentUser.id));
-      setTransactions(res.data?.transactions ?? []);
+      const res = await saveTransactionsToDatabase(allParsedData, currentUser.id);
+      setTransactions(res.data?.inserted_rows ?? []);
     } catch (error) {
       console.error('Ошибка при сохранении транзакций:', error);
       throw error;
@@ -100,8 +107,11 @@ const TransactionUploader = () => {
       <CardContent className="flex flex-col gap-8">
         <div className="text-xs">
           <p>
-            You can upload a file from <a href="https://www.permatanet.com/pnet/" target="_blank">Permata Bank export</a>, it will automatically save these
-            transactions to the database.
+            You can upload a file from{' '}
+            <a href="https://www.permatanet.com/pnet/" target="_blank">
+              Permata Bank export
+            </a>
+            , it will automatically save these transactions to the database.
           </p>
           <p>After uploading, you will see ulpoaded transactions.</p>
           <p>

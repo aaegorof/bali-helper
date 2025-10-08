@@ -1,4 +1,4 @@
-import { initializeVectorTables } from '@/app/permata/lib/vectorDb';
+
 import path from 'path';
 import sqlite3 from 'sqlite3';
 
@@ -100,15 +100,15 @@ async function initializeTables(): Promise<void> {
         db.run(`PRAGMA foreign_keys = ON`);
 
         // После создания основных таблиц, инициализируем векторные таблицы
-        initializeVectorTables()
-          .then(() => {
-            console.log('Векторные таблицы успешно инициализированы');
-            resolve();
-          })
-          .catch((error) => {
-            console.error('Ошибка при инициализации векторных таблиц:', error);
-            reject(error);
-          });
+        // initializeVectorTables()
+        //   .then(() => {
+        //     console.log('Векторные таблицы успешно инициализированы');
+        //     resolve();
+        //   })
+        //   .catch((error) => {
+        //     console.error('Ошибка при инициализации векторных таблиц:', error);
+        //     reject(error);
+        //   });
       } catch (error) {
         reject(error);
       }

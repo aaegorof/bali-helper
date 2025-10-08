@@ -62,12 +62,12 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
     });
   };
 
-  const onClickUpdate = async (idsToUpdate: number[], category: string) => {
+  const onClickUpdate = async (idsToUpdate: number[], category?: string) => {
     setLoading(loading.set('upd', true));
 
     const resp = await fetch(`/permata/api/update`, {
       method: 'POST',
-      body: JSON.stringify({ ids: idsToUpdate, category }),
+      body: JSON.stringify({ ids: idsToUpdate, category: category || '' }),
     });
 
     const data = (await resp.json()) as UpdateCategoriesResponse;
@@ -93,10 +93,12 @@ export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProp
 
   const remove = useCallback(async () => {
     setLoading(new Map().set('upd', true));
-    const res = await fetch('/permata/api', {
+
+    const res = await fetch('/permata/api/transactions', {
       method: 'DELETE',
       body: JSON.stringify({ ids }),
     });
+
     const data = await res.json();
     if (data.success) {
       toast.success(data?.data?.message);

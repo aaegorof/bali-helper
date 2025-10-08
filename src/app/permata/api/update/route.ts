@@ -1,15 +1,9 @@
-import { getDb } from '@/app/lib/db';
-import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { createClient } from '@/app/lib/supabase/server';
 import { parseTimeFromDescription } from '@/app/permata/lib/TransactionParseResult';
 import { createEmbedding, saveEmbedding } from '@/app/permata/lib/vectorDb';
 import { ApiResponse } from '@/app/types/api';
+import { Transaction } from '@/app/types/supabase-extended';
 import { NextResponse } from 'next/server';
-
-// Интерфейс для SQLite колбэка с this
-interface SQLiteRunResult {
-  lastID: number;
-  changes: number;
-}
 
 // Specific response types
 export type UpdateCategoriesResponse = ApiResponse<{
@@ -25,6 +19,7 @@ export type UpdateCategoryRequest = {
 export async function POST(request: Request): Promise<NextResponse<UpdateCategoriesResponse>> {
   try {
     const { ids, category } = (await request.json()) as UpdateCategoryRequest;
+    const supabase = await createClient();
 
     if (!Array.isArray(ids) || !category) {
       return NextResponse.json<UpdateCategoriesResponse>({
@@ -34,34 +29,29 @@ export async function POST(request: Request): Promise<NextResponse<UpdateCategor
     }
 
     // Обновляем категорию в таблице транзакций
-    const placeholders = ids.map(() => '?').join(',');
-    const query = `UPDATE transactions SET category = ? WHERE id IN (${placeholders})`;
-    const params = [category, ...ids];
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ category })
+      .in('id', ids);
 
-    const changes = await new Promise<number>((resolve, reject) => {
-      getDb().run(query, params, function (this: SQLiteRunResult, err: Error | null) {
-        if (err) {
-          console.error('Error updating categories:', err);
-          return reject(err);
-        }
-        resolve(this.changes);
-      });
-    });
+    if (updateError) {
+      console.error('Error updating categories:', updateError);
+      throw updateError;
+    }
 
     // Получаем обновленные транзакции для создания новых embeddings
-    const updatedTransactionsQuery = `SELECT id, description FROM transactions WHERE id IN (${placeholders})`;
-    const updatedTransactions: TransactionDb[] = await new Promise((resolve, reject) => {
-      getDb().all(updatedTransactionsQuery, ids, (err: Error | null, rows: TransactionDb[]) => {
-        if (err) {
-          console.error('Error fetching updated transactions:', err);
-          return reject(err);
-        }
-        resolve(rows);
-      });
-    });
+    const { data: updatedTransactions, error: fetchError } = await supabase
+      .from('transactions')
+      .select('id, description')
+      .in('id', ids);
+
+    if (fetchError) {
+      console.error('Error fetching updated transactions:', fetchError);
+      throw fetchError;
+    }
 
     // Обновляем embeddings для измененных транзакций
-    const embeddingPromises = updatedTransactions.map(async (transaction) => {
+    const embeddingPromises = (updatedTransactions as Transaction[]).map(async (transaction) => {
       try {
         const { cleanDescription } = parseTimeFromDescription(transaction?.description || '');
         if (cleanDescription && transaction.id !== undefined) {

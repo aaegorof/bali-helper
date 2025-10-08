@@ -8,7 +8,6 @@ import { Toaster } from 'sonner';
 import { authOptions } from './api/auth/[...nextauth]/route';
 import './globals.css';
 import { AuthProvider } from './lib/auth';
-import { ensureDatabaseInitialized } from './lib/init';
 import { createClient } from './lib/supabase/server';
 
 const satoshi = localFont({
@@ -31,7 +30,7 @@ const satoshi = localFont({
 const inter = Inter({ subsets: ['latin'] });
 
 // Инициализируем базу данных при старте приложения
-ensureDatabaseInitialized().catch(console.error);
+// ensureDatabaseInitialized().catch(console.error);
 
 export const metadata: Metadata = {
   title: 'Sandbox for financial analytic projects',
@@ -45,7 +44,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${satoshi.variable} ${inter.className}`}>
