@@ -3,18 +3,18 @@ import { formatNumberToKMil } from '@/app/lib/utils';
 import { useTransactionsContext } from './transactions-context';
 
 export default function TotalAmounts() {
-  const { filteredTransactions, transactions, totalDebit, totalCredit } = useTransactionsContext();
+  const { totalDebit, totalCredit, count, totalCount } = useTransactionsContext();
   return (
     <div>
       <p className="text-xs">
         Calculated from{' '}
-        {filteredTransactions.length !== transactions.length && (
+        {count !== totalCount && (
           <span>
-            <span className="font-bold">{filteredTransactions.length}</span> filtered transactions
+            <span className="font-bold">{count}</span> filtered transactions
             out of
           </span>
         )}{' '}
-        <span className="font-bold">{transactions.length}</span> total transactions.
+        <span className="font-bold">{totalCount}</span> total transactions.
       </p>
       <p>
         Total Debit:{' '}

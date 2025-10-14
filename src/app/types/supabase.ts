@@ -76,6 +76,7 @@ export type Database = {
           credit_debit: string | null;
           description: string | null;
           id: number;
+          month: string | null;
           posted_date: string | null;
           time: string | null;
           transaction_hash: string | null;
@@ -88,6 +89,7 @@ export type Database = {
           credit_debit?: string | null;
           description?: string | null;
           id?: number;
+          month?: string | null;
           posted_date?: string | null;
           time?: string | null;
           transaction_hash?: string | null;
@@ -100,6 +102,7 @@ export type Database = {
           credit_debit?: string | null;
           description?: string | null;
           id?: number;
+          month?: string | null;
           posted_date?: string | null;
           time?: string | null;
           transaction_hash?: string | null;
@@ -109,7 +112,15 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      transactions_monthly: {
+        Row: {
+          credit_debit: string | null;
+          month_start: string | null;
+          total_amount: number | null;
+          tx_count: number | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       binary_quantize: {

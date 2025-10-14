@@ -1,114 +1,71 @@
 import { TRANSACTION_COLORS } from '@/app/lib/constants';
 import { formatNumberToKMil } from '@/app/lib/utils';
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
-} from 'chart.js';
-import { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { useMonthlyStats } from '../hooks/useMonthlyStats';
+import { useMemo } from 'react';
+import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useTransactionsContext } from './transactions-context';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type Props = {
   className?: string;
 };
-type ChartData = {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string;
-  }[];
-};
 
 const GraphPermata = ({ className }: Props) => {
-  const [monthlyData, setMonthlyData] = useState<ChartData | null>(null);
-  const { filteredTransactions: data } = useTransactionsContext();
-  const { monthlyStats } = useMonthlyStats();
-  console.log(monthlyStats);
-  useEffect(() => {
-    // Prepare Data for Chart
-    const monthly: Record<string, { debit: number; credit: number }> = {};
+  const { monthlyStats } = useTransactionsContext();
 
-    data?.forEach((transaction) => {
-      const date = new Date(transaction.posted_date!);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+  const chartData = useMemo(() => {
+    if (!monthlyStats?.length) return [];
 
-      if (!monthly[monthYear]) {
-        monthly[monthYear] = { debit: 0, credit: 0 };
-      }
+    // Group data by month
+    const groupedData = monthlyStats.reduce(
+      (acc, stat) => {
+        const date = new Date(stat.month);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
-      const amount = transaction.amount;
-      if (transaction.credit_debit === 'Debit') {
-        monthly[monthYear].debit += amount;
-      } else {
-        monthly[monthYear].credit += amount;
-      }
+        if (!acc[monthKey]) {
+          acc[monthKey] = {
+            month: monthKey,
+            Debit: 0,
+            Credit: 0,
+          };
+        }
+
+        if (stat.credit_debit === 'Debit' || stat.credit_debit === 'Credit') {
+          acc[monthKey][stat.credit_debit] = Math.abs(stat.sum);
+        }
+
+        return acc;
+      },
+      {} as Record<string, { month: string; Debit: number; Credit: number }>
+    );
+
+    return Object.values(groupedData).sort((a, b) => {
+      const dateA = new Date(a.month);
+      const dateB = new Date(b.month);
+      return dateA.getTime() - dateB.getTime();
     });
+  }, [monthlyStats]);
 
-    const labels = Object.keys(monthly).sort();
-    const debitData = labels.map((month) => monthly[month].debit);
-    const creditData = labels.map((month) => monthly[month].credit);
-
-    setMonthlyData({
-      labels,
-      datasets: [
-        {
-          label: 'Debit',
-          data: debitData,
-          backgroundColor: TRANSACTION_COLORS.debit.background,
-        },
-        {
-          label: 'Credit',
-          data: creditData,
-          backgroundColor: TRANSACTION_COLORS.credit.background,
-        },
-      ],
-    });
-  }, [data]);
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-        },
-      },
-      title: {
-        display: true,
-        text: 'Monthly Debit and Credit',
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              label += formatNumberToKMil(context.parsed.y);
-            }
-            return label;
-          },
-        },
-      },
-    },
-  };
   return (
     <div className={className}>
-      {monthlyData && (
-        <div>
-          <Bar options={chartOptions} data={monthlyData} />
+      {chartData.length > 0 && (
+        <div className="w-full h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              {/* <CartesianGrid strokeDasharray="1 1" /> */}
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={formatNumberToKMil} />
+              <Tooltip
+                cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
+                formatter={(value: number) => formatNumberToKMil(value)}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                }}
+              />
+              <Legend />
+              <Bar dataKey="Debit" fill={TRANSACTION_COLORS.debit.background} name="Debit" />
+              <Bar dataKey="Credit" fill={TRANSACTION_COLORS.credit.background} name="Credit" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

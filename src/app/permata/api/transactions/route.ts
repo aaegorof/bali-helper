@@ -36,47 +36,6 @@ export type RespPostTransactions = ApiResponse<
   InsertUniqueTransactionsResult & { message: string }
 >;
 
-// GET /api/transactions
-export async function GET(request: NextRequest): Promise<NextResponse<RespGetTransactions>> {
-  // await ensureDatabaseInitialized();
-  const supabase = await createClient();
-
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('userId');
-
-  if (!userId) {
-    return NextResponse.json<RespGetTransactions>({
-      success: false,
-      error: 'User ID is required',
-    });
-  }
-
-  // query += ` ORDER BY posted_date DESC`;
-  const {
-    data: rows,
-    error,
-    count,
-  } = await supabase
-    .from('transactions')
-    .select('*', {count: 'exact'})
-    .range(0, 100)
-    .order('posted_date', { ascending: false });
-
-  if (error) {
-    return NextResponse.json<RespGetTransactions>({
-      success: false,
-      error: error.message,
-    });
-  }
-  return NextResponse.json<RespGetTransactions>({
-    success: true,
-    data: {
-      message: 'Transactions fetched successfully',
-      transactions: (rows as TransactionDb[]) || [],
-      count: count || 0,
-    },
-  });
-
   // return new Promise((resolve) => {
   //   getDb().all(query, params, (err: Error | null, rows: TransactionDb[]) => {
   //     if (err) {
@@ -87,7 +46,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RespGetTra
   //     resolve(NextResponse.json(rows));
   //   });
   // });
-}
+
 
 async function prepareTransactions(
   transactions: PermataRawTransaction[]

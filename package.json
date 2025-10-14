@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "migrate:supabase": "ts-node ./src/app/lib/migrations/run-supabase-migration.ts",
-    "update-types": "node -r dotenv/config ./scripts/generate-types.js"
+    "types": "node -r dotenv/config ./scripts/generate-types.js"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

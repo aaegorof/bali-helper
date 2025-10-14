@@ -17,5 +17,5 @@ export async function middleware(request: NextRequest) {
 // })
 
 export const config = {
-  matcher: ['/permata/:path*', '/trading-analyser/:path*'],
+  matcher: ['/permata/:path*', '/trading-analyser/:path*', '/api/:path*'],
 };

@@ -8,28 +8,28 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import React, { useMemo, useState } from 'react';
 import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
   Legend,
-  LinearScale,
-  Title,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
   Tooltip,
-} from 'chart.js';
-import React, { useEffect, useState } from 'react';
-import { Bar, Doughnut } from 'react-chartjs-2';
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { transactionCategories } from '../categories';
 import { useTransactionsContext } from './transactions-context';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 type ChartType = 'bar' | 'doughnut';
 
 interface CategoryData {
   category: string;
-  amount: number;
+  sum: number;
   count: number;
   percentage: number;
 }
@@ -40,162 +40,62 @@ const getCategoryColor = (index: number) => {
   return `hsl(${hslValue})`;
 };
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: CategoryData;
+  }>;
+}
+
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-background border rounded p-2 shadow-lg">
+        <p className="font-medium">{data.category}</p>
+        <p>{formatNumberToKMil(data.sum)}</p>
+        <p>{data.percentage.toFixed(1)}% of total spending</p>
+        <p>{data.count} transactions</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const CategorySpendingChart: React.FC = () => {
-  const { filteredTransactions } = useTransactionsContext();
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const { categoryStats } = useTransactionsContext();
   const [chartType, setChartType] = useState<ChartType>('doughnut');
   const [showTopCategories, setShowTopCategories] = useState(10);
 
   const maxCategories = transactionCategories.length;
 
-  useEffect(() => {
-    // Группируем транзакции по категориям (только дебетовые)
-    const categoryMap = new Map<string, { amount: number; count: number }>();
+  const totalAmount = categoryStats.reduce((sum, cat) => sum + cat.sum, 0);
+  const topCategories = categoryStats.slice(0, showTopCategories);
+  const otherCategories = categoryStats.slice(showTopCategories);
+  const otherAmount = otherCategories.reduce((sum, cat) => sum + cat.sum, 0);
 
-    filteredTransactions
-      .filter((transaction) => transaction.credit_debit === 'Debit')
-      .forEach((transaction) => {
-        const category = transaction.category || 'Uncategorized';
-        const amount = Number(transaction.amount) || 0;
-
-        if (categoryMap.has(category)) {
-          const existing = categoryMap.get(category)!;
-          categoryMap.set(category, {
-            amount: existing.amount + amount,
-            count: existing.count + 1,
-          });
-        } else {
-          categoryMap.set(category, { amount, count: 1 });
-        }
+  const preparedData = useMemo(() => {
+    const arr = topCategories.map((cat) => ({
+      category: cat.category,
+      sum: cat.sum,
+      count: cat.count,
+      percentage: totalAmount > 0 ? (cat.sum / totalAmount) * 100 : 0,
+    }));
+    if (otherCategories.length > 0) {
+      arr.push({
+        category: `Other (${otherCategories.length} categories)`,
+        sum: otherAmount,
+        count: otherCategories.reduce((sum, cat) => sum + cat.count, 0),
+        percentage: totalAmount > 0 ? (otherAmount / totalAmount) * 100 : 0,
       });
+    }
+    return arr;
+  }, [topCategories, otherCategories, totalAmount, otherAmount]);
 
-    // Преобразуем в массив и сортируем по сумме
-    const totalAmount = Array.from(categoryMap.values()).reduce(
-      (sum, item) => sum + item.amount,
-      0
-    );
-
-    const sortedCategories = Array.from(categoryMap.entries())
-      .map(([category, data]) => ({
-        category,
-        amount: data.amount,
-        count: data.count,
-        percentage: totalAmount > 0 ? (data.amount / totalAmount) * 100 : 0,
-      }))
-      .sort((a, b) => b.amount - a.amount);
-    console.log(sortedCategories);
-    setCategoryData(sortedCategories);
-  }, [filteredTransactions]);
-
-  const topCategories = categoryData.slice(0, showTopCategories);
-  const otherCategories = categoryData.slice(showTopCategories);
-
-  // Объединяем остальные категории в "Other"
-  const chartData = topCategories;
-  if (otherCategories.length > 0) {
-    const otherAmount = otherCategories.reduce((sum, cat) => sum + cat.amount, 0);
-    const otherCount = otherCategories.reduce((sum, cat) => sum + cat.count, 0);
-    const otherPercentage = otherCategories.reduce((sum, cat) => sum + cat.percentage, 0);
-
-    chartData.push({
-      category: `Other (${otherCategories.length} categories)`,
-      amount: otherAmount,
-      count: otherCount,
-      percentage: otherPercentage,
-    });
-  }
-
-  const chartConfig = {
-    labels: chartData.map((item) => item.category),
-    datasets: [
-      {
-        data: chartData.map((item) => item.amount),
-        backgroundColor: chartData.map((_, index) => {
-          return getCategoryColor(index);
-        }),
-        borderColor: chartData.map((_, index) => {
-          return getCategoryColor(index);
-        }),
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        align: 'center' as const,
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 20,
-          font: {
-            size: 12,
-          },
-        },
-      },
-      title: {
-        display: true,
-        text: `Spending by Category (Top ${showTopCategories})`,
-        font: {
-          size: 16,
-          weight: 'bold' as const,
-        },
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context: { dataIndex: number }) {
-            const item = chartData[context.dataIndex];
-            const label = item.category;
-            const amount = formatNumberToKMil(item.amount);
-            const percentage = item.percentage.toFixed(1);
-            const count = item.count;
-            return [
-              `${label}: ${amount}`,
-              `${percentage}% of total spending`,
-              `${count} transactions`,
-            ];
-          },
-        },
-      },
-    },
-  };
-
-  const barOptions = {
-    ...chartOptions,
-    plugins: {
-      ...chartOptions.plugins,
-      title: {
-        ...chartOptions.plugins.title,
-        text: `Spending by Category (Top ${showTopCategories})`,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function (value: number | string) {
-            return formatNumberToKMil(Number(value));
-          },
-        },
-      },
-      x: {
-        ticks: {
-          maxRotation: 45,
-          minRotation: 0,
-        },
-      },
-    },
-  };
-
-  const totalSpending = categoryData.reduce((sum, cat) => sum + cat.amount, 0);
 
   return (
     <div>
-      {categoryData.length === 0 ? (
+      {preparedData.length === 0 ? (
         <div className="text-center text-muted-foreground py-8">No spending data available</div>
       ) : (
         <>
@@ -204,7 +104,7 @@ const CategorySpendingChart: React.FC = () => {
               <span className="text-sm text-muted-foreground">
                 Total Spending:{' '}
                 <span className="font-semibold text-foreground">
-                  {formatNumberToKMil(totalSpending)}
+                  {formatNumberToKMil(totalAmount)}
                 </span>
               </span>
               <div className="flex items-center gap-2">
@@ -240,11 +140,55 @@ const CategorySpendingChart: React.FC = () => {
           </div>
 
           <div className="h-80">
-            {chartType === 'doughnut' ? (
-              <Doughnut data={chartConfig} options={chartOptions} />
-            ) : (
-              <Bar data={chartConfig} options={barOptions} />
-            )}
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === 'doughnut' ? (
+                <PieChart>
+                  <Pie
+                    data={preparedData}
+                    dataKey="sum"
+                    nameKey="category"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="60%"
+                    outerRadius="80%"
+                    paddingAngle={2}
+                  >
+                    {preparedData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={getCategoryColor(index)} />
+                    ))}
+                  </Pie>
+                  <Tooltip cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }} content={<CustomTooltip />} />
+                  <Legend
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    formatter={(value: string) => <span className="text-sm">{value}</span>}
+                  />
+                </PieChart>
+              ) : (
+                <BarChart data={preparedData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="category"
+                    angle={45}
+                    textAnchor="start"
+                    height={100}
+                    interval={0}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    tickFormatter={(value) => formatNumberToKMil(value)}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }} content={<CustomTooltip />} />
+                  <Bar dataKey="sum">
+                    {preparedData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={getCategoryColor(index)} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              )}
+            </ResponsiveContainer>
           </div>
 
           {/* Детальная таблица */}
@@ -253,9 +197,8 @@ const CategorySpendingChart: React.FC = () => {
               <AccordionItem value="item-1">
                 <AccordionTrigger>Category Details</AccordionTrigger>
                 <AccordionContent>
-                  {/* <h4 className="text-sm font-semibold mb-3">Category Details</h4> */}
                   <div className="max-h-60 overflow-y-auto">
-                    {categoryData.map((item, index) => {
+                    {preparedData.map((item, index) => {
                       const bgColor = getCategoryColor(index);
                       return (
                         <div
@@ -271,7 +214,7 @@ const CategorySpendingChart: React.FC = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-sm font-semibold">
-                              {formatNumberToKMil(item.amount)}
+                              {formatNumberToKMil(item.sum)}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {item.percentage.toFixed(1)}% • {item.count} txns
