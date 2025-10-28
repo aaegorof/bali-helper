@@ -15,6 +15,7 @@ export interface Transaction {
   user_id?: number;
   created_at?: string;
   cleanDescription?: string;
+  month?: string;
 }
 
 export const parseTimeFromDescription = (description: string): TransactionParseResult => {

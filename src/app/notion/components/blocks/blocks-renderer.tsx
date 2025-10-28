@@ -1,4 +1,5 @@
 import { BlockObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import React from 'react';
 import Block from './block';
 
 interface BlocksRendererProps {
@@ -11,9 +12,9 @@ export default function BlocksRenderer({ blocks }: BlocksRendererProps) {
   }
 
   // Group list items to render them in proper list containers
-  const renderedBlocks: JSX.Element[] = [];
+  const renderedBlocks: React.JSX.Element[] = [];
   let currentListType: null | 'bulleted' | 'numbered' = null;
-  let currentListItems: JSX.Element[] = [];
+  let currentListItems: React.JSX.Element[] = [];
 
   const flushCurrentList = () => {
     if (currentListItems.length > 0) {

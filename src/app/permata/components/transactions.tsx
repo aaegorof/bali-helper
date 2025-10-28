@@ -10,36 +10,31 @@ import {
 } from '@/components/ui/table';
 import {
   Column,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   Row,
-  SortingState,
+  Updater,
   useReactTable,
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { BulkEditDialog } from './bulk-edit-dialog';
 import PaginationStack from './pagination';
-import { columns, multiIncludesFilter } from './transaction-columns';
+import { columns } from './transaction-columns-copy';
 import { defaultFilters, useTransactionsContext } from './transactions-context';
 
 declare module '@tanstack/table-core' {
   interface ColumnMeta<TData, TValue> {
     className?: string;
-    Filter?: React.ComponentType<{
+    Filter?: React.FunctionComponent<{
       column: Column<TData, TValue>;
       reset: () => void;
     }>;
   }
 }
 
-
-
 const TransactionsPermata = () => {
-  
-
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
@@ -73,9 +68,7 @@ const TransactionsPermata = () => {
     },
     columns,
     enableColumnFilters: true,
-    filterFns: {
-      multiIncludes: multiIncludesFilter,
-    },
+
     // getFilteredRowModel: getFilteredRowModel(),
     getCoreRowModel: getCoreRowModel(),
     // getSortedRowModel: getSortedRowModel(),
@@ -83,7 +76,9 @@ const TransactionsPermata = () => {
     manualPagination: true,
     manualFiltering: true,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setFilters,
+    onColumnFiltersChange: (updaterOrValue: Updater<ColumnFiltersState>) => {
+      setFilters(updaterOrValue as ColumnFiltersState);
+    },
     onPaginationChange: setPagination,
     enableRowSelection: true,
     enableMultiRowSelection: true,

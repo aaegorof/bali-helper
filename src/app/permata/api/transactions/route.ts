@@ -36,21 +36,20 @@ export type RespPostTransactions = ApiResponse<
   InsertUniqueTransactionsResult & { message: string }
 >;
 
-  // return new Promise((resolve) => {
-  //   getDb().all(query, params, (err: Error | null, rows: TransactionDb[]) => {
-  //     if (err) {
-  //       console.error('Error fetching transactions:', err);
-  //       resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-  //       return;
-  //     }
-  //     resolve(NextResponse.json(rows));
-  //   });
-  // });
-
+// return new Promise((resolve) => {
+//   getDb().all(query, params, (err: Error | null, rows: TransactionDb[]) => {
+//     if (err) {
+//       console.error('Error fetching transactions:', err);
+//       resolve(NextResponse.json({ error: err.message }, { status: 500 }));
+//       return;
+//     }
+//     resolve(NextResponse.json(rows));
+//   });
+// });
 
 async function prepareTransactions(
   transactions: PermataRawTransaction[]
-): Promise<Omit<TransactionDb, 'user_id' | 'id' | 'created_at'>[]> {
+): Promise<Omit<TransactionDb, 'user_id' | 'id' | 'created_at' | 'month'>[]> {
   const cleanTransactions = await Promise.all(
     transactions.map(async (tr) => {
       const { time, cleanDescription } = parseTimeFromDescription(tr.Description || '');

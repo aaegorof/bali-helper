@@ -5,9 +5,9 @@ import { getServerSession } from 'next-auth';
 import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Toaster } from 'sonner';
-import { authOptions } from './api/auth/[...nextauth]/route';
 import './globals.css';
 import { AuthProvider } from './lib/auth';
+import { authOptions } from './lib/auth-config';
 import { createClient } from './lib/supabase/server';
 
 const satoshi = localFont({

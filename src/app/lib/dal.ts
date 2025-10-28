@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { cache } from 'react';
 import 'server-only';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { authOptions } from './auth-config';
 import { getDb } from './db';
 
 export interface DbUser {

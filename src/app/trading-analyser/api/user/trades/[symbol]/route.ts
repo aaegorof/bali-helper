@@ -1,4 +1,4 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/lib/auth-config';
 import { analyzeCoinTrade } from '@/app/trading-analyser/helpers';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,7 +10,7 @@ import { SpotTradeDbService } from '../../../services/db-service';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { symbol: string } }
+  { params }: { params: Promise<{ symbol: string }> }
 ): Promise<NextResponse> {
   try {
     const { symbol } = await params;
@@ -69,7 +69,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { symbol: string } }
+  { params }: { params: Promise<{ symbol: string }> }
 ): Promise<NextResponse> {
   try {
     const { symbol } = await params;

@@ -1,32 +1,34 @@
 'use client';
 
 import {
+  BlockObjectResponse,
   DatabaseObjectResponse,
   PageObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Database from '../../components/database';
 import ListPage from '../../components/list-page';
 
 interface DatabaseParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function NotionDatabaseDetail({ params }: DatabaseParams) {
+  const { id } = use(params) as { id: string };
   const [database, setDatabase] = useState<DatabaseObjectResponse | null>(null);
   const [databaseContent, setDatabaseContent] = useState<PageObjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPage, setSelectedPage] = useState<string | null>(null);
-  const [pageBlocks, setPageBlocks] = useState<any[]>([]);
+  const [pageBlocks, setPageBlocks] = useState<BlockObjectResponse[]>([]);
   const [loadingBlocks, setLoadingBlocks] = useState(false);
 
   useEffect(() => {
     const fetchDatabaseData = async () => {
       try {
-        const response = await fetch(`/notion/api/database?id=${params.id}`);
+        const response = await fetch(`/notion/api/database?id=${id}`);
         const data = await response.json();
 
         if (data.status === 'success') {
@@ -44,7 +46,7 @@ export default function NotionDatabaseDetail({ params }: DatabaseParams) {
     };
 
     fetchDatabaseData();
-  }, [params.id]);
+  }, [id]);
 
   // Fetch blocks for a selected page
   useEffect(() => {

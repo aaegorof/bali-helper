@@ -7,6 +7,12 @@ type AnimationConfig = {
     x: number;
     y: number;
     vertices: { x: number; y: number }[];
+    row: number;
+    col: number;
+    gridRow: number;
+    gridCol: number;
+    speedFactor: number;
+    startDelay: number;
   }[];
   connections: {
     from: { x: number; y: number };
@@ -27,8 +33,8 @@ type AnimationConfig = {
 };
 
 const HexagonPattern = () => {
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationRef = useRef<number | null>(null);
   const [hexSize, setHexSize] = useState(16);
   const [strokeWidth, setStrokeWidth] = useState(1);
   const [strokeColor, setStrokeColor] = useState('#333333');
@@ -83,7 +89,7 @@ const HexagonPattern = () => {
           const hexagon = {
             x,
             y,
-            vertices: [],
+            vertices: [] as { x: number; y: number }[],
             row,
             col,
             gridRow: row,
@@ -123,7 +129,7 @@ const HexagonPattern = () => {
     }
     console.log(centerIndex);
     // Генерируем волны распространения от центра
-    const waves = [];
+    const waves: number[][] = [];
     const visited = new Set<number>();
     let currentWave = [centerIndex];
     visited.add(centerIndex);

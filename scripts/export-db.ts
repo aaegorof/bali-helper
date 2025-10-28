@@ -19,9 +19,17 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
   console.log('Connected to database successfully');
 });
 
+interface TableInfo {
+  name: string;
+  type: string;
+  notnull: number;
+  dflt_value: any;
+  pk: number;
+}
+
 async function getTableColumns(tableName: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    db.all(`PRAGMA table_info(${tableName})`, (err, rows) => {
+    db.all(`PRAGMA table_info(${tableName})`, (err, rows: TableInfo[]) => {
       if (err) {
         reject(err);
         return;
@@ -40,7 +48,7 @@ async function exportTable(tableName: string) {
     });
 
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM ${tableName}`, async (err, rows) => {
+      db.all(`SELECT * FROM ${tableName}`, async (err, rows: Record<string, any>[]) => {
         if (err) {
           reject(err);
           return;
@@ -65,13 +73,16 @@ async function exportAllTables() {
   try {
     // Get list of all tables
     const tables = await new Promise<string[]>((resolve, reject) => {
-      db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, rows) => {
-        if (err) {
-          reject(err);
-          return;
+      db.all(
+        "SELECT name FROM sqlite_master WHERE type='table'",
+        (err, rows: { name: string }[]) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(rows.map((row) => row.name));
         }
-        resolve(rows.map((row) => row.name));
-      });
+      );
     });
 
     console.log('Found tables:', tables);

@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 interface DatePickerProps {
   date: Date;
-  setDate: (date: Date) => void;
+  setDate: (date: Date | null) => void;
   label?: string;
 }
 

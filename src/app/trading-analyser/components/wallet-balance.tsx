@@ -5,6 +5,7 @@ import { useTradingContext } from '@/app/trading-analyser/context/TradingContext
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { WalletBalance as WalletBalanceType } from '@/app/trading-analyser/api/types';
 import {
   Table,
   TableBody,
@@ -67,25 +68,25 @@ export default function WalletBalance() {
               name: 'Coin',
               key: 'coin',
               className: 'text-left',
-              value: (balance: any) => balance.coin,
+              value: (balance: WalletBalanceType) => balance.coin,
             },
             {
               name: 'Price (USD)',
               key: 'price',
               className: 'text-right',
-              value: (balance: any) => formatNumberWithLeadingZeros(balance.current_price),
+              value: (balance: WalletBalanceType) => formatNumberWithLeadingZeros(balance.current_price),
             },
             {
               name: 'Total',
               key: 'total',
               className: 'text-right',
-              value: (balance: any) => formatNumberWithLeadingZeros(balance.total),
+              value: (balance: WalletBalanceType) => formatNumberWithLeadingZeros(balance.total),
             },
             {
               name: 'Value (USD)',
               key: 'value',
               className: 'text-right',
-              value: (balance: any) => balance.usd_value.toFixed(2),
+              value: (balance: WalletBalanceType) => balance.usd_value.toFixed(2),
             },
           ];
 

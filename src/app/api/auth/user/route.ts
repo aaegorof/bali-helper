@@ -1,8 +1,8 @@
+import { DbUser } from '@/app/lib/auth-config';
 import { getDb } from '@/app/lib/db';
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { DbUser } from '../[...nextauth]/route';
 
 // Валидация тела запроса
 const userSchema = z.object({
@@ -47,7 +47,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               [email, name, password_hash],
               function (err: Error | null) {
                 if (err) reject(err);
-                resolve({ id: this.lastID, email: email, name: name, password_hash });
+                resolve({
+                  id: this.lastID,
+                  email: email,
+                  name: name || undefined,
+                  password_hash: password_hash || undefined,
+                });
               }
             );
           }

@@ -1,26 +1,27 @@
 'use client';
 
-import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
-import { useEffect, useState } from 'react';
+import { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { use, useEffect, useState } from 'react';
 import BlocksRenderer from '../../components/blocks/blocks-renderer';
 import ListPage from '../../components/list-page';
 
 interface PageParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function NotionPageDetail({ params }: PageParams) {
+  const { id } = use(params) as { id: string };
   const [page, setPage] = useState<PageObjectResponse | null>(null);
-  const [blocks, setBlocks] = useState<any[]>([]);
+  const [blocks, setBlocks] = useState<BlockObjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPageData = async () => {
       try {
-        const response = await fetch(`/notion/api/page?id=${params.id}`);
+        const response = await fetch(`/notion/api/page?id=${id}`);
         const data = await response.json();
 
         if (data.status === 'success') {
@@ -38,7 +39,7 @@ export default function NotionPageDetail({ params }: PageParams) {
     };
 
     fetchPageData();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (

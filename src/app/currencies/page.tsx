@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useState } from 'react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -19,14 +20,19 @@ function buildDates() {
   return dates;
 }
 
-async function fetchRates(date: string) {
+interface ExchangeRateResponse {
+  rates: Record<string, number>;
+  date: string;
+}
+
+async function fetchRates(date: string): Promise<ExchangeRateResponse> {
   const res = await fetch(
     `https://api.exchangerate.host/${date}?base=${BASE}&symbols=${CURRENCIES.join(',')}`
   );
   return res.json();
 }
 
-function computeIndices(data) {
+function computeIndices(data: ExchangeRateResponse[]) {
   const idx: Record<string, number[]> = {};
   CURRENCIES.forEach((c) => (idx[c] = []));
   CURRENCIES.forEach((c) => idx[c].push(100));

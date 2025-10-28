@@ -22,7 +22,13 @@ export interface TransactionStats {
   category: CategoryTransactionStats[];
 }
 
-export const filterQuery = async <T>(query: T, filters?: ColumnFiltersState) => {
+export const filterQuery = async <
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends { gte: any; lte: any; like: any; ilike: any; in: any; is: any; or: any; filter: any },
+>(
+  query: T,
+  filters?: ColumnFiltersState
+) => {
   if (filters) {
     filters.forEach((filter) => {
       if (filter.value) {
@@ -39,7 +45,7 @@ export const filterQuery = async <T>(query: T, filters?: ColumnFiltersState) => 
           if (min) query.gte(filter.id, min);
           if (max) query.lte(filter.id, max);
         }
-        if (filter.id === 'category' && filter.value.length > 0) {
+        if (filter.id === 'category' && Array.isArray(filter.value) && filter.value.length > 0) {
           const hasUncategorized = filter.value.includes('Uncategorized');
           const categories = filter.value.filter((c) => c !== 'Uncategorized') as string[];
 
