@@ -1,4 +1,5 @@
 'use client';
+import { menuItems } from '@/components/menuItems';
 import {
   Card,
   CardContent,
@@ -15,23 +16,14 @@ export default function Home() {
       <h1>Home page</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-        <ModuleCard
-          title="APY Calculation"
-          description="Calculate and forecast investment returns based on APY"
-          href="/apy-calculation"
-        />
-
-        <ModuleCard
-          title="Trading Analyser"
-          description="Analyze your trading history and performance"
-          href="/trading-analyser"
-        />
-
-        <ModuleCard
-          title="Permata"
-          description="Manage and categorize your financial transactions"
-          href="/permata"
-        />
+        {menuItems.map((item) => (
+          <ModuleCard
+            key={item.href}
+            title={item.title}
+            description={item.description}
+            href={item.href}
+          />
+        ))}
       </div>
     </main>
   );
@@ -42,9 +34,9 @@ function ModuleCard({
   description,
   href,
 }: {
-  title: string;
-  description: string;
   href: string;
+  title: string;
+  description?: string;
 }) {
   return (
     <Card className="flex flex-col h-full">

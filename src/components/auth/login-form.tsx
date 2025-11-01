@@ -16,7 +16,7 @@ type LoginFormProps = {
   callbackUrl?: string;
 };
 
-export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
+export function LoginForm({ callbackUrl }: LoginFormProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

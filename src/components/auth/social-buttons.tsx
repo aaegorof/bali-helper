@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { loginwithGoogle } from './login-actions';
 import { toast } from 'sonner';
 
-export function SocialButtons({ callbackUrl }: { callbackUrl: string }) {
+export function SocialButtons({ callbackUrl }: { callbackUrl?: string }) {
+  
   const handleSocialSignIn = async (provider: 'google' | 'github') => {
     if (provider === 'google') {
       const { error } = await loginwithGoogle(callbackUrl);

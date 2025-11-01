@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${satoshi.variable} ${inter.className}`}>
