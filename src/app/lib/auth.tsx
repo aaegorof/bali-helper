@@ -2,18 +2,27 @@
 import { User } from '@supabase/supabase-js';
 import { createContext, FC, useContext } from 'react';
 
-export const AuthContext = createContext<{ user: User | null }>({
+interface AuthContextType {
+  user: User | null;
+}
+
+export const AuthContext = createContext<AuthContextType>({
   user: null,
 });
 
-export const AuthProvider: FC<{ user: User | null; children: React.ReactNode }> = ({ user, ...props }) => {
+export const AuthProvider: FC<{ user: User | null; children: React.ReactNode }> = ({
+  user,
+  children,
+}) => {
+
   return (
     <AuthContext.Provider
       value={{
         user,
       }}
-      {...props}
-    />
+    >
+      {children}
+    </AuthContext.Provider>
   );
 };
 

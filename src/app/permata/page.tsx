@@ -1,14 +1,10 @@
 'use client';
-
-import { useSession } from 'next-auth/react';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TransactionsProvider } from './components/transactions-context';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import CategorySpendingChart from './components/category-analyzer';
 import Graph from './components/graph';
@@ -32,24 +28,6 @@ const ANALYSIS_TABS = [
 export default function Permata() {
   // const router = useRouter();
   const [activeTab, setActiveTab] = useState(ANALYSIS_TABS[0].id);
-  // const { data: session } = useSession({
-  //   required: true,
-  //   onUnauthenticated() {
-  //     router.push('/?callbackUrl=/permata');
-  //   },
-  // });
-
-  // if (!session) {
-  //   return null;
-  // }
-
-  // if (status === "loading") {
-  //   return (
-  //     <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
-  //       <p>Loading...</p>
-  //     </div>
-  //   );
-  // }
 
   return (
     <main className="container mx-auto">

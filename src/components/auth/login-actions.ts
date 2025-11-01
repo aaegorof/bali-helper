@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { createClient } from '@/app/lib/supabase/server';
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData, callbackUrl?: string) {
   const supabase = await createClient();
   // type-casting here for convenience
   // in practice, you should validate your inputs
@@ -17,12 +17,33 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect('/error');
+    return { error: error.message };
   }
 
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect(callbackUrl || '/');
 }
+
+export async function loginwithGoogle(callbackUrl?: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/callback?next=${callbackUrl}`,
+    },
+  })
+  console.log('actions back url', `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/callback?next=${callbackUrl}`)
+
+  if (data.url) {
+    redirect(data.url) // use the redirect API for your server framework
+  }
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true, url: data.url };
+}
+
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
@@ -34,12 +55,14 @@ export async function signup(formData: FormData) {
     password: formData.get('password') as string,
   };
 
-  const { error } = await supabase.auth.signUp(data);
-  console.log(error);
+
+  const { error, data: responseData } = await supabase.auth.signUp(data);
+
   if (error) {
-    redirect('/error');
+    console.error(error);
+    return { error: error.message };
   }
 
-  revalidatePath('/', 'layout');
-  redirect('/');
+  return { success: true, 
+    user : responseData.user };
 }

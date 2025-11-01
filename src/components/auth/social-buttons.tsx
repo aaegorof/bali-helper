@@ -1,12 +1,24 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { signIn } from 'next-auth/react';
 import Image from 'next/image';
+import { loginwithGoogle } from './login-actions';
+import { toast } from 'sonner';
 
 export function SocialButtons({ callbackUrl }: { callbackUrl: string }) {
-  const handleSocialSignIn = async (provider: string) => {
-    await signIn(provider, { callbackUrl });
+  const handleSocialSignIn = async (provider: 'google' | 'github') => {
+    if (provider === 'google') {
+      const { error } = await loginwithGoogle(callbackUrl);
+      if (error) {
+        toast.error(error);
+      }
+    }
+    // if (provider === 'github') {
+    //   const { error } = await loginwithGithub(callbackUrl);
+    //   if (error) {
+    //     toast.error(error);
+    //   }
+    // }
   };
 
   return (
@@ -17,16 +29,15 @@ export function SocialButtons({ callbackUrl }: { callbackUrl: string }) {
         onClick={() => handleSocialSignIn('google')}
       >
         <Image src="/google.svg" alt="Google" width={20} height={20} />
-        Войти через Google
+        Sign in with Google
       </Button>
-
 
       <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Или</span>
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
         </div>
       </div>
     </div>

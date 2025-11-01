@@ -1,36 +1,25 @@
 'use client';
-import { createClient } from '@/app/lib/supabase/client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User } from '@supabase/supabase-js';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { useAuth } from '@/app/lib/auth';
+import { toast } from 'sonner';
 import { login, signup } from './login-actions';
 import { SocialButtons } from './social-buttons';
+import { useState } from 'react';
 
-export function LoginForm() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+type LoginFormProps = {
+  callbackUrl?: string;
+};
+
+export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
+  const { user } = useAuth();
   const router = useRouter();
-  const getUser = async () => {
-    setIsLoading(true);
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (error) {
-      console.error(error);
-    } else {
-      setUser(data.user);
-    }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (user) {
     return (
@@ -41,11 +30,33 @@ export function LoginForm() {
     );
   }
 
+  const onLogin = async (formData: FormData) => {
+    setIsLoading(true);
+    const response = await login(formData, callbackUrl);
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(`User logged in successfully`);
+    }
+    setIsLoading(false);
+  };
+
+  const onSignUp = async (formData: FormData) => {
+    setIsLoading(true);
+    const { error, user } = await signup(formData);
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success(`User created successfully: ${user?.email}`);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle>Войти</CardTitle>
-        <CardDescription>Введите email для входа в систему</CardDescription>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Enter your email to login</CardDescription>
       </CardHeader>
       <CardContent>
         <SocialButtons callbackUrl={callbackUrl} />
@@ -54,7 +65,7 @@ export function LoginForm() {
             <div className="flex flex-col space-y-4">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" name="email" placeholder="your@email.com" required />
+                <Input id="email" type="email" name="email" placeholder="your@email.com" required disabled={isLoading} />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="password">Password</Label>
@@ -64,17 +75,19 @@ export function LoginForm() {
                   name="password"
                   placeholder="Enter your password"
                   required
+                  disabled={isLoading}
                 />
               </div>
-              <div className="flex flex-col space-y-1.5">
-                <Button formAction={signup} type="submit" disabled={isLoading}>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <Button formAction={onSignUp} type="submit" disabled={isLoading}>
                   Sign up
+                </Button>
+                <Button formAction={onLogin} type="submit" disabled={isLoading}>
+                  {isLoading ? 'Loading...' : 'Login'}
                 </Button>
               </div>
             </div>
-            <Button formAction={login} type="submit" disabled={isLoading}>
-              {isLoading ? 'Loading...' : 'Login'}
-            </Button>
           </div>
         </form>
       </CardContent>
