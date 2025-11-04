@@ -43,7 +43,7 @@ interface TransactionsContextType {
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
 
 export const defaultFilters: TransactionsContextType['filters'] = [
-  { id: 'posted_date', value: ['', ''] },
+  // { id: 'posted_date', value: ['', ''] },
   // { id: 'amount', value: ['', ''] },
   // { id: 'category', value: null },
 ];
@@ -64,7 +64,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   });
 
   const { user } = useAuth();
-
+  
   const setFilters = (filters: ColumnFiltersState) => {
     _setFilters(filters);
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));

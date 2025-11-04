@@ -51,7 +51,7 @@ export async function POST(request: Request): Promise<NextResponse<UpdateCategor
     }
 
     // Обновляем embeddings для измененных транзакций
-    const embeddingPromises = (updatedTransactions as Transaction[]).map(async (transaction) => {
+    const embeddingPromises = updatedTransactions.map(async (transaction) => {
       try {
         const { cleanDescription } = parseTimeFromDescription(transaction?.description || '');
         if (cleanDescription && transaction.id !== undefined) {

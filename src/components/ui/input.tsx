@@ -40,10 +40,16 @@ const InputLabel = ({
 const DebounceInput = React.forwardRef<
   HTMLInputElement,
   React.ComponentProps<'input'> & { delay?: number }
->(({ onChange, delay = 300, ...props }, ref) => {
-  const [value, setValue] = React.useState(props.defaultValue || '');
-  const timeoutRef = React.useRef<NodeJS.Timeout>(null);
+>(({ onChange, delay = 300, value: controlledValue, ...props }, ref) => {
+  const [value, setValue] = React.useState(controlledValue || props.defaultValue || '');
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Синхронизируем внутреннее состояние с внешним пропсом
+  React.useEffect(() => {
+    setValue(controlledValue || '');
+  }, [controlledValue]);
+
+  // Очищаем таймер при размонтировании
   React.useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -52,26 +58,29 @@ const DebounceInput = React.forwardRef<
     };
   }, []);
 
-  React.useEffect(() => {
-    if (props.value !== undefined) {
-      setValue(props.value);
-    }
-  }, [props.value]);
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
+    const newValue = event.target.value;
+    setValue(newValue);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
     timeoutRef.current = setTimeout(() => {
-      onChange?.(event);
+      // Создаем новое синтетическое событие с актуальным значением
+      onChange?.({
+        ...event,
+        target: {
+          ...event.target,
+          value: newValue
+        }
+      } as React.ChangeEvent<HTMLInputElement>);
     }, delay);
   };
 
   return <Input {...props} value={value} onChange={handleChange} ref={ref} />;
 });
+
 DebounceInput.displayName = 'DebounceInput';
 
 const NumberInput = React.forwardRef<
@@ -132,7 +141,7 @@ const DebounceNumberInput = React.forwardRef<
   }
 >(({ onChange, delay = 300, ...props }, ref) => {
   const timeoutRef = React.useRef<NodeJS.Timeout>(null);
-  const [value, setValue] = React.useState<number | null>(props.value ?? null);
+  const [value, setValue] = React.useState<number | null | undefined>(props.value ?? null);
 
   React.useEffect(() => {
     return () => {
@@ -143,12 +152,13 @@ const DebounceNumberInput = React.forwardRef<
   }, []);
 
   React.useEffect(() => {
-    if (props.value !== undefined) {
+    
       setValue(props.value);
-    }
+    
   }, [props.value]);
 
   const handleChange = (newValue: number | null) => {
+    console.log('newValue', newValue);
     setValue(newValue);
 
     if (timeoutRef.current) {

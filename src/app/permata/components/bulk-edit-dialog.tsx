@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { RespSuggestCategories } from '@/app/permata/api/suggest/route';
 import { TransactionDb } from '@/app/permata/api/transactions/route';
@@ -24,18 +24,19 @@ import { toast } from 'sonner';
 import { transactionCategories } from '../categories';
 
 interface BulkEditDialogProps {
-  ids: number[];
   onSave?: () => Promise<void>;
   transactions?: TransactionDb[];
 }
 
 type TransForEdit = TransactionDb & { suggested: null | RespSuggestCategories['categories'][0] };
 
-export function BulkEditDialog({ ids, onSave, transactions }: BulkEditDialogProps) {
+export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
   const [open, setOpen] = useState(false);
   const [transForEdit, setTransForEdit] = useState<Map<number, TransForEdit>>();
   const [loading, setLoading] = useState<Map<'sug' | 'upd', boolean>>(new Map());
   const [category, setCategory] = useState('');
+
+  const ids = useMemo(() => transactions?.map((t) => t.id!) || [], [transactions]);
 
   const onClickSuggest = async () => {
     toast.success(`Suggesting categories...`);

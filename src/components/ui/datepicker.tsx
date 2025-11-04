@@ -26,16 +26,18 @@ export function DatePicker({ date, setDate, label }: DatePickerProps) {
           )}
         >
           {date ? format(date, 'PP') : <span>{label ? label : 'Pick a date'}</span>}
-          {date && (
-            <X
-              className="mr-2 h-4 w-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                setDate(null);
-              }}
-            />
-          )}
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <div className="flex justify-end items-center gap-2">
+            {date && (
+              <X
+                className="h-4 w-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDate(null);
+                }}
+              />
+            )}
+            <CalendarIcon className="h-4 w-4" />
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

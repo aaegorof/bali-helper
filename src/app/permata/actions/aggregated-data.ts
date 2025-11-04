@@ -81,47 +81,7 @@ export async function fetchAggregatedData(options: {
       .from('transactions')
       .select('month, credit_debit, amount.sum(), count:id.count()')
       .order('month', { ascending: false });
-    // const query = supabase.from('transactions_monthly').select('*');
-
-    // Apply filters if provided
-    // if (filters) {
-    //   filters.forEach((filter) => {
-    //     if (filter.value) {
-    //       if (filter.id === 'posted_date') {
-    //         const [start, end] = filter.value as [string?, string?];
-    //         if (start) query.gte(filter.id, start);
-    //         if (end) query.lte(filter.id, end);
-    //       }
-    //       if (filter.id === 'credit_debit') {
-    //         query.like(filter.id, filter.value as string);
-    //       }
-    //       if (filter.id === 'amount') {
-    //         const [min, max] = filter.value as [number?, number?];
-    //         if (min) query.gte(filter.id, min);
-    //         if (max) query.lte(filter.id, max);
-    //       }
-    //       if (filter.id === 'category' && filter.value.length > 0) {
-    //         const hasUncategorized = filter.value.includes('Uncategorized');
-    //         const categories = filter.value.filter((c) => c !== 'Uncategorized') as string[];
-
-    //         if (hasUncategorized && categories.length > 0) {
-    //           // If Uncategorized is selected along with other categories
-    //           query.or(`category.is.null,category.in.(${categories.join(',')})`);
-    //         } else if (hasUncategorized) {
-    //           // If only Uncategorized is selected
-    //           query.is('category', null);
-    //         } else if (categories.length > 0) {
-    //           // If only specific categories are selected
-    //           query.in('category', categories);
-    //         }
-    //       }
-    //       if (typeof filter.value === 'string') {
-    //         query.ilike(filter.id, `%${filter.value}%`);
-    //       }
-    //     }
-    //   });
-    // }
-
+    
     const queryCats = supabase
       .from('transactions')
       .select('category, amount.sum(), count:id.count()')

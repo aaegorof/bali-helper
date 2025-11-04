@@ -86,7 +86,6 @@ export default function Permata() {
           </Card>
         </div>
 
-        <h2 className="mb-2">Transactions</h2>
         <Transactions />
       </TransactionsProvider>
     </main>
