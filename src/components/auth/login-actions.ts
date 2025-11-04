@@ -31,7 +31,7 @@ export async function loginwithGoogle(callbackUrl?: string) {
   const baseUrl =
     process.env.NODE_ENV === 'development'
       ? 'http://localhost:3000'
-      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      : process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
   const redirectLink = callbackUrl
     ? `${baseUrl}/auth/callback?next=${callbackUrl}`
