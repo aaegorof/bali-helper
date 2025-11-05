@@ -37,49 +37,52 @@ const InputLabel = ({
   );
 };
 
-const DebounceInput = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & { delay?: number }
->(({ onChange, delay = 300, value: controlledValue, ...props }, ref) => {
-  const [value, setValue] = React.useState(controlledValue || props.defaultValue || '');
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+interface DebounceInputProps extends React.ComponentProps<'input'> {
+  delay?: number;
+}
 
-  // Синхронизируем внутреннее состояние с внешним пропсом
-  React.useEffect(() => {
-    setValue(controlledValue || '');
-  }, [controlledValue]);
+const DebounceInput = React.forwardRef<HTMLInputElement, DebounceInputProps>(
+  ({ onChange, delay = 300, value: controlledValue, ...props }, ref) => {
+    const [value, setValue] = React.useState(controlledValue || props.defaultValue || '');
+    const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Очищаем таймер при размонтировании
-  React.useEffect(() => {
-    return () => {
+    // Синхронизируем внутреннее состояние с внешним пропсом
+    React.useEffect(() => {
+      setValue(controlledValue || '');
+    }, [controlledValue]);
+
+    // Очищаем таймер при размонтировании
+    React.useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, []);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.target.value;
+      setValue(newValue);
+
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+
+      timeoutRef.current = setTimeout(() => {
+        // Создаем новое синтетическое событие с актуальным значением
+        onChange?.({
+          ...event,
+          target: {
+            ...event.target,
+            value: newValue,
+          },
+        } as React.ChangeEvent<HTMLInputElement>);
+      }, delay);
     };
-  }, []);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
-    setValue(newValue);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      // Создаем новое синтетическое событие с актуальным значением
-      onChange?.({
-        ...event,
-        target: {
-          ...event.target,
-          value: newValue
-        }
-      } as React.ChangeEvent<HTMLInputElement>);
-    }, delay);
-  };
-
-  return <Input {...props} value={value} onChange={handleChange} ref={ref} />;
-});
+    return <Input {...props} value={value} onChange={handleChange} ref={ref} />;
+  }
+);
 
 DebounceInput.displayName = 'DebounceInput';
 
@@ -152,13 +155,10 @@ const DebounceNumberInput = React.forwardRef<
   }, []);
 
   React.useEffect(() => {
-    
-      setValue(props.value);
-    
+    setValue(props.value);
   }, [props.value]);
 
   const handleChange = (newValue: number | null) => {
-    console.log('newValue', newValue);
     setValue(newValue);
 
     if (timeoutRef.current) {

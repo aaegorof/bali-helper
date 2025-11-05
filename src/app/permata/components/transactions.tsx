@@ -152,14 +152,20 @@ const TransactionsPermata = () => {
       <div className="overflow-x-auto">
         <div>
           {getHeaderGroups().map((headerGroup) => (
-            <div className="flex items-center gap-4 py-2" key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <div key={header.id + 'filter'}>
-                  {header.column.columnDef.meta?.Filter ? (
-                    <header.column.columnDef.meta.Filter column={header.column} />
-                  ) : null}
-                </div>
-              ))}
+            <div
+              className="flex items-center gap-4 py-2 flex-wrap"
+              key={`filter-wrap-header-group-${headerGroup.id}`}
+            >
+              {headerGroup.headers
+                .filter((header) => header.column.columnDef.meta?.Filter)
+                .map((header) => {
+                  return header.column.columnDef.meta?.Filter ? (
+                    <header.column.columnDef.meta.Filter
+                      column={header.column}
+                      key={`filter-${header.id}`}
+                    />
+                  ) : null;
+                })}
             </div>
           ))}
         </div>
@@ -167,13 +173,13 @@ const TransactionsPermata = () => {
         <Table className="min-w-full">
           <TableHeader>
             {getHeaderGroups().map((headerGroup) => (
-              <React.Fragment key={headerGroup.id}>
+              <React.Fragment key={`headergroup-${headerGroup.id}`}>
                 <TableRow>
                   {headerGroup.headers.map((header) => (
                     <TableHead
-                      id={header.id}
+                      id={`header-${header.id}`}
                       onClick={header.column.getToggleSortingHandler()}
-                      key={header.id}
+                      key={`header-${header.id}`}
                     >
                       <div
                         className={cn(

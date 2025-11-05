@@ -61,6 +61,7 @@ export const FilterText = ({ column }: { column: Column<TransactionDb> }) => {
     <DebounceInput
       type="search"
       placeholder="Search..."
+      className="w-[clamp(8ch,25%,32ch)]"
       value={val}
       onChange={(e) => {
         column.setFilterValue(e.target.value);
@@ -73,7 +74,7 @@ export const DebitCreditFilter = ({ column }: { column: Column<TransactionDb> })
   const val = column?.getFilterValue() as string | undefined;
   return (
     <Select value={val} onValueChange={(value) => column.setFilterValue(value)}>
-      <SelectTrigger>
+      <SelectTrigger className="w-[clamp(12ch,20%,20ch)]">
         <SelectValue placeholder="Transaction type" />
       </SelectTrigger>
       <SelectContent>
@@ -116,7 +117,8 @@ export const MultiFilterCategory = ({ column }: MultiFilterCategoryProps) => {
       onValueChange={debouncedSetFilter}
       placeholder="Select categories..."
       maxCount={1}
-      className="w-full min-w-80"
+      // className="w-[clamp(12ch,25%,34ch)]"
+      className="min-w-[16ch] flex-1"
     />
   );
 };
@@ -130,23 +132,23 @@ export const FilterAmount: React.FC<FilterAmountProps> = ({ column }) => {
   const [minValue, maxValue] = columnFilterValue;
 
   return (
-    <div className="flex gap-2">
-      <div className="flex gap-2">
-        <DebounceNumberInput
-          id="min-amount"
-          placeholder="Min"
-          value={minValue}
-          step={100000}
-          onChange={(e) => column.setFilterValue([e, maxValue])}
-        />
-        <DebounceNumberInput
-          id="max-amount"
-          placeholder="Max"
-          value={maxValue}
-          step={100000}
-          onChange={(e) => column.setFilterValue([minValue, e])}
-        />
-      </div>
+    <div className="flex gap-2 w-[clamp(20ch,25%,32ch)]">
+      <DebounceNumberInput
+        id="min-amount"
+        placeholder="Min"
+        value={minValue}
+        className="min-w-[12ch]"
+        step={100000}
+        onChange={(e) => column.setFilterValue([e, maxValue])}
+      />
+      <DebounceNumberInput
+        id="max-amount"
+        placeholder="Max"
+        className="min-w-[12ch]"
+        value={maxValue}
+        step={100000}
+        onChange={(e) => column.setFilterValue([minValue, e])}
+      />
     </div>
   );
 };
