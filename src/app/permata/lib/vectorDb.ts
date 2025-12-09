@@ -2,7 +2,7 @@ import { createClient } from '@/app/lib/supabase/server';
 import { catKeywords, transactionCategories } from '@/app/permata/categories';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
-import { cosineSimilarity, embed, generateText } from 'ai';
+import { embed, generateText } from 'ai';
 
 // Initialize the Anthropic client using the new SDK
 const MODEL = 'claude-3-5-sonnet-20241022';
@@ -171,13 +171,14 @@ async function findSimilarTransactions(
     //   console.error('Ошибка при получении embeddings:', error);
     //   throw error;
     // }
-    
+
     const { data: rows, error } = await supabase.rpc('get_similar_transactions_by_embedding', {
       query_embedding: JSON.stringify(queryEmbedding),
-      limit_count: limit,            
-      similarity_threshold: threshold})
-        
-      if(error) throw error
+      limit_count: limit,
+      similarity_threshold: threshold,
+    });
+
+    if (error) throw error;
 
     if (!rows) {
       return [];

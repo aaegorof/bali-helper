@@ -9,9 +9,10 @@ import {
 } from '@/components/ui/select';
 import { useCallback, useState } from 'react';
 
-import { UpdateCategoriesResponse } from '@/app/permata/api/update/route';
 import { transactionCategories } from '@/app/permata/categories';
+import { deleteTransactions } from '@/app/permata/lib/transactions-service';
 import { toast } from 'sonner';
+import { updateCategory } from '../actions/update-category';
 
 type BulkEditProps = {
   ids: number[];
@@ -22,28 +23,28 @@ const BulkEdit = ({ ids, onSave }: BulkEditProps) => {
   const [category, setCategory] = useState('');
 
   const save = useCallback(async () => {
-    const res = await fetch('/permata/api/update', {
-      method: 'POST',
-      body: JSON.stringify({ ids, category }),
-    });
-    const data = (await res.json()) as UpdateCategoriesResponse;
-    if (data.success) {
-      toast.success(`Category updated for ${data.data?.updatedCount} transactions`);
+    const { success, error, data } = await updateCategory(ids, category);
+    if (success) {
+      toast.success(`Category updated for ${data?.updatedCount} transactions`);
       onSave();
     } else {
-      toast.error(`Failed to update categories: ${data.error}`);
+      toast.error(`Failed to update categories: ${error}`);
     }
   }, [ids, category]);
 
   const remove = async (ids: number[]) => {
-    const res = await fetch('/permata/api', {
-      method: 'DELETE',
-      body: JSON.stringify({ ids }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      toast.success(data?.data?.message);
-      onSave();
+    try {
+      const result = await deleteTransactions({ ids });
+
+      if (result.success) {
+        toast.success(result.data?.message);
+        onSave();
+      } else {
+        toast.error(`Failed to delete transactions: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting transactions:', error);
+      toast.error('Error deleting transactions');
     }
   };
 

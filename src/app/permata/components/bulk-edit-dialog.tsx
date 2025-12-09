@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { RespSuggestCategories } from '@/app/permata/api/suggest/route';
-import { TransactionDb } from '@/app/permata/api/transactions/route';
-import { UpdateCategoriesResponse } from '@/app/permata/api/update/route';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { deleteTransactions } from '@/app/permata/lib/transactions-service';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,13 +21,15 @@ import {
 import { LoaderPinwheel } from 'lucide-react';
 import { toast } from 'sonner';
 import { transactionCategories } from '../categories';
+import { suggestCategories } from '../actions/suggest';
+import { updateCategory } from '../actions/update-category';
 
 interface BulkEditDialogProps {
   onSave?: () => Promise<void>;
   transactions?: TransactionDb[];
 }
 
-type TransForEdit = TransactionDb & { suggested: null | RespSuggestCategories['categories'][0] };
+type TransForEdit = TransactionDb & { suggested: null | Awaited<ReturnType<typeof suggestCategories>>['categories'][0] };
 
 export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
   const [open, setOpen] = useState(false);
@@ -42,21 +43,21 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
     toast.success(`Suggesting categories...`);
     setLoading(loading.set('sug', true));
 
-    const resp = await fetch(`/permata/api/suggest`, {
-      method: 'POST',
-      body: JSON.stringify({ transactions }),
-    });
-
+    const { categories, success, error } = await suggestCategories(transactions || []);
+    if (!success) {
+      toast.error(error);
+      return;
+    }
     setLoading(loading.set('sug', false));
 
-    const data = (await resp.json()) as RespSuggestCategories;
-    if (!data.categories.some((cat) => cat.category || cat.keywordCategory)) {
+    
+    if (!categories.some((cat) => cat.category || cat.keywordCategory)) {
       toast.error('No suggestions for categories found');
       return;
     }
     setTransForEdit((prev) => {
       const newMap = new Map(prev);
-      data.categories.forEach((cat) => {
+      categories.forEach((cat) => {
         newMap.set(cat.id, { ...prev?.get(cat.id)!, suggested: cat });
       });
       return newMap;
@@ -66,15 +67,11 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
   const onClickUpdate = async (idsToUpdate: number[], category?: string) => {
     setLoading(loading.set('upd', true));
 
-    const resp = await fetch(`/permata/api/update`, {
-      method: 'POST',
-      body: JSON.stringify({ ids: idsToUpdate, category: category || '' }),
-    });
+    const { success, error, data } = await updateCategory(idsToUpdate, category || '');
+      
 
-    const data = (await resp.json()) as UpdateCategoriesResponse;
-
-    if (data.success) {
-      toast.success(`Category updated for ${data.data?.updatedCount} transactions`);
+    if (success) {
+      toast.success(`Category updated for ${data?.updatedCount} transactions`);
       setTransForEdit((prev) => {
         const newMap = new Map(prev);
         if (prev) {
@@ -90,21 +87,29 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
         onSave?.();
       }
     }
+
+    if(error) {
+      toast.error(error);
+    }
   };
 
   const remove = useCallback(async () => {
     setLoading(new Map().set('upd', true));
 
-    const res = await fetch('/permata/api/transactions', {
-      method: 'DELETE',
-      body: JSON.stringify({ ids }),
-    });
+    try {
+      const result = await deleteTransactions({ ids });
 
-    const data = await res.json();
-    if (data.success) {
-      toast.success(data?.data?.message);
-      onSave?.();
+      if (result.success) {
+        toast.success(result.data?.message);
+        onSave?.();
+      } else {
+        toast.error(`Failed to delete transactions: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting transactions:', error);
+      toast.error('Error deleting transactions');
     }
+
     setLoading(new Map().set('upd', false));
   }, [ids, onSave]);
 

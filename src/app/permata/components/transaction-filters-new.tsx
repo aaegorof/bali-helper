@@ -1,4 +1,5 @@
 import { useDebounceCallback } from '@/app/hooks/useDebounceCallback';
+import { toISOString } from '@/app/lib/helpers';
 import { DatePicker } from '@/components/ui/datepicker';
 import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -11,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Column, FilterFn } from '@tanstack/react-table';
-import { TransactionDb } from '../api/transactions/route';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { transactionCategories } from '../categories';
 
 export const multiIncludesFilter: FilterFn<TransactionDb> = (row, columnId, filterValue) => {
@@ -38,14 +39,15 @@ export const FilterDates = ({ column }: { column: Column<TransactionDb> }) => {
       <DatePicker
         date={start}
         setDate={(date) => {
-          // column.setFilterValue(([a, b]: [Date, Date]) => [date?.toISOString(), b]);
-          column.setFilterValue([date?.toISOString(), end]);
+          column.setFilterValue([toISOString(date), end]);
         }}
         label="Start date"
       />
       <DatePicker
         date={end}
-        setDate={(date) => column.setFilterValue([start, date?.toISOString()])}
+        setDate={(date) => {
+          column.setFilterValue([start, toISOString(date)]);
+        }}
         label="End date"
       />
       {/* <DateRangePicker dates={column?.getFilterValue() as Date[]} setDates={(dates) => {

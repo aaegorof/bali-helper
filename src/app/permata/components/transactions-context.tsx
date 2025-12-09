@@ -1,5 +1,5 @@
 import { useAuth } from '@/app/lib/auth';
-import { TransactionDb } from '@/app/permata/api/transactions/route';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import {
   ColumnFiltersState,
   OnChangeFn,
@@ -64,7 +64,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   });
 
   const { user } = useAuth();
-  
+
   const setFilters = (filters: ColumnFiltersState) => {
     _setFilters(filters);
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
@@ -84,6 +84,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         if (!user?.id) {
           return [];
         }
+
         const response = await fetchDataForTableView({
           userId: user?.id,
           pagination,

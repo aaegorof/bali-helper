@@ -1,9 +1,5 @@
 import { useAuth } from '@/app/lib/auth';
-import {
-  PermataRawTransaction,
-  ReqPostTransactions,
-  RespPostTransactions,
-} from '@/app/permata/api/transactions/route';
+import { PermataRawTransaction, saveTransactions } from '@/app/permata/lib/transactions-service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -37,18 +33,14 @@ const saveTransactionsToDatabase = async (
   userId: string
 ) => {
   try {
-    const response = await fetch('/permata/api/transactions', {
-      method: 'POST',
-      body: JSON.stringify({ transactions, userId } as ReqPostTransactions),
-    });
-    
-    const resp = (await response.json()) as RespPostTransactions;
-    if(resp.success){
-      toast.success(resp.data?.message);
+    const result = await saveTransactions({ transactions, userId });
+
+    if (result.success) {
+      toast.success(result.data?.message);
     } else {
-      toast.error('Error saving transactions:' + resp.details);
+      toast.error('Error saving transactions: ' + result.details);
     }
-    return resp;
+    return result;
   } catch (error) {
     console.error('Ошибка при сохранении транзакций:', error);
     throw error;
@@ -90,7 +82,9 @@ const TransactionUploader = () => {
     try {
       setIsLoading(true);
       const res = await saveTransactionsToDatabase(allParsedData, currentUser.id);
-      setTransactions(res.data?.inserted_rows ?? []);
+      if (res.success && res.data?.inserted_rows) {
+        setTransactions(res.data.inserted_rows);
+      }
     } catch (error) {
       console.error('Ошибка при сохранении транзакций:', error);
       throw error;

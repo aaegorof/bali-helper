@@ -30,7 +30,7 @@ export async function fetchDataForTableView(options: {
     }
 
     const filteredQuery = await filterQuery<typeof query>(query, filters);
-    
+
     const { data: rows, error, count } = await filteredQuery;
 
     if (error) {

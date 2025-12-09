@@ -1,12 +1,12 @@
+'use server';
+
 import { createClient } from '@/app/lib/supabase/server';
 import {
   createTransactionHash,
   parseTimeFromDescription,
 } from '@/app/permata/lib/TransactionParseResult';
 import { createEmbedding, determineCategory, saveEmbedding } from '@/app/permata/lib/vectorDb';
-import { ApiResponse } from '@/app/types/api';
-import { InsertUniqueTransactionsResult, Transaction } from '@/app/types/supabase-extended';
-import { NextRequest, NextResponse } from 'next/server';
+import { Transaction } from '@/app/types/supabase-extended';
 
 // Типы
 export interface PermataRawTransaction {
@@ -21,31 +21,21 @@ export interface TransactionDb extends Transaction {
   id: number;
 }
 
-export type ReqPostTransactions = {
+export type SaveTransactionsRequest = {
   transactions: PermataRawTransaction[];
   userId: string;
 };
 
-export type RespGetTransactions = ApiResponse<{
-  message: string;
-  transactions: TransactionDb[];
-  count: number;
-}>;
+export type DeleteTransactionsRequest = {
+  ids: number[];
+};
 
-export type RespPostTransactions = ApiResponse<
-  InsertUniqueTransactionsResult & { message: string }
->;
-
-// return new Promise((resolve) => {
-//   getDb().all(query, params, (err: Error | null, rows: TransactionDb[]) => {
-//     if (err) {
-//       console.error('Error fetching transactions:', err);
-//       resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-//       return;
-//     }
-//     resolve(NextResponse.json(rows));
-//   });
-// });
+export type DeleteTransactionsResult = {
+  success: boolean;
+  data?: { message: string };
+  error?: string;
+  details?: string;
+};
 
 async function prepareTransactions(
   transactions: PermataRawTransaction[]
@@ -78,19 +68,13 @@ async function prepareTransactions(
   return cleanTransactions;
 }
 
-// POST /api/transactions
-export async function POST(request: NextRequest): Promise<NextResponse<RespPostTransactions>> {
-  // await ensureDatabaseInitialized();
-
+export async function saveTransactions({ transactions, userId }: SaveTransactionsRequest) {
   try {
-    const body = (await request.json()) as ReqPostTransactions;
-    const { transactions, userId } = body;
-
     if (!userId) {
-      return NextResponse.json<RespPostTransactions>({
+      return {
         success: false,
         error: 'User ID is required',
-      });
+      };
     }
 
     const preparedTransactions = await prepareTransactions(transactions);
@@ -101,11 +85,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<RespPostT
       ...transaction,
       user_id: userId,
     }));
-
-    // const { data, error } = await supabase
-    //   .from('transactions')
-    //   .insert<TransactionInsert>(transactionsWithUserId)
-    //   .select();
 
     const { data, error } = await supabase.rpc('insert_unique_transactions', {
       _txns: transactionsWithUserId,
@@ -127,40 +106,34 @@ export async function POST(request: NextRequest): Promise<NextResponse<RespPostT
       await Promise.all(embeddingPromises);
     }
 
-    return NextResponse.json<RespPostTransactions>({
+    return {
       success: true,
       data: {
         message: `${data.inserted_count} transactions saved successfully, ${data.duplicate_count} duplicates found`,
         ...data,
       },
-    });
+    };
   } catch (error) {
     console.error('Error saving transactions:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json<RespPostTransactions>({
+    return {
       success: false,
       error: 'Error saving transactions',
       details: errorMessage,
-    });
+    };
   }
 }
 
-// DELETE /api/transactions
-export async function DELETE(request: NextRequest) {
-  // await ensureDatabaseInitialized();
-  const supabase = await createClient();
+export async function deleteTransactions({ ids }: DeleteTransactionsRequest) {
   try {
-    const body = await request.json();
-    const { ids } = body;
-
-    if (!Array.isArray(ids)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid input - ids must be an array',
-        },
-        { status: 400 }
-      );
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return {
+        success: false,
+        error: 'Invalid input - ids must be a non-empty array',
+      };
     }
+
+    const supabase = await createClient();
 
     const { error } = await supabase.from('transactions').delete().in('id', ids);
 
@@ -169,19 +142,17 @@ export async function DELETE(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({
+    return {
       success: true,
       data: { message: `${ids.length} transactions deleted successfully` },
-    });
+    };
   } catch (error) {
     console.error('Error deleting transactions:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      {
-        error: 'Error deleting transactions',
-        details: errorMessage,
-      },
-      { status: 500 }
-    );
+    return {
+      success: false,
+      error: 'Error deleting transactions',
+      details: errorMessage,
+    };
   }
 }

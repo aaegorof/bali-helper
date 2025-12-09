@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TransactionDb } from '../api/transactions/route';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { DebitCreditFilter, FilterAmount, FilterDates, FilterText, MultiFilterCategory } from './transaction-filters-new';
 import { Checkbox } from '@/components/ui/checkbox';
 

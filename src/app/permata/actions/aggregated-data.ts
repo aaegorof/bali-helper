@@ -2,7 +2,7 @@
 
 import { createClient } from '@/app/lib/supabase/server';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { TransactionDb } from '../api/transactions/route';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
 
 export interface MonthlyTransactionStats {
   month: Date;
