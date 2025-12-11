@@ -91,4 +91,6 @@ Use JSDoc to describe functions and data types if required by the project.
 
 Leave TODO comments for future improvements.
 
+10 Try using the best practices and new features from React 19, if the project has a dependency for react ^19
+
 
