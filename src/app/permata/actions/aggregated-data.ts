@@ -1,15 +1,11 @@
 'use server';
 
 import { createClient } from '@/app/lib/supabase/server';
-import { ColumnFiltersState } from '@tanstack/react-table';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { Database } from '@/app/types/supabase';
+import { ColumnFiltersState } from '@tanstack/react-table';
 
-export interface MonthlyTransactionStats {
-  month: Date;
-  credit_debit: TransactionDb['credit_debit'];
-  sum: number;
-  count: number;
-}
+export type MonthlyTransactionStats = Database['public']['Views']['transactions_by_month']['Row']
 
 export interface CategoryTransactionStats {
   category: TransactionDb['category'];
@@ -23,7 +19,7 @@ export interface TransactionStats {
 }
 
 export const filterQuery = async <
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends { gte: any; lte: any; like: any; ilike: any; in: any; is: any; or: any; filter: any },
 >(
   query: T,
@@ -70,18 +66,19 @@ export const filterQuery = async <
 };
 
 export async function fetchAggregatedData(options: {
-  userId?: string;
+  userId: string;
   filters?: ColumnFiltersState;
 }): Promise<TransactionStats> {
-  const { filters } = options;
+  const { filters, userId } = options;
   const supabase = await createClient();
 
   try {
     const query = supabase
-      .from('transactions')
-      .select('month, credit_debit, amount.sum(), count:id.count()')
+      .from('transactions_by_month')
+      .select('*')
+      .eq('user_id', userId)
       .order('month', { ascending: false });
-    
+
     const queryCats = supabase
       .from('transactions')
       .select('category, amount.sum(), count:id.count()')
@@ -98,13 +95,7 @@ export async function fetchAggregatedData(options: {
     }
 
     return {
-      monthly:
-        data?.map((item) => ({
-          month: new Date(item.month!),
-          credit_debit: item.credit_debit,
-          sum: item.sum,
-          count: item.count,
-        })) || [],
+      monthly: data || [],
       category:
         dataCats
           ?.sort((a, b) => (b.sum ?? 0) - (a.sum ?? 0))

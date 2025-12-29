@@ -274,8 +274,8 @@ function determineKeywordCategory(description: string): string {
   return bestMatchGroup;
 }
 
-async function determineCategory(description: string): Promise<string> {
-  if (!description) return '';
+async function determineCategory(description: string | null): Promise<string> {
+  if (!description || description === null) return '';
 
   try {
     // Сначала пробуем определить категорию с помощью AI

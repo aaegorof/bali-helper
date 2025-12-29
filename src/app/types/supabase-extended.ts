@@ -9,6 +9,8 @@ export type TransactionEmbedding = Database['public']['Tables']['transaction_emb
 export type SpotTradeInsert = Database['public']['Tables']['spottrades']['Insert']
 export type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
 export type TransactionEmbeddingInsert = Database['public']['Tables']['transaction_embeddings']['Insert']
+
+export type InsertUniqueTransactionsReq = Database['public']['CompositeTypes']['transaction_input']
 export type InsertUniqueTransactionsResult = Database['public']['CompositeTypes']['insert_unique_transactions_result']
 
 // Export update types

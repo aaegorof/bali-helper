@@ -1,35 +1,23 @@
 import { useAuth } from '@/app/lib/auth';
-import { PermataRawTransaction, saveTransactions } from '@/app/permata/lib/transactions-service';
+import { AVAILABLE_ADAPTERS, getAdapterById, NormalizedTransaction } from '@/app/permata/adapters';
+import { saveTransactions } from '@/app/permata/lib/transactions-service';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
 import { useTransactionsContext } from './transactions-context';
 
-const parseCSV = (csvText: string): PermataRawTransaction[] => {
-  const lines = csvText.split('\n');
-  const headers: (keyof PermataRawTransaction)[] = lines[2]
-    .split(',')
-    .map((header: string) => header.trim() as keyof PermataRawTransaction);
-  const data: PermataRawTransaction[] = [];
-
-  for (let i = 3; i < lines.length; i++) {
-    const values = lines[i].split(',').map((value) => value.trim());
-    if (values.length !== headers.length) continue; // Skip incomplete lines
-
-    const entry: Partial<PermataRawTransaction> = {};
-    for (let j = 0; j < headers.length; j++) {
-      entry[headers[j]] = values[j];
-    }
-    data.push(entry as PermataRawTransaction);
-  }
-
-  return data;
-};
-
 const saveTransactionsToDatabase = async (
-  transactions: PermataRawTransaction[],
+  transactions: NormalizedTransaction[],
   userId: string
 ) => {
   try {
@@ -42,85 +30,153 @@ const saveTransactionsToDatabase = async (
     }
     return result;
   } catch (error) {
-    console.error('Ошибка при сохранении транзакций:', error);
+    console.error('Error saving transactions:', error);
     throw error;
   }
 };
 
 const TransactionUploader = () => {
-  // const { data: session } = useSession();
   const { user: currentUser } = useAuth();
-
   const { setTransactions } = useTransactionsContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [selectedAdapterId, setSelectedAdapterId] = useState<string>(
+    AVAILABLE_ADAPTERS[0]?.id || ''
+  );
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    let allParsedData: PermataRawTransaction[] = [];
+  const handleFileUpload = async (formData: FormData) => {
+    const files = formData.getAll('file') as File[];
+    let allParsedData: NormalizedTransaction[] = [];
 
     if (!currentUser) {
-      console.error('No user logged in');
+      toast.error('No user logged in');
       return;
     }
 
-    for (const file of files ?? []) {
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
-      if (fileExtension === 'csv') {
-        const text = await file.text();
-        const parsedData = parseCSV(text);
-        allParsedData = allParsedData.concat(parsedData);
-      } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0]; // Take the first sheet
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet) as PermataRawTransaction[];
-        allParsedData = allParsedData.concat(jsonData);
-      }
+    const adapter = getAdapterById(selectedAdapterId);
+    if (!adapter) {
+      toast.error('Please select a valid bank adapter');
+      return;
     }
+
+    if (files.length === 0) {
+      toast.error('Please select at least one file');
+      return;
+    }
+
     try {
+      // Parse all files using the selected adapter
+      for (const file of files) {
+        try {
+          // Validate file format
+          if (adapter.validate && !(await adapter.validate(file))) {
+            toast.error(`Invalid file format for ${file.name}`);
+            continue;
+          }
+
+          const parsedData = await adapter.parse(file);
+          allParsedData = allParsedData.concat(parsedData);
+        } catch (error) {
+          console.error(`Error parsing file ${file.name}:`, error);
+          toast.error(
+            `Failed to parse ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      }
+
+      if (allParsedData.length === 0) {
+        toast.error('No valid transactions found in the uploaded files');
+        return;
+      }
+      
       setIsLoading(true);
+      // Save to database
       const res = await saveTransactionsToDatabase(allParsedData, currentUser.id);
       if (res.success && res.data?.inserted_rows) {
         setTransactions(res.data.inserted_rows);
       }
     } catch (error) {
-      console.error('Ошибка при сохранении транзакций:', error);
-      throw error;
+      console.error('Error processing transactions:', error);
+      toast.error('Failed to process transactions');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const selectedAdapter = getAdapterById(selectedAdapterId);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Import Transactions</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-8">
-        <div className="text-xs">
-          <p>
-            You can upload a file from{' '}
-            <a href="https://www.permatanet.com/pnet/" target="_blank">
-              Permata Bank export
-            </a>
-            , it will automatically save these transactions to the database.
-          </p>
-          <p>After uploading, you will see ulpoaded transactions.</p>
-          <p>
-            Transactions will be unique by hash, so if you upload the same file multiple times, it
-            will not add the same transactions again.
-          </p>
+      <CardContent className="flex flex-col gap-6">
+        {/* Adapter Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="adapter-select">Select Bank</Label>
+          <Select value={selectedAdapterId} onValueChange={setSelectedAdapterId}>
+            <SelectTrigger id="adapter-select">
+              <SelectValue placeholder="Select a bank" />
+            </SelectTrigger>
+            <SelectContent>
+              {AVAILABLE_ADAPTERS.map((adapter) => (
+                <SelectItem key={adapter.id} value={adapter.id}>
+                  {adapter.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedAdapter && (
+            <div className="text-xs text-muted-foreground">{selectedAdapter.description}</div>
+          )}
         </div>
-        <Input
-          type="file"
-          accept=".csv, .xlsx, .xls"
-          multiple
-          className="cursor-pointer bg-accent"
-          onChange={handleFileUpload}
-        />
-        {isLoading && <p>Loading...</p>}
+
+        {/* Instructions */}
+        <div className="text-xs space-y-2">
+          <p>
+            Upload transaction files from your selected bank. The system will automatically parse
+            and save transactions to the database.
+          </p>
+          <p>After uploading, you will see the imported transactions below.</p>
+          <p>
+            Transactions are unique by hash - uploading the same file multiple times won&apos;t
+            create duplicates.
+          </p>
+          {selectedAdapter && (
+            <p>
+              <strong>Supported formats:</strong> {selectedAdapter.supportedFormats.join(', ')}
+            </p>
+          )}
+        </div>
+
+        {/* File Upload */}
+        <form
+          action={(formData) => startTransition(() => handleFileUpload(formData))}
+          className="pt-3 flex gap-2 relative"
+        >
+          <Label htmlFor="file-upload" className="absolute -top-2">
+            Upload Files <span className="text-xs text-muted-foreground">(multiple supported)</span>
+          </Label>
+          <Input
+            id="file-upload"
+            name="file"
+            type="file"
+            accept={selectedAdapter?.supportedFormats.join(', ') || '.csv, .xlsx, .xls'}
+            multiple
+            className="cursor-pointer bg-accent"
+            disabled={isPending || !selectedAdapter}
+          />
+          <Button type="submit" disabled={isPending || !selectedAdapter}>
+            {isPending ? 'Uploading...' : 'Upload'}
+          </Button>
+        </form>
+
+        {isLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span>Processing transactions...</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

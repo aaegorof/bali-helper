@@ -1,28 +1,17 @@
 'use server';
 
 import { createClient } from '@/app/lib/supabase/server';
-import {
-  createTransactionHash,
-  parseTimeFromDescription,
-} from '@/app/permata/lib/TransactionParseResult';
-import { createEmbedding, determineCategory, saveEmbedding } from '@/app/permata/lib/vectorDb';
-import { Transaction } from '@/app/types/supabase-extended';
+import { NormalizedTransaction } from '@/app/permata/adapters';
 
-// Типы
-export interface PermataRawTransaction {
-  [key: string]: string; // Allow any string key
-  'Posted Date (mm/dd/yyyy)': string;
-  Description: string;
-  'Credit/Debit': string;
-  Amount: string;
-}
+import { createEmbedding, determineCategory, saveEmbedding } from '@/app/permata/lib/vectorDb';
+import { InsertUniqueTransactionsReq, Transaction } from '@/app/types/supabase-extended';
 
 export interface TransactionDb extends Transaction {
   id: number;
 }
 
 export type SaveTransactionsRequest = {
-  transactions: PermataRawTransaction[];
+  transactions: NormalizedTransaction[];
   userId: string;
 };
 
@@ -38,56 +27,46 @@ export type DeleteTransactionsResult = {
 };
 
 async function prepareTransactions(
-  transactions: PermataRawTransaction[]
-): Promise<Omit<TransactionDb, 'user_id' | 'id' | 'created_at' | 'month'>[]> {
+  transactions: NormalizedTransaction[]
+): Promise<InsertUniqueTransactionsReq[]> {
+  
   const cleanTransactions = await Promise.all(
     transactions.map(async (tr) => {
-      const { time, cleanDescription } = parseTimeFromDescription(tr.Description || '');
-
-      const category = await determineCategory(cleanDescription);
-
-      const cleanTr = {
-        category,
-        time: time ?? '',
-        description: cleanDescription,
-        posted_date: tr['Posted Date (mm/dd/yyyy)'] ?? '',
-        credit_debit: tr['Credit/Debit'],
-        amount: parseFloat(
-          tr.Amount.replace(/[^0-9.-]+/g, '')
-            ?.split('.')
-            ?.at(0) ?? '0'
-        ),
-      };
-      const transactionHash = createTransactionHash(cleanTr);
+      const category = await determineCategory(tr.description);
       return {
-        ...cleanTr,
-        transaction_hash: transactionHash,
+        ...tr,
+        category,
       };
     })
   );
+
   return cleanTransactions;
 }
 
-export async function saveTransactions({ transactions, userId }: SaveTransactionsRequest) {
+export async function saveTransactions({ transactions }: SaveTransactionsRequest) {
   try {
-    if (!userId) {
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
       return {
         success: false,
-        error: 'User ID is required',
+        error: 'User is not authenticated',
       };
     }
 
     const preparedTransactions = await prepareTransactions(transactions);
 
-    const supabase = await createClient();
-
-    const transactionsWithUserId = preparedTransactions.map((transaction) => ({
-      ...transaction,
-      user_id: userId,
-    }));
+    // const transactionsWithUserId = preparedTransactions.map((transaction) => ({
+    //   ...transaction,
+    //   user_id: user.id,
+    // }));
 
     const { data, error } = await supabase.rpc('insert_unique_transactions', {
-      _txns: transactionsWithUserId,
+      _txns: preparedTransactions,
     });
 
     if (error) {

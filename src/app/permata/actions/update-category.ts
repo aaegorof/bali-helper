@@ -1,17 +1,15 @@
-"use server";
+'use server';
 
-import { createClient } from "@/app/lib/supabase/server";
-import { parseTimeFromDescription } from "../lib/TransactionParseResult";
-import { createEmbedding, saveEmbedding } from "../lib/vectorDb";
+import { createClient } from '@/app/lib/supabase/server';
+import { createEmbedding, saveEmbedding } from '../lib/vectorDb';
 
 export async function updateCategory(ids: number[], category: string) {
-    
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    if (!Array.isArray(ids) || !category) {
-      throw new Error('Invalid input - ids must be an array and category must be specified');
-    }
-    try {
+  if (!Array.isArray(ids) || !category) {
+    throw new Error('Invalid input - ids must be an array and category must be specified');
+  }
+  try {
     // Обновляем категорию в таблице транзакций
     const { error: updateError } = await supabase
       .from('transactions')
@@ -37,10 +35,9 @@ export async function updateCategory(ids: number[], category: string) {
     // Обновляем embeddings для измененных транзакций
     const embeddingPromises = updatedTransactions.map(async (transaction) => {
       try {
-        const { cleanDescription } = parseTimeFromDescription(transaction?.description || '');
-        if (cleanDescription && transaction.id !== undefined) {
-          const embedding = await createEmbedding(cleanDescription);
-          await saveEmbedding(cleanDescription, category, embedding);
+        if (transaction.description && transaction.id !== undefined) {
+          const embedding = await createEmbedding(transaction.description);
+          await saveEmbedding(transaction.description, category, embedding);
         }
       } catch (error) {
         console.error('Error updating embedding:', error);
@@ -55,13 +52,13 @@ export async function updateCategory(ids: number[], category: string) {
       data: {
         updatedCount: updatedTransactions.length,
       },
-    }
+    };
   } catch (err) {
     console.error('Error in update-category:', err);
     return {
       success: false,
       error: 'Error updating categories',
       details: err ?? 'Unknown error occurred',
-    }
+    };
   }
 }

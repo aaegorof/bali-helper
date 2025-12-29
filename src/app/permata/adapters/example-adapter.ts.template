@@ -1,0 +1,97 @@
+/**
+ * Пример адаптера для нового банка
+ * 
+ * Чтобы добавить новый банк:
+ * 1. Скопируйте этот файл и переименуйте (например, bca-adapter.ts)
+ * 2. Реализуйте метод parse() для вашего формата
+ * 3. Обновите метаданные (id, name, description, supportedFormats)
+ * 4. Добавьте адаптер в AVAILABLE_ADAPTERS в index.ts
+ */
+
+import * as XLSX from 'xlsx';
+import { BankAdapter, NormalizedTransaction } from './base-adapter';
+
+// Определите формат RAW данных вашего банка
+interface YourBankRawTransaction {
+  // Добавьте поля из вашего банковского экспорта
+  date: string;
+  description: string;
+  type: string; // 'debit' | 'credit'
+  amount: string;
+  // ... другие поля
+}
+
+/**
+ * Функция нормализации: преобразует RAW формат банка в NormalizedTransaction
+ */
+const normalizeYourBankTransaction = (
+  raw: YourBankRawTransaction
+): NormalizedTransaction => {
+  return {
+    posted_date: raw.date, // конвертируйте в формат mm/dd/yyyy если нужно
+    description: raw.description,
+    credit_debit: raw.type === 'credit' ? 'C' : 'D',
+    amount: parseFloat(raw.amount.replace(/[^0-9.-]+/g, '')),
+  };
+};
+
+export class YourBankAdapter implements BankAdapter {
+  id = 'your-bank-id'; // Уникальный ID
+  name = 'Your Bank Name'; // Название для UI
+  description = 'Import transactions from Your Bank CSV or Excel export';
+  supportedFormats = ['.csv', '.xlsx', '.xls'];
+
+  async parse(file: File): Promise<NormalizedTransaction[]> {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    let rawTransactions: YourBankRawTransaction[] = [];
+
+    if (fileExtension === 'csv') {
+      // Реализуйте парсинг CSV для вашего банка
+      const text = await file.text();
+      rawTransactions = this.parseCSV(text);
+    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+      // Парсинг Excel
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      rawTransactions = XLSX.utils.sheet_to_json(worksheet) as YourBankRawTransaction[];
+    } else {
+      throw new Error(`Unsupported file format: ${fileExtension}`);
+    }
+
+    return rawTransactions.map(normalizeYourBankTransaction);
+  }
+
+  private parseCSV(csvText: string): YourBankRawTransaction[] {
+    // Реализуйте парсинг CSV в зависимости от формата вашего банка
+    const lines = csvText.split('\n');
+    const data: YourBankRawTransaction[] = [];
+
+    // Пример: если заголовки в первой строке
+    const headers = lines[0].split(',').map((h) => h.trim());
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map((v) => v.trim());
+      if (values.length !== headers.length) continue;
+
+      // Маппинг значений на вашу структуру
+      const transaction: YourBankRawTransaction = {
+        date: values[0], // адаптируйте индексы под ваш формат
+        description: values[1],
+        type: values[2],
+        amount: values[3],
+      };
+      
+      data.push(transaction);
+    }
+
+    return data;
+  }
+
+  async validate(file: File): Promise<boolean> {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    return this.supportedFormats.some((format) => format === `.${extension}`);
+  }
+}
+

@@ -52,7 +52,7 @@ export default function Permata() {
             </Card>
           </div>
           <Card>
-            <CardHeader className="flex-row justify-between items-center">
+            <CardHeader className="flex-row justify-between items-center space-y-0">
               <CardTitle>Transaction Analysis</CardTitle>
               <Tabs
                 defaultValue={activeTab}

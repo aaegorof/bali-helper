@@ -92,7 +92,6 @@ const CategorySpendingChart: React.FC = () => {
     return arr;
   }, [topCategories, otherCategories, totalAmount, otherAmount]);
 
-
   return (
     <div>
       {preparedData.length === 0 ? (
@@ -157,12 +156,16 @@ const CategorySpendingChart: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={getCategoryColor(index)} />
                     ))}
                   </Pie>
-                  <Tooltip cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }} content={<CustomTooltip />} />
+                  <Tooltip
+                    cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
+                    content={<CustomTooltip />}
+                  />
                   <Legend
                     layout="vertical"
                     align="right"
+                    iconSize={12}
                     verticalAlign="middle"
-                    formatter={(value: string) => <span className="text-sm">{value}</span>}
+                    formatter={(value: string) => <span className="text-xs">{value}</span>}
                   />
                 </PieChart>
               ) : (
@@ -180,7 +183,10 @@ const CategorySpendingChart: React.FC = () => {
                     tickFormatter={(value) => formatNumberToKMil(value)}
                     tick={{ fontSize: 12 }}
                   />
-                  <Tooltip cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }} content={<CustomTooltip />} />
+                  <Tooltip
+                    cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
+                    content={<CustomTooltip />}
+                  />
                   <Bar dataKey="sum">
                     {preparedData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={getCategoryColor(index)} />

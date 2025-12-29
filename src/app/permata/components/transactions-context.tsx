@@ -109,7 +109,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
     try {
       const data = await fetchAggregatedData({ userId: user.id, filters });
-
+      console.log(data);
       setMonthlyStats(data.monthly);
       setCategoryStats(data.category);
     } catch (err) {
@@ -126,13 +126,13 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   const totalDebit = useMemo(() => {
     return monthlyStats
       .filter((stat) => stat.credit_debit === 'Debit')
-      .reduce((acc, stat) => acc + stat.sum, 0);
+      .reduce((acc, stat) => acc + (stat?.sum ?? 0), 0);
   }, [monthlyStats]);
 
   const totalCredit = useMemo(() => {
     return monthlyStats
       .filter((stat) => stat.credit_debit === 'Credit')
-      .reduce((acc, stat) => acc + stat.sum, 0);
+      .reduce((acc, stat) => acc + (stat?.sum ?? 0), 0);
   }, [monthlyStats]);
 
   useEffect(() => {

@@ -74,6 +74,8 @@ export type Database = {
           category: string | null;
           created_at: string | null;
           credit_debit: string | null;
+          currency: Database['public']['Enums']['currency_code'] | null;
+          date: string | null;
           description: string | null;
           id: number;
           month: string | null;
@@ -87,6 +89,8 @@ export type Database = {
           category?: string | null;
           created_at?: string | null;
           credit_debit?: string | null;
+          currency?: Database['public']['Enums']['currency_code'] | null;
+          date?: string | null;
           description?: string | null;
           id?: number;
           month?: string | null;
@@ -100,6 +104,8 @@ export type Database = {
           category?: string | null;
           created_at?: string | null;
           credit_debit?: string | null;
+          currency?: Database['public']['Enums']['currency_code'] | null;
+          date?: string | null;
           description?: string | null;
           id?: number;
           month?: string | null;
@@ -112,21 +118,18 @@ export type Database = {
       };
     };
     Views: {
-      transactions_monthly: {
+      transactions_by_month: {
         Row: {
+          count: number | null;
           credit_debit: string | null;
-          month_start: string | null;
-          total_amount: number | null;
-          tx_count: number | null;
+          month: string | null;
+          sum: number | null;
+          user_id: string | null;
         };
         Relationships: [];
       };
     };
     Functions: {
-      binary_quantize: {
-        Args: { '': string } | { '': unknown };
-        Returns: unknown;
-      };
       get_monthly_stats: {
         Args: { user_id_param: string };
         Returns: {
@@ -149,113 +152,22 @@ export type Database = {
           usage_count: number;
         }[];
       };
-      halfvec_avg: {
-        Args: { '': number[] };
-        Returns: unknown;
-      };
-      halfvec_out: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      halfvec_send: {
-        Args: { '': unknown };
-        Returns: string;
-      };
-      halfvec_typmod_in: {
-        Args: { '': unknown[] };
-        Returns: number;
-      };
-      hnsw_bit_support: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      hnsw_halfvec_support: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      hnsw_sparsevec_support: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      hnswhandler: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      insert_transactions_batch: {
-        Args: { batch: Json };
-        Returns: Json;
-      };
-      insert_transactions_batch_with_rows: {
-        Args: {
-          transactions_to_insert: Database['public']['CompositeTypes']['transactions_input_type'][];
-        };
-        Returns: Json;
-      };
+      insert_transactions_batch: { Args: { batch: Json }; Returns: Json };
       insert_unique_transactions: {
         Args: {
           _txns: Database['public']['CompositeTypes']['transaction_input'][];
         };
         Returns: Database['public']['CompositeTypes']['insert_unique_transactions_result'];
-      };
-      ivfflat_bit_support: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      ivfflat_halfvec_support: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      ivfflathandler: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      l2_norm: {
-        Args: { '': unknown } | { '': unknown };
-        Returns: number;
-      };
-      l2_normalize: {
-        Args: { '': string } | { '': unknown } | { '': unknown };
-        Returns: unknown;
-      };
-      sparsevec_out: {
-        Args: { '': unknown };
-        Returns: unknown;
-      };
-      sparsevec_send: {
-        Args: { '': unknown };
-        Returns: string;
-      };
-      sparsevec_typmod_in: {
-        Args: { '': unknown[] };
-        Returns: number;
-      };
-      vector_avg: {
-        Args: { '': number[] };
-        Returns: string;
-      };
-      vector_dims: {
-        Args: { '': string } | { '': unknown };
-        Returns: number;
-      };
-      vector_norm: {
-        Args: { '': string };
-        Returns: number;
-      };
-      vector_out: {
-        Args: { '': string };
-        Returns: unknown;
-      };
-      vector_send: {
-        Args: { '': string };
-        Returns: string;
-      };
-      vector_typmod_in: {
-        Args: { '': unknown[] };
-        Returns: number;
+        SetofOptions: {
+          from: '*';
+          to: 'insert_unique_transactions_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
     };
     Enums: {
-      [_ in never]: never;
+      currency_code: 'RUB' | 'USD' | 'AUD' | 'GBP' | 'IDR' | 'EUR';
     };
     CompositeTypes: {
       insert_unique_transactions_result: {
@@ -265,13 +177,12 @@ export type Database = {
         inserted_rows: Database['public']['Tables']['transactions']['Row'][] | null;
       };
       transaction_input: {
-        posted_date: string | null;
+        date: string | null;
         description: string | null;
         credit_debit: string | null;
         amount: number | null;
-        time: string | null;
+        currency: Database['public']['Enums']['currency_code'] | null;
         category: string | null;
-        user_id: string | null;
       };
       transactions_input_type: {
         created_at: string | null;
@@ -405,6 +316,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR'],
+    },
   },
 } as const;
