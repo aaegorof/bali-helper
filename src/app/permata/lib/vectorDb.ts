@@ -1,5 +1,6 @@
 import { createClient } from '@/app/lib/supabase/server';
 import { catKeywords, transactionCategories } from '@/app/permata/categories';
+import { Database } from '@/app/types/supabase';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { embed, generateText } from 'ai';
@@ -12,18 +13,9 @@ const EMBEDDING_MODEL_OPENAI = 'text-embedding-3-small';
 // const embeddingModel = voyage.textEmbeddingModel(EMBEDDING_MODEL);
 const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
 
-// Интерфейсы для типизации
-export interface TransactionEmbedding {
-  description: string;
-  category: string;
-  embedding: string;
-  last_used_at: string;
-  usage_count: number;
-}
-
 export interface SimilarTransaction {
   description: string;
-  category: string;
+  category: Database['public']['Enums']['transaction_category'];
   similarity: number;
   usage_count: number;
 }
@@ -89,7 +81,7 @@ async function determineCategoryWithAI(description: string): Promise<string> {
 // Функция для сохранения embedding в базу данных
 async function saveEmbedding(
   description: string,
-  category: string,
+  category: (typeof transactionCategories)[number],
   embedding: number[]
 ): Promise<void> {
   try {
@@ -206,17 +198,14 @@ async function findSimilarTransactions(
 }
 
 // Функция для определения категории с помощью RAG
-async function determineCategoryWithRAG(
-  description: string,
-  similarityThreshold = 0.85
-): Promise<string> {
+async function determineCategoryWithRAG(description: string, similarityThreshold = 0.85) {
   try {
     // Ищем похожие транзакции
     const similarTransactions = await findSimilarTransactions(description, 3, similarityThreshold);
 
     // Если нет похожих транзакций, возвращаем пустую строку
     if (similarTransactions.length === 0) {
-      return '';
+      return null;
     }
     console.log(similarTransactions);
 
@@ -226,10 +215,10 @@ async function determineCategoryWithRAG(
       return mostSimilar.category;
     }
 
-    return '';
+    return null;
   } catch (error) {
     console.error('Ошибка при определении категории с помощью RAG:', error);
-    return '';
+    return null;
   }
 }
 
@@ -254,28 +243,28 @@ function countMatchingKeywords(description: string, keywords: string[]): number 
   return matchCount;
 }
 
-function determineKeywordCategory(description: string): string {
-  if (!description) return '';
+function determineKeywordCategory(description: string) {
+  if (!description) return null;
 
   const lowerDesc = description.toLowerCase();
 
   // Находим группу с наибольшим количеством совпадений
   let maxMatchCount = 0;
-  let bestMatchGroup = '';
+  let bestMatchGroup = null;
 
   for (const [group, keywords] of Object.entries(catKeywords)) {
     const matchCount = countMatchingKeywords(lowerDesc, keywords);
     if (matchCount > maxMatchCount) {
       maxMatchCount = matchCount;
-      bestMatchGroup = group;
+      bestMatchGroup = group as (typeof transactionCategories)[number];
     }
   }
 
-  return bestMatchGroup;
+  return bestMatchGroup as (typeof transactionCategories)[number];
 }
 
-async function determineCategory(description: string | null): Promise<string> {
-  if (!description || description === null) return '';
+async function determineCategory(description: string | null) {
+  if (!description || description === null) return null;
 
   try {
     // Сначала пробуем определить категорию с помощью AI

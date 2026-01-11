@@ -26,7 +26,7 @@ interface BCATransaction {
 // 2️⃣ Создайте функцию нормализации
 const normalizeBCATransaction = (raw: BCATransaction): NormalizedTransaction => {
   return {
-    posted_date: raw.Date,
+    date: raw.Date,
     description: raw.Description,
     credit_debit: raw.Type === 'CR' ? 'C' : 'D',
     amount: parseFloat(raw.Amount.replace(/,/g, '')),
@@ -135,7 +135,7 @@ private parseCSV(csvText: string): YourBankTransaction[] {
 const normalizeBCATransaction = (raw: BCATransaction): NormalizedTransaction => {
   return {
     // DD-MM-YYYY → MM/DD/YYYY
-    posted_date: convertDate(raw.Date),
+    date: convertDate(raw.Date),
     // ...
   };
 };
@@ -197,7 +197,7 @@ const testFile = new File(['Date,Description,Type,Amount\n11/12/2024,Test,CR,100
 // Протестируйте
 const result = await adapter.parse(testFile);
 console.log(result);
-// [{ posted_date: '11/12/2024', description: 'Test', credit_debit: 'C', amount: 100 }]
+// [{ date: '11/12/2024', description: 'Test', credit_debit: 'C', amount: 100 }]
 ```
 
 ## Чек-лист
@@ -206,7 +206,7 @@ console.log(result);
 
 - [ ] Адаптер реализует интерфейс `BankAdapter`
 - [ ] Метод `parse()` возвращает `NormalizedTransaction[]`
-- [ ] `posted_date` в формате `mm/dd/yyyy`
+- [ ] `date` в формате `mm/dd/yyyy`
 - [ ] `amount` это число (не строка!)
 - [ ] `credit_debit` это 'C' или 'D'
 - [ ] Адаптер зарегистрирован в `AVAILABLE_ADAPTERS`
@@ -243,10 +243,10 @@ amount: parseFloat(raw.Amount.replace(/[^0-9.-]/g, '')); // 100 - число! �
 
 ```typescript
 // НЕПРАВИЛЬНО
-posted_date: '2024-12-11'; // yyyy-mm-dd ❌
+date: '2024-12-11'; // yyyy-mm-dd ❌
 
 // ПРАВИЛЬНО
-posted_date: '12/11/2024'; // mm/dd/yyyy ✅
+date: '12/11/2024'; // mm/dd/yyyy ✅
 ```
 
 ### ❌ Забыли зарегистрировать

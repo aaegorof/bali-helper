@@ -20,10 +20,10 @@ type BulkEditProps = {
 };
 
 const BulkEdit = ({ ids, onSave }: BulkEditProps) => {
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<(typeof transactionCategories)[number] | ''>('');
 
   const save = useCallback(async () => {
-    const { success, error, data } = await updateCategory(ids, category);
+    const { success, error, data } = await updateCategory(ids, category || null);
     if (success) {
       toast.success(`Category updated for ${data?.updatedCount} transactions`);
       onSave();
@@ -50,7 +50,9 @@ const BulkEdit = ({ ids, onSave }: BulkEditProps) => {
 
   return (
     <div className="grid gap-4">
-      <Select onValueChange={(value) => setCategory(value)}>
+      <Select
+        onValueChange={(value) => setCategory(value as (typeof transactionCategories)[number])}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select category" />
         </SelectTrigger>

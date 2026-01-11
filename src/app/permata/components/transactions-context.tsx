@@ -43,12 +43,12 @@ interface TransactionsContextType {
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
 
 export const defaultFilters: TransactionsContextType['filters'] = [
-  // { id: 'posted_date', value: ['', ''] },
+  // { id: 'date', value: ['', ''] },
   // { id: 'amount', value: ['', ''] },
   // { id: 'category', value: null },
 ];
 
-const defaultSorting: SortingState = [{ id: 'posted_date', desc: true }];
+const defaultSorting: SortingState = [{ id: 'date', desc: true }];
 
 export function TransactionsProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<TransactionsContextType['transactions']>([]);

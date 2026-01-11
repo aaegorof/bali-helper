@@ -46,21 +46,21 @@ export type Database = {
       };
       transaction_embeddings: {
         Row: {
-          category: string | null;
+          category: Database['public']['Enums']['transaction_category'] | null;
           description: string;
           embedding: string | null;
           last_used_at: string | null;
           usage_count: number | null;
         };
         Insert: {
-          category?: string | null;
+          category?: Database['public']['Enums']['transaction_category'] | null;
           description: string;
           embedding?: string | null;
           last_used_at?: string | null;
           usage_count?: number | null;
         };
         Update: {
-          category?: string | null;
+          category?: Database['public']['Enums']['transaction_category'] | null;
           description?: string;
           embedding?: string | null;
           last_used_at?: string | null;
@@ -71,7 +71,7 @@ export type Database = {
       transactions: {
         Row: {
           amount: number | null;
-          category: string | null;
+          category: Database['public']['Enums']['transaction_category'] | null;
           created_at: string | null;
           credit_debit: string | null;
           currency: Database['public']['Enums']['currency_code'] | null;
@@ -86,7 +86,7 @@ export type Database = {
         };
         Insert: {
           amount?: number | null;
-          category?: string | null;
+          category?: Database['public']['Enums']['transaction_category'] | null;
           created_at?: string | null;
           credit_debit?: string | null;
           currency?: Database['public']['Enums']['currency_code'] | null;
@@ -101,7 +101,7 @@ export type Database = {
         };
         Update: {
           amount?: number | null;
-          category?: string | null;
+          category?: Database['public']['Enums']['transaction_category'] | null;
           created_at?: string | null;
           credit_debit?: string | null;
           currency?: Database['public']['Enums']['currency_code'] | null;
@@ -146,7 +146,7 @@ export type Database = {
           similarity_threshold?: number;
         };
         Returns: {
-          category: string;
+          category: Database['public']['Enums']['transaction_category'];
           description: string;
           similarity: number;
           usage_count: number;
@@ -168,6 +168,25 @@ export type Database = {
     };
     Enums: {
       currency_code: 'RUB' | 'USD' | 'AUD' | 'GBP' | 'IDR' | 'EUR';
+      transaction_category:
+        | 'Cafe/Restaurant'
+        | 'Transfers/Payments'
+        | 'Bills'
+        | 'Entertainment'
+        | 'Shopping'
+        | 'Tourism'
+        | 'Accommodations'
+        | 'Groceries'
+        | 'Transportation'
+        | 'Wellness'
+        | 'Health'
+        | 'Beauty'
+        | 'Education'
+        | 'Home'
+        | 'Pets'
+        | 'Events'
+        | 'Online'
+        | 'Utilities';
     };
     CompositeTypes: {
       insert_unique_transactions_result: {
@@ -182,7 +201,7 @@ export type Database = {
         credit_debit: string | null;
         amount: number | null;
         currency: Database['public']['Enums']['currency_code'] | null;
-        category: string | null;
+        category: Database['public']['Enums']['transaction_category'] | null;
       };
       transactions_input_type: {
         created_at: string | null;
@@ -318,6 +337,26 @@ export const Constants = {
   public: {
     Enums: {
       currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR'],
+      transaction_category: [
+        'Cafe/Restaurant',
+        'Transfers/Payments',
+        'Bills',
+        'Entertainment',
+        'Shopping',
+        'Tourism',
+        'Accommodations',
+        'Groceries',
+        'Transportation',
+        'Wellness',
+        'Health',
+        'Beauty',
+        'Education',
+        'Home',
+        'Pets',
+        'Events',
+        'Online',
+        'Utilities',
+      ],
     },
   },
 } as const;

@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "migrate:supabase": "ts-node ./src/app/lib/migrations/run-supabase-migration.ts",
     "types": "node -r dotenv/config ./scripts/generate-types.js"
   },
   "dependencies": {

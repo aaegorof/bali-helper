@@ -74,9 +74,9 @@ const CategorySpendingChart: React.FC = () => {
   const otherCategories = categoryStats.slice(showTopCategories);
   const otherAmount = otherCategories.reduce((sum, cat) => sum + cat.sum, 0);
 
-  const preparedData = useMemo(() => {
-    const arr = topCategories.map((cat) => ({
-      category: cat.category,
+  const preparedData = useMemo((): CategoryData[] => {
+    const arr: CategoryData[] = topCategories.map((cat) => ({
+      category: cat.category || 'Uncategorized',
       sum: cat.sum,
       count: cat.count,
       percentage: totalAmount > 0 ? (cat.sum / totalAmount) * 100 : 0,

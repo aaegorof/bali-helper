@@ -1,24 +1,6 @@
-// Список категорий транзакций
-const transactionCategories = [
-  'Cafe/Restaurant',
-  'Transfers/Payments',
-  'Bills',
-  'Entertainment',
-  'Shopping',
-  'Tourism',
-  'Accommodations',
-  'Groceries',
-  'Transportation',
-  'Wellness',
-  'Health',
-  'Beauty',
-  'Education',
-  'Home',
-  'Pets',
-  'Events',
-  'Online',
-  'Utilities',
-] as const;
+import { Constants } from '@/app/types/supabase';
+
+const transactionCategories = Constants.public.Enums.transaction_category;
 
 const cafeRestaurantKeywords: string[] = [
   'cafe',

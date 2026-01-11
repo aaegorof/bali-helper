@@ -35,7 +35,7 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
   const [open, setOpen] = useState(false);
   const [transForEdit, setTransForEdit] = useState<Map<number, TransForEdit>>();
   const [loading, setLoading] = useState<Map<'sug' | 'upd', boolean>>(new Map());
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<typeof transactionCategories[number] | null>(null);
 
   const ids = useMemo(() => transactions?.map((t) => t.id!) || [], [transactions]);
 
@@ -64,10 +64,10 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
     });
   };
 
-  const onClickUpdate = async (idsToUpdate: number[], category?: string) => {
+  const onClickUpdate = async (idsToUpdate: number[], category?: typeof transactionCategories[number] | null) => {
     setLoading(loading.set('upd', true));
 
-    const { success, error, data } = await updateCategory(idsToUpdate, category || '');
+    const { success, error, data } = await updateCategory(idsToUpdate, category);
       
 
     if (success) {
@@ -149,7 +149,7 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
                         size="none"
                         variant="link"
                         onClick={() => {
-                          onClickUpdate([id], trans.suggested?.category || '');
+                          onClickUpdate([id], trans.suggested?.category);
                         }}
                         disabled={loading.get('upd')}
                       >
@@ -177,7 +177,7 @@ export function BulkEditDialog({ onSave, transactions }: BulkEditDialogProps) {
         )}
         <div className="grid gap-4">
           <div className="flex gap-2">
-            <Select onValueChange={(value) => setCategory(value)}>
+            <Select onValueChange={(value) => setCategory(value as typeof transactionCategories[number])}>
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>

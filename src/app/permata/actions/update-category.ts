@@ -2,8 +2,9 @@
 
 import { createClient } from '@/app/lib/supabase/server';
 import { createEmbedding, saveEmbedding } from '../lib/vectorDb';
+import { transactionCategories } from '../categories';
 
-export async function updateCategory(ids: number[], category: string) {
+export async function updateCategory(ids: number[], category?: typeof transactionCategories[number] | null) {
   const supabase = await createClient();
 
   if (!Array.isArray(ids) || !category) {
@@ -22,7 +23,7 @@ export async function updateCategory(ids: number[], category: string) {
     }
 
     // Получаем обновленные транзакции для создания новых embeddings
-    const { data: updatedTransactions, error: fetchError } = await supabase
+    const { data: updatedTransactions, error: fetchError} = await supabase
       .from('transactions')
       .select('id, description')
       .in('id', ids);

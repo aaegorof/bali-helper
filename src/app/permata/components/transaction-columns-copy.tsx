@@ -1,8 +1,14 @@
-import { createColumnHelper } from '@tanstack/react-table';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
-import { DebitCreditFilter, FilterAmount, FilterDates, FilterText, MultiFilterCategory } from './transaction-filters-new';
 import { Checkbox } from '@/components/ui/checkbox';
-
+import { createColumnHelper } from '@tanstack/react-table';
+import { format } from 'date-fns';
+import {
+  DebitCreditFilter,
+  FilterAmount,
+  FilterDates,
+  FilterText,
+  MultiFilterCategory,
+} from './transaction-filters-new';
 
 // Расширяем тип meta для кастомных свойств
 // declare module '@tanstack/react-table' {
@@ -13,8 +19,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 // }
 
 const columnHelper = createColumnHelper<TransactionDb>();
-
-
 
 export const columns = [
   columnHelper.display({
@@ -41,16 +45,11 @@ export const columns = [
     },
   }),
 
-  
-
-  columnHelper.accessor('posted_date', {
+  columnHelper.accessor('date', {
     header: 'Date',
     cell: ({ getValue }) => {
       const date = new Date(getValue() as string);
-      const day = date.getDate();
-      const month = date.toLocaleString('default', { month: 'short' });
-      const year = date.getFullYear();
-      return `${day} ${month} ${year}`;
+      return format(date, 'dd MMM yyyy HH:mm:ss');
     },
     meta: {
       Filter: FilterDates,
@@ -58,24 +57,16 @@ export const columns = [
     },
   }),
 
-  columnHelper.accessor('time', {
-    header: 'Time',
-    cell: info => info.getValue(),
-    meta: {
-      className: 'text-nowrap text-right w-[8ch]',
-    },
-  }),
 
   columnHelper.accessor('description', {
     header: 'Description',
-    cell: info => info.getValue(),
+    cell: (info) => info.getValue(),
     meta: {
       Filter: FilterText,
       className: 'text-xs',
     },
   }),
 
-  
   columnHelper.accessor('credit_debit', {
     header: 'Type',
     cell: ({ getValue }) => {
@@ -91,7 +82,7 @@ export const columns = [
 
   columnHelper.accessor('category', {
     header: 'Category',
-    cell: info => info.getValue(),
+    cell: (info) => info.getValue(),
     meta: {
       Filter: MultiFilterCategory,
     },
@@ -108,7 +99,7 @@ export const columns = [
     cell: ({ getValue, row }) => {
       const amount = getValue();
       const formatted = amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-      
+
       return row.original.credit_debit === 'Debit' ? (
         <span className="text-destructive">{formatted}</span>
       ) : (

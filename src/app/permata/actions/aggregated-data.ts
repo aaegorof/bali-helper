@@ -2,10 +2,16 @@
 
 import { createClient } from '@/app/lib/supabase/server';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
-import { Database } from '@/app/types/supabase';
 import { ColumnFiltersState } from '@tanstack/react-table';
 
-export type MonthlyTransactionStats = Database['public']['Views']['transactions_by_month']['Row']
+// export type MonthlyTransactionStats = Database['public']['Views']['transactions_by_month']['Row']
+export interface MonthlyTransactionStats {
+  month: Date;
+  credit_debit: TransactionDb['credit_debit'];
+  sum: number;
+  count: number;
+}
+
 
 export interface CategoryTransactionStats {
   category: TransactionDb['category'];
@@ -28,7 +34,7 @@ export const filterQuery = async <
   if (filters) {
     filters.forEach((filter) => {
       if (filter.value) {
-        if (filter.id === 'posted_date') {
+        if (filter.id === 'date') {
           const [start, end] = filter.value as [string?, string?];
           if (start) query.gte(filter.id, start);
           if (end) query.lte(filter.id, end);
@@ -69,14 +75,13 @@ export async function fetchAggregatedData(options: {
   userId: string;
   filters?: ColumnFiltersState;
 }): Promise<TransactionStats> {
-  const { filters, userId } = options;
+  const { filters } = options;
   const supabase = await createClient();
 
   try {
     const query = supabase
-      .from('transactions_by_month')
-      .select('*')
-      .eq('user_id', userId)
+    .from('transactions')
+    .select('month, credit_debit, amount.sum(), count:id.count()')
       .order('month', { ascending: false });
 
     const queryCats = supabase
@@ -95,15 +100,10 @@ export async function fetchAggregatedData(options: {
     }
 
     return {
-      monthly: data || [],
+      monthly: data?.map((i) => ({...i, month: new Date(i.month ?? '')})) || [],
       category:
         dataCats
-          ?.sort((a, b) => (b.sum ?? 0) - (a.sum ?? 0))
-          .map((item) => ({
-            category: item.category ?? 'Uncategorized',
-            sum: item.sum,
-            count: item.count,
-          })) || [],
+          ?.sort((a, b) => (b.sum ?? 0) - (a.sum ?? 0)) || [],
     };
   } catch (error) {
     console.error('Error processing request:', error);

@@ -51,8 +51,8 @@ const GraphPermata = ({ className }: Props) => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               {/* <CartesianGrid strokeDasharray="1 1" /> */}
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={formatNumberToKMil} />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={formatNumberToKMil} tick={{ fontSize: 12 }} />
               <Tooltip
                 cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
                 formatter={(value: number) => formatNumberToKMil(value)}
