@@ -1,4 +1,5 @@
 'use client';
+import { HexagonGridExample } from '@/components/hexagons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type AnimationConfig = {
@@ -833,4 +834,13 @@ const HexagonPattern = () => {
   );
 };
 
-export default HexagonPattern;
+const HexagonPage = () => {
+  return (
+    <div className="grid gap-36">
+      <HexagonPattern />
+      <HexagonGridExample />
+    </div>
+  );
+};
+
+export default HexagonPage;

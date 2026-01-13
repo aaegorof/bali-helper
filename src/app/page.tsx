@@ -12,9 +12,9 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="container mx-auto">
+    <main>
+      <div className="container mx-auto">
       <h1>Home page</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
         {menuItems.map((item) => (
           <ModuleCard
@@ -24,6 +24,7 @@ export default function Home() {
             href={item.href}
           />
         ))}
+        </div>
       </div>
     </main>
   );
