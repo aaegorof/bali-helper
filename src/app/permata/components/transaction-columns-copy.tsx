@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import {
   DebitCreditFilter,
   FilterAmount,
+  FilterCurrency,
   FilterDates,
   FilterText,
   MultiFilterCategory,
@@ -57,7 +58,6 @@ export const columns = [
     },
   }),
 
-
   columnHelper.accessor('description', {
     header: 'Description',
     cell: (info) => info.getValue(),
@@ -105,6 +105,18 @@ export const columns = [
       ) : (
         <span className="text-positive">{formatted}</span>
       );
+    },
+  }),
+
+  columnHelper.accessor('currency', {
+    header: 'Currency',
+    meta: {
+      className: 'w-[8ch] text-nowrap text-right justify-end',
+      Filter: FilterCurrency,
+    },
+    cell: ({ getValue }) => {
+      const currency = getValue();
+      return <span>{currency}</span>;
     },
   }),
 ];

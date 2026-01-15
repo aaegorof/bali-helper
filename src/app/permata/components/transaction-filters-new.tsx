@@ -1,5 +1,7 @@
 import { useDebounceCallback } from '@/app/hooks/useDebounceCallback';
+import { CURRENCY_OPTIONS, CurrencyCode } from '@/app/lib/currencies';
 import { toISOString } from '@/app/lib/helpers';
+import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { DatePicker } from '@/components/ui/datepicker';
 import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -12,7 +14,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Column, FilterFn } from '@tanstack/react-table';
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { transactionCategories } from '../categories';
 
 export const multiIncludesFilter: FilterFn<TransactionDb> = (row, columnId, filterValue) => {
@@ -152,5 +153,33 @@ export const FilterAmount: React.FC<FilterAmountProps> = ({ column }) => {
         onChange={(e) => column.setFilterValue([minValue, e])}
       />
     </div>
+  );
+};
+
+export const FilterCurrency = ({ column }: { column: Column<TransactionDb> }) => {
+  const val = column?.getFilterValue() as CurrencyCode | undefined;
+
+  return (
+    <Select value={val} onValueChange={(value) => column.setFilterValue(value)}>
+      <SelectTrigger className="w-[clamp(12ch,20%,20ch)]">
+        <SelectValue placeholder="Currency" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {/* @ts-expect-error - null is a valid value for the SelectItem */}
+          <SelectItem key="All" value={null}>
+            All
+          </SelectItem>
+          {CURRENCY_OPTIONS.map((currency) => (
+            <SelectItem key={currency.code} value={currency.code}>
+              <div className="flex gap-2">
+                <span className="font-medium">{currency.symbol}</span>
+                <span>{currency.code}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 };

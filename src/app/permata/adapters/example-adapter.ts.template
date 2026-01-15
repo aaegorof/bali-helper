@@ -28,7 +28,7 @@ const normalizeYourBankTransaction = (
   raw: YourBankRawTransaction
 ): NormalizedTransaction => {
   return {
-    posted_date: raw.date, // конвертируйте в формат mm/dd/yyyy если нужно
+    date: raw.date, // конвертируйте в формат mm/dd/yyyy если нужно
     description: raw.description,
     credit_debit: raw.type === 'credit' ? 'C' : 'D',
     amount: parseFloat(raw.amount.replace(/[^0-9.-]+/g, '')),

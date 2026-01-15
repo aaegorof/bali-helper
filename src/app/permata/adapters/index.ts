@@ -1,4 +1,5 @@
 import { BankAdapter } from './base-adapter';
+import { DeelAdapter } from './deel-adapter';
 import { PermataAdapter } from './permata-adapter';
 
 /**
@@ -6,6 +7,7 @@ import { PermataAdapter } from './permata-adapter';
  */
 export const AVAILABLE_ADAPTERS: BankAdapter[] = [
   new PermataAdapter(),
+  new DeelAdapter(),
   // Добавьте другие адаптеры здесь в будущем:
   // new BCAAdapter(),
   // new MandiriAdapter(),
@@ -19,4 +21,5 @@ export function getAdapterById(id: string): BankAdapter | undefined {
 }
 
 export * from './base-adapter';
+export * from './deel-adapter';
 export * from './permata-adapter';

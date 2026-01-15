@@ -23,7 +23,7 @@ export function CurrencySelect({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Выберите валюту',
+  placeholder = 'Choose currency',
 }: CurrencySelectProps) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>

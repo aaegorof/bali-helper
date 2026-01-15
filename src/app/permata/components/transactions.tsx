@@ -180,6 +180,7 @@ const TransactionsPermata = () => {
                       id={`header-${header.id}`}
                       onClick={header.column.getToggleSortingHandler()}
                       key={`header-${header.id}`}
+                      className="[&:has([role=checkbox])]:pr-0 [&:has([role=checkbox])]:pl-2 px-2"
                     >
                       <div
                         className={cn(

@@ -18,10 +18,9 @@ import { useTransactionsContext } from './transactions-context';
 
 const saveTransactionsToDatabase = async (
   transactions: NormalizedTransaction[],
-  userId: string
 ) => {
   try {
-    const result = await saveTransactions({ transactions, userId });
+    const result = await saveTransactions({ transactions });
 
     if (result.success) {
       toast.success(result.data?.message);
@@ -91,7 +90,7 @@ const TransactionUploader = () => {
       
       setIsLoading(true);
       // Save to database
-      const res = await saveTransactionsToDatabase(allParsedData, currentUser.id);
+      const res = await saveTransactionsToDatabase(allParsedData);
       if (res.success && res.data?.inserted_rows) {
         setTransactions(res.data.inserted_rows);
       }

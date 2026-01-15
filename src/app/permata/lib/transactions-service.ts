@@ -12,7 +12,6 @@ export interface TransactionDb extends Transaction {
 
 export type SaveTransactionsRequest = {
   transactions: NormalizedTransaction[];
-  userId: string;
 };
 
 export type DeleteTransactionsRequest = {
@@ -30,17 +29,18 @@ async function prepareTransactions(
   transactions: NormalizedTransaction[]
 ): Promise<InsertUniqueTransactionsReq[]> {
   
-  const cleanTransactions = await Promise.all(
+  return await Promise.all(
     transactions.map(async (tr) => {
+      if(!tr.category) {
       const category = await determineCategory(tr.description);
       return {
         ...tr,
         category,
       };
+    }
+      return tr
     })
   );
-
-  return cleanTransactions;
 }
 
 export async function saveTransactions({ transactions }: SaveTransactionsRequest) {
@@ -60,10 +60,8 @@ export async function saveTransactions({ transactions }: SaveTransactionsRequest
 
     const preparedTransactions = await prepareTransactions(transactions);
 
-    // const transactionsWithUserId = preparedTransactions.map((transaction) => ({
-    //   ...transaction,
-    //   user_id: user.id,
-    // }));
+
+// return {success: true, data: {message: 'Transactions prepared successfully', inserted_rows: []}}
 
     const { data, error } = await supabase.rpc('insert_unique_transactions', {
       _txns: preparedTransactions,

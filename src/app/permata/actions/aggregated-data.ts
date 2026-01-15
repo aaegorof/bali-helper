@@ -1,5 +1,6 @@
 'use server';
 
+import { CurrencyCode } from '@/app/lib/currencies';
 import { createClient } from '@/app/lib/supabase/server';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { ColumnFiltersState } from '@tanstack/react-table';
@@ -11,7 +12,6 @@ export interface MonthlyTransactionStats {
   sum: number;
   count: number;
 }
-
 
 export interface CategoryTransactionStats {
   category: TransactionDb['category'];
@@ -25,8 +25,17 @@ export interface TransactionStats {
 }
 
 export const filterQuery = async <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends { gte: any; lte: any; like: any; ilike: any; in: any; is: any; or: any; filter: any },
+  T extends {
+    gte: any;
+    lte: any;
+    like: any;
+    ilike: any;
+    in: any;
+    is: any;
+    or: any;
+    filter: any;
+    eq: any;
+  },
 >(
   query: T,
   filters?: ColumnFiltersState
@@ -62,7 +71,10 @@ export const filterQuery = async <
             query.in('category', categories);
           }
         }
-        if (typeof filter.value === 'string') {
+        if (filter.id === 'currency') {
+          query.eq('currency', filter.value as CurrencyCode);
+        }
+        if (typeof filter.value === 'string' && filter.id !== 'currency') {
           query.ilike(filter.id, `%${filter.value}%`);
         }
       }
@@ -80,8 +92,8 @@ export async function fetchAggregatedData(options: {
 
   try {
     const query = supabase
-    .from('transactions')
-    .select('month, credit_debit, amount.sum(), count:id.count()')
+      .from('transactions')
+      .select('month, credit_debit, amount.sum(), count:id.count()')
       .order('month', { ascending: false });
 
     const queryCats = supabase
@@ -100,10 +112,8 @@ export async function fetchAggregatedData(options: {
     }
 
     return {
-      monthly: data?.map((i) => ({...i, month: new Date(i.month ?? '')})) || [],
-      category:
-        dataCats
-          ?.sort((a, b) => (b.sum ?? 0) - (a.sum ?? 0)) || [],
+      monthly: data?.map((i) => ({ ...i, month: new Date(i.month ?? '') })) || [],
+      category: dataCats?.sort((a, b) => (b.sum ?? 0) - (a.sum ?? 0)) || [],
     };
   } catch (error) {
     console.error('Error processing request:', error);
