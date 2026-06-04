@@ -88,6 +88,8 @@ const TransactionsPermata = () => {
 
   const { getHeaderGroups, resetRowSelection, getSelectedRowModel } = table;
 
+  const activeFilters = filters.filter(f => f.value !== null);
+
   const onResetFilters = () => {
     setFilters(defaultFilters);
     resetRowSelection();
@@ -136,7 +138,7 @@ const TransactionsPermata = () => {
         <Button
           variant="ghost"
           // size="icon"
-          disabled={filters.length === 0}
+          disabled={activeFilters.length === 0}
           className="flex items-center gap-2"
           onClick={() => {
             onResetFilters();
@@ -144,7 +146,7 @@ const TransactionsPermata = () => {
         >
           <FilterX className="h-5 w-5" />{' '}
           <Badge size={'small'} className="text-xs">
-            {filters.length}
+            {activeFilters.length}
           </Badge>
         </Button>
       </h2>

@@ -6,7 +6,7 @@ import {
   PaginationState,
   SortingState,
 } from '@tanstack/react-table';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   CategoryTransactionStats,
   fetchAggregatedData,
@@ -26,8 +26,6 @@ interface TransactionsContextType {
     pagination: PaginationState;
     sorting: SortingState;
   }) => Promise<TransactionDb[]>;
-  totalDebit: number;
-  totalCredit: number;
   filters: ColumnFiltersState;
   setFilters: (filters: ColumnFiltersState) => void;
   pagination: PaginationState;
@@ -46,6 +44,8 @@ export const defaultFilters: TransactionsContextType['filters'] = [
   // { id: 'date', value: ['', ''] },
   // { id: 'amount', value: ['', ''] },
   // { id: 'category', value: null },
+  { id: 'currency', value: null },
+  { id: 'credit_debit', value: null },
 ];
 
 const defaultSorting: SortingState = [{ id: 'date', desc: true }];
@@ -123,18 +123,6 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     setTotalCount(data);
   };
 
-  const totalDebit = useMemo(() => {
-    return monthlyStats
-      .filter((stat) => stat.credit_debit === 'Debit')
-      .reduce((acc, stat) => acc + (stat?.sum ?? 0), 0);
-  }, [monthlyStats]);
-
-  const totalCredit = useMemo(() => {
-    return monthlyStats
-      .filter((stat) => stat.credit_debit === 'Credit')
-      .reduce((acc, stat) => acc + (stat?.sum ?? 0), 0);
-  }, [monthlyStats]);
-
   useEffect(() => {
     fetchTransactions({ pagination, filters, sorting });
     fetchMonthlyStats(filters);
@@ -149,8 +137,6 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         fetchTransactions,
         monthlyStats,
         categoryStats,
-        totalDebit,
-        totalCredit,
         filters,
         setFilters,
         pagination,

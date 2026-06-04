@@ -1,5 +1,6 @@
 'use client';
 
+import { CurrencyCode, getCurrencySymbol } from '@/app/lib/currencies';
 import { cn, formatNumberToKMil } from '@/app/lib/utils';
 import {
   Accordion,
@@ -29,6 +30,7 @@ type ChartType = 'bar' | 'doughnut';
 
 interface CategoryData {
   category: string;
+  currency: CurrencyCode | null;
   sum: number;
   count: number;
   percentage: number;
@@ -53,7 +55,9 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     return (
       <div className="bg-background border rounded p-2 shadow-lg">
         <p className="font-medium">{data.category}</p>
-        <p>{formatNumberToKMil(data.sum)}</p>
+        <p>
+          {formatNumberToKMil(data.sum)} {data.currency ? getCurrencySymbol(data.currency) : ''}
+        </p>
         <p>{data.percentage.toFixed(1)}% of total spending</p>
         <p>{data.count} transactions</p>
       </div>
@@ -63,34 +67,104 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 const CategorySpendingChart: React.FC = () => {
-  const { categoryStats } = useTransactionsContext();
+  const { categoryStats, filters } = useTransactionsContext();
   const [chartType, setChartType] = useState<ChartType>('doughnut');
   const [showTopCategories, setShowTopCategories] = useState(10);
 
   const maxCategories = transactionCategories.length;
 
-  const totalAmount = categoryStats.reduce((sum, cat) => sum + cat.sum, 0);
-  const topCategories = categoryStats.slice(0, showTopCategories);
-  const otherCategories = categoryStats.slice(showTopCategories);
-  const otherAmount = otherCategories.reduce((sum, cat) => sum + cat.sum, 0);
+  // Get selected currency from filters
+  const selectedCurrency = useMemo(() => {
+    const currencyFilter = filters.find((f) => f.id === 'currency');
+    return currencyFilter?.value as CurrencyCode | undefined;
+  }, [filters]);
+
+  // Group by currency and category
+  const groupedStats = useMemo(() => {
+    if (selectedCurrency) {
+      // Filter by selected currency
+      return categoryStats.filter((stat) => stat.currency === selectedCurrency);
+    }
+
+    // Group by category, combining different currencies
+    const grouped = categoryStats.reduce(
+      (acc, stat) => {
+        const key = stat.category || 'Uncategorized';
+        const existing = acc.find(
+          (item) => item.category === key && item.currency === stat.currency
+        );
+
+        if (existing) {
+          existing.sum += stat.sum;
+          existing.count += stat.count;
+        } else {
+          acc.push({ ...stat, category: key });
+        }
+
+        return acc;
+      },
+      [] as typeof categoryStats
+    );
+
+    return grouped.sort((a, b) => b.sum - a.sum);
+  }, [categoryStats, selectedCurrency]);
+
+  // Calculate totals per currency
+  const totalsPerCurrency = useMemo(() => {
+    return groupedStats.reduce(
+      (acc, stat) => {
+        const curr = stat.currency || 'USD';
+        if (!acc[curr]) acc[curr] = 0;
+        acc[curr] += stat.sum;
+        return acc;
+      },
+      {} as Record<CurrencyCode, number>
+    );
+  }, [groupedStats]);
+
+  const topCategories = groupedStats.slice(0, showTopCategories);
+  const otherCategories = groupedStats.slice(showTopCategories);
 
   const preparedData = useMemo((): CategoryData[] => {
-    const arr: CategoryData[] = topCategories.map((cat) => ({
-      category: cat.category || 'Uncategorized',
-      sum: cat.sum,
-      count: cat.count,
-      percentage: totalAmount > 0 ? (cat.sum / totalAmount) * 100 : 0,
-    }));
+    const arr: CategoryData[] = topCategories.map((cat) => {
+      const totalForCurrency = totalsPerCurrency[cat.currency] || 1;
+      return {
+        category: cat.category || 'Uncategorized',
+        currency: cat.currency,
+        sum: cat.sum,
+        count: cat.count,
+        percentage: totalForCurrency > 0 ? (cat.sum / totalForCurrency) * 100 : 0,
+      };
+    });
+
     if (otherCategories.length > 0) {
-      arr.push({
-        category: `Other (${otherCategories.length} categories)`,
-        sum: otherAmount,
-        count: otherCategories.reduce((sum, cat) => sum + cat.count, 0),
-        percentage: totalAmount > 0 ? (otherAmount / totalAmount) * 100 : 0,
+      // Group "Other" by currency
+      const otherByCurrency = otherCategories.reduce(
+        (acc, cat) => {
+          const curr = cat.currency;
+          if (!acc[curr]) {
+            acc[curr] = { sum: 0, count: 0, currency: curr };
+          }
+          acc[curr].sum += cat.sum;
+          acc[curr].count += cat.count;
+          return acc;
+        },
+        {} as Record<string, { sum: number; count: number; currency: CurrencyCode }>
+      );
+
+      Object.values(otherByCurrency).forEach((other) => {
+        const totalForCurrency = totalsPerCurrency[other.currency] || 1;
+        arr.push({
+          category: `Other (${otherCategories.filter((c) => c.currency === other.currency).length} categories)`,
+          currency: other.currency,
+          sum: other.sum,
+          count: other.count,
+          percentage: totalForCurrency > 0 ? (other.sum / totalForCurrency) * 100 : 0,
+        });
       });
     }
     return arr;
-  }, [topCategories, otherCategories, totalAmount, otherAmount]);
+  }, [topCategories, otherCategories, totalsPerCurrency]);
 
   return (
     <div>
@@ -100,12 +174,17 @@ const CategorySpendingChart: React.FC = () => {
         <>
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">
-                Total Spending:{' '}
-                <span className="font-semibold text-foreground">
-                  {formatNumberToKMil(totalAmount)}
-                </span>
-              </span>
+              <div className="text-sm text-muted-foreground">
+                <span>Total Spending:</span>
+                {Object.entries(totalsPerCurrency).map(([currency, amount]) => (
+                  <div key={currency} className="font-semibold text-foreground">
+                    {formatNumberToKMil(amount)} {getCurrencySymbol(currency as CurrencyCode)}
+                  </div>
+                ))}
+                {!selectedCurrency && Object.keys(totalsPerCurrency).length > 1 && (
+                  <div className="text-xs mt-1">Select currency filter for combined view</div>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <div className="flex gap-2">
                   <Button
@@ -220,7 +299,8 @@ const CategorySpendingChart: React.FC = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-sm font-semibold">
-                              {formatNumberToKMil(item.sum)}
+                              {formatNumberToKMil(item.sum)}{' '}
+                              {item.currency ? getCurrencySymbol(item.currency) : ''}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {item.percentage.toFixed(1)}% • {item.count} txns

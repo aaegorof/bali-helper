@@ -9,12 +9,14 @@ import { ColumnFiltersState } from '@tanstack/react-table';
 export interface MonthlyTransactionStats {
   month: Date;
   credit_debit: TransactionDb['credit_debit'];
+  currency: CurrencyCode | null;
   sum: number;
   count: number;
 }
 
 export interface CategoryTransactionStats {
   category: TransactionDb['category'];
+  currency: CurrencyCode | null;
   sum: number;
   count: number;
 }
@@ -93,12 +95,12 @@ export async function fetchAggregatedData(options: {
   try {
     const query = supabase
       .from('transactions')
-      .select('month, credit_debit, amount.sum(), count:id.count()')
+      .select('month, credit_debit, currency, amount.sum(), count:id.count()')
       .order('month', { ascending: false });
 
     const queryCats = supabase
       .from('transactions')
-      .select('category, amount.sum(), count:id.count()')
+      .select('category, currency, amount.sum(), count:id.count()')
       .filter('credit_debit', 'eq', 'Debit');
 
     const filteredQuery = await filterQuery(query, filters);

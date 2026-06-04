@@ -1,4 +1,5 @@
 import { TRANSACTION_COLORS } from '@/app/lib/constants';
+import { CurrencyCode } from '@/app/lib/currencies';
 import { formatNumberToKMil } from '@/app/lib/utils';
 import { useMemo } from 'react';
 import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -9,64 +10,108 @@ type Props = {
 };
 
 const GraphPermata = ({ className }: Props) => {
-  const { monthlyStats } = useTransactionsContext();
+  const { monthlyStats, filters } = useTransactionsContext();
+
+  // Get selected currency from filters or use 'all' as default
+  const selectedCurrency = useMemo(() => {
+    const currencyFilter = filters.find((f) => f.id === 'currency');
+    return currencyFilter?.value as CurrencyCode | undefined;
+  }, [filters]);
 
   const chartData = useMemo(() => {
     if (!monthlyStats?.length) return [];
 
-    // Group data by month
-    const groupedData = monthlyStats.reduce(
+    // Filter by currency if selected
+    const filteredStats = selectedCurrency
+      ? monthlyStats.filter((stat) => stat.currency === selectedCurrency)
+      : monthlyStats;
+
+    // Group data by month and currency
+    const groupedData = filteredStats.reduce(
       (acc, stat) => {
         const date = new Date(stat.month);
         const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        const currency = stat.currency || 'USD';
 
         if (!acc[monthKey]) {
           acc[monthKey] = {
             month: monthKey,
-            Debit: 0,
-            Credit: 0,
           };
         }
 
         if (stat.credit_debit === 'Debit' || stat.credit_debit === 'Credit') {
-          acc[monthKey][stat.credit_debit] = Math.abs(stat.sum);
+          const key = selectedCurrency ? stat.credit_debit : `${stat.credit_debit} (${currency})`;
+
+          if (!acc[monthKey][key]) {
+            acc[monthKey][key] = 0;
+          }
+          acc[monthKey][key] += Math.abs(stat.sum);
         }
 
         return acc;
       },
-      {} as Record<string, { month: string; Debit: number; Credit: number }>
+      {} as Record<string, Record<string, string | number>>
     );
 
     return Object.values(groupedData).sort((a, b) => {
-      const dateA = new Date(a.month);
-      const dateB = new Date(b.month);
+      const dateA = new Date(a.month as string);
+      const dateB = new Date(b.month as string);
       return dateA.getTime() - dateB.getTime();
     });
-  }, [monthlyStats]);
+  }, [monthlyStats, selectedCurrency]);
+
+  // Get all unique keys (currencies) for bars
+  const barKeys = useMemo(() => {
+    if (!chartData.length) return [];
+    const keys = new Set<string>();
+    chartData.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== 'month') keys.add(key);
+      });
+    });
+    return Array.from(keys).sort();
+  }, [chartData]);
+
+  // Generate colors for bars
+  const getBarColor = (key: string) => {
+    if (key.includes('Debit')) return TRANSACTION_COLORS.debit.background;
+    if (key.includes('Credit')) return TRANSACTION_COLORS.credit.background;
+    return TRANSACTION_COLORS.debit.background;
+  };
 
   return (
     <div className={className}>
-      {chartData.length > 0 && (
-        <div className="w-full h-[400px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              {/* <CartesianGrid strokeDasharray="1 1" /> */}
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tickFormatter={formatNumberToKMil} tick={{ fontSize: 12 }} />
-              <Tooltip
-                cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
-                formatter={(value: number) => formatNumberToKMil(value)}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                }}
-              />
-              <Legend />
-              <Bar dataKey="Debit" fill={TRANSACTION_COLORS.debit.background} name="Debit" />
-              <Bar dataKey="Credit" fill={TRANSACTION_COLORS.credit.background} name="Credit" />
-            </BarChart>
-          </ResponsiveContainer>
+      {chartData.length > 0 ? (
+        <div className="w-full">
+          {!selectedCurrency && (
+            <div className="mb-2 text-sm text-muted-foreground">
+              Showing all currencies. Select a currency filter to see combined view.
+            </div>
+          )}
+          <div className="w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                {/* <CartesianGrid strokeDasharray="1 1" /> */}
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tickFormatter={formatNumberToKMil} tick={{ fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: 'hsl(var(--muted-foreground) / 0.1)' }}
+                  formatter={(value: number) => formatNumberToKMil(value)}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                  }}
+                />
+                <Legend />
+                {barKeys.map((key) => (
+                  <Bar key={key} dataKey={key} fill={getBarColor(key)} name={key} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+      ) : (
+        <div className="text-center text-muted-foreground py-8">No data available</div>
       )}
     </div>
   );
