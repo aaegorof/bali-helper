@@ -207,7 +207,6 @@ async function determineCategoryWithRAG(description: string, similarityThreshold
     if (similarTransactions.length === 0) {
       return null;
     }
-    console.log(similarTransactions);
 
     // Берем категорию самой похожей транзакции, если сходство выше порога
     const mostSimilar = similarTransactions[0];

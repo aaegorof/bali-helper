@@ -45,7 +45,7 @@ const GraphPermata = ({ className }: Props) => {
           if (!acc[monthKey][key]) {
             acc[monthKey][key] = 0;
           }
-          acc[monthKey][key] += Math.abs(stat.sum);
+          acc[monthKey][key] = (acc[monthKey][key] as number) + Math.abs(stat.sum);
         }
 
         return acc;

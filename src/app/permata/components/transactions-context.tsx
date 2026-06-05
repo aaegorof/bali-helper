@@ -127,6 +127,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     fetchTransactions({ pagination, filters, sorting });
     fetchMonthlyStats(filters);
     fetchTotals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, filters, sorting]);
 
   return (

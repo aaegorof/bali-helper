@@ -89,16 +89,15 @@ const CategorySpendingChart: React.FC = () => {
     // Group by category, combining different currencies
     const grouped = categoryStats.reduce(
       (acc, stat) => {
-        const key = stat.category || 'Uncategorized';
         const existing = acc.find(
-          (item) => item.category === key && item.currency === stat.currency
+          (item) => item.category === stat.category && item.currency === stat.currency
         );
 
         if (existing) {
           existing.sum += stat.sum;
           existing.count += stat.count;
         } else {
-          acc.push({ ...stat, category: key });
+          acc.push({ ...stat });
         }
 
         return acc;
@@ -127,7 +126,7 @@ const CategorySpendingChart: React.FC = () => {
 
   const preparedData = useMemo((): CategoryData[] => {
     const arr: CategoryData[] = topCategories.map((cat) => {
-      const totalForCurrency = totalsPerCurrency[cat.currency] || 1;
+      const totalForCurrency = totalsPerCurrency[cat.currency || 'USD'] || 1;
       return {
         category: cat.category || 'Uncategorized',
         currency: cat.currency,
@@ -141,19 +140,20 @@ const CategorySpendingChart: React.FC = () => {
       // Group "Other" by currency
       const otherByCurrency = otherCategories.reduce(
         (acc, cat) => {
-          const curr = cat.currency;
-          if (!acc[curr]) {
-            acc[curr] = { sum: 0, count: 0, currency: curr };
+          const key = cat.currency ?? 'unknown';
+          if (!acc[key]) {
+            acc[key] = { sum: 0, count: 0, currency: cat.currency };
           }
-          acc[curr].sum += cat.sum;
-          acc[curr].count += cat.count;
+          acc[key].sum += cat.sum;
+          acc[key].count += cat.count;
           return acc;
         },
-        {} as Record<string, { sum: number; count: number; currency: CurrencyCode }>
+        {} as Record<string, { sum: number; count: number; currency: CurrencyCode | null }>
       );
 
       Object.values(otherByCurrency).forEach((other) => {
-        const totalForCurrency = totalsPerCurrency[other.currency] || 1;
+        const totalForCurrency =
+          (other.currency ? totalsPerCurrency[other.currency] : undefined) ?? 1;
         arr.push({
           category: `Other (${otherCategories.filter((c) => c.currency === other.currency).length} categories)`,
           currency: other.currency,

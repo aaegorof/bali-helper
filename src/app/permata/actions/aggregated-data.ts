@@ -3,6 +3,7 @@
 import { CurrencyCode } from '@/app/lib/currencies';
 import { createClient } from '@/app/lib/supabase/server';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { ColumnFiltersState } from '@tanstack/react-table';
 
 // export type MonthlyTransactionStats = Database['public']['Views']['transactions_by_month']['Row']
@@ -27,21 +28,12 @@ export interface TransactionStats {
 }
 
 export const filterQuery = async <
-  T extends {
-    gte: any;
-    lte: any;
-    like: any;
-    ilike: any;
-    in: any;
-    is: any;
-    or: any;
-    filter: any;
-    eq: any;
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends PostgrestFilterBuilder<any, any, any, any, any, any, any>,
 >(
   query: T,
   filters?: ColumnFiltersState
-) => {
+): Promise<T> => {
   if (filters) {
     filters.forEach((filter) => {
       if (filter.value) {

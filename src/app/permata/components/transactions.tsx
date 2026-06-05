@@ -53,6 +53,7 @@ const TransactionsPermata = () => {
 
   useEffect(() => {
     resetRowSelection();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const table = useReactTable({
