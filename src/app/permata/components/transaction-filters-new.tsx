@@ -1,6 +1,7 @@
 import { useDebounceCallback } from '@/app/hooks/useDebounceCallback';
 import { CURRENCY_OPTIONS, CurrencyCode } from '@/app/lib/currencies';
 import { toISOString } from '@/app/lib/helpers';
+import { AVAILABLE_ADAPTERS } from '@/app/permata/adapters/index';
 import { TransactionDb } from '@/app/permata/lib/transactions-service';
 import { DatePicker } from '@/components/ui/datepicker';
 import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
@@ -138,7 +139,7 @@ export const FilterAmount: React.FC<FilterAmountProps> = ({ column }) => {
     <div className="flex gap-2 w-[clamp(20ch,25%,32ch)]">
       <DebounceNumberInput
         id="min-amount"
-        placeholder="Min"
+        placeholder="Price Min"
         value={minValue}
         className="min-w-[12ch]"
         step={100000}
@@ -146,7 +147,7 @@ export const FilterAmount: React.FC<FilterAmountProps> = ({ column }) => {
       />
       <DebounceNumberInput
         id="max-amount"
-        placeholder="Max"
+        placeholder="Price Max"
         className="min-w-[12ch]"
         value={maxValue}
         step={100000}
@@ -181,5 +182,30 @@ export const FilterCurrency = ({ column }: { column: Column<TransactionDb> }) =>
         </SelectGroup>
       </SelectContent>
     </Select>
+  );
+};
+
+export const FilterSource = ({ column }: { column: Column<TransactionDb> }) => {
+  const val = column?.getFilterValue() as string[] | undefined;
+
+  const options = AVAILABLE_ADAPTERS.map((adapter) => ({
+    label: adapter.name,
+    value: adapter.id,
+  }));
+
+  const debouncedSetFilter = useDebounceCallback<typeof column.setFilterValue>((values) => {
+    column.setFilterValue(values);
+  }, 1200);
+
+  return (
+    <MultiSelect
+      options={options}
+      defaultValue={val}
+      value={val}
+      onValueChange={debouncedSetFilter}
+      placeholder="Select source..."
+      maxCount={1}
+      className="min-w-[16ch] w-auto"
+    />
   );
 };

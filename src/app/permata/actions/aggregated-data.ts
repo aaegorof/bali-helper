@@ -76,6 +76,9 @@ export const filterQuery = async <
         if (filter.id === 'currency') {
           query.eq('currency', filter.value as CurrencyCode);
         }
+        if (filter.id === 'source' && Array.isArray(filter.value) && filter.value.length > 0) {
+          query.in('source', filter.value);
+        }
         if (typeof filter.value === 'string' && filter.id !== 'currency') {
           query.ilike(filter.id, `%${filter.value}%`);
         }

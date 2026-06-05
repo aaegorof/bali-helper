@@ -7,6 +7,7 @@ import {
   FilterAmount,
   FilterCurrency,
   FilterDates,
+  FilterSource,
   FilterText,
   MultiFilterCategory,
 } from './transaction-filters-new';
@@ -85,6 +86,15 @@ export const columns = [
     cell: (info) => info.getValue(),
     meta: {
       Filter: MultiFilterCategory,
+    },
+  }),
+
+  columnHelper.accessor('source', {
+    header: 'Source',
+    cell: ({ getValue }) => getValue(),
+    meta: {
+      Filter: FilterSource,
+      className: 'w-[10ch]',
     },
   }),
 

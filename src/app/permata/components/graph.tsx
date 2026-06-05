@@ -85,7 +85,7 @@ const GraphPermata = ({ className }: Props) => {
         <div className="w-full">
           {!selectedCurrency && (
             <div className="mb-2 text-sm text-muted-foreground">
-              Showing all currencies. Select a currency filter to see combined view.
+              Showing all currencies. Select a currency filter to see more clear view.
             </div>
           )}
           <div className="w-full h-[400px]">

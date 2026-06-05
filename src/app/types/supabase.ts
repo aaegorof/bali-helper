@@ -80,6 +80,7 @@ export type Database = {
           id: number;
           month: string | null;
           posted_date: string | null;
+          source: Database['public']['Enums']['adapter_source'] | null;
           time: string | null;
           transaction_hash: string | null;
           user_id: string | null;
@@ -95,6 +96,7 @@ export type Database = {
           id?: number;
           month?: string | null;
           posted_date?: string | null;
+          source?: Database['public']['Enums']['adapter_source'] | null;
           time?: string | null;
           transaction_hash?: string | null;
           user_id?: string | null;
@@ -110,6 +112,7 @@ export type Database = {
           id?: number;
           month?: string | null;
           posted_date?: string | null;
+          source?: Database['public']['Enums']['adapter_source'] | null;
           time?: string | null;
           transaction_hash?: string | null;
           user_id?: string | null;
@@ -167,6 +170,7 @@ export type Database = {
       };
     };
     Enums: {
+      adapter_source: 'permata' | 'deel';
       currency_code: 'RUB' | 'USD' | 'AUD' | 'GBP' | 'IDR' | 'EUR';
       transaction_category:
         | 'Cafe/Restaurant'
@@ -202,6 +206,7 @@ export type Database = {
         amount: number | null;
         currency: Database['public']['Enums']['currency_code'] | null;
         category: Database['public']['Enums']['transaction_category'] | null;
+        source: Database['public']['Enums']['adapter_source'] | null;
       };
       transactions_input_type: {
         created_at: string | null;
@@ -336,6 +341,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adapter_source: ['permata', 'deel'],
       currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR'],
       transaction_category: [
         'Cafe/Restaurant',

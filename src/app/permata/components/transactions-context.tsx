@@ -46,6 +46,7 @@ export const defaultFilters: TransactionsContextType['filters'] = [
   // { id: 'category', value: null },
   { id: 'currency', value: null },
   { id: 'credit_debit', value: null },
+  { id: 'source', value: null },
 ];
 
 const defaultSorting: SortingState = [{ id: 'date', desc: true }];
@@ -109,7 +110,6 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
     try {
       const data = await fetchAggregatedData({ userId: user.id, filters });
-      console.log(data);
       setMonthlyStats(data.monthly);
       setCategoryStats(data.category);
     } catch (err) {

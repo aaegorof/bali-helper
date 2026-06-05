@@ -74,7 +74,11 @@ const TransactionUploader = () => {
           }
 
           const parsedData = await adapter.parse(file);
-          allParsedData = allParsedData.concat(parsedData);
+          const parsedWithSource = parsedData.map((t) => ({
+            ...t,
+            source: adapter.id,
+          }));
+          allParsedData = allParsedData.concat(parsedWithSource);
         } catch (error) {
           console.error(`Error parsing file ${file.name}:`, error);
           toast.error(

@@ -33,7 +33,7 @@ const parseCSV = (csvText: string): PermataRawTransaction[] => {
   return data;
 };
 
-const normalizePermataTransaction = (raw: PermataRawTransaction): NormalizedTransaction => {
+const normalizePermataTransaction = (raw: PermataRawTransaction): Omit<NormalizedTransaction, 'source'> => {
   const { time, cleanDescription } = parseTimeFromDescription(raw.Description || '');
   const postedDate = raw['Posted Date (mm/dd/yyyy)'] ?? '';
   const dateTimeString = `${postedDate} ${time ?? '00:00:00'}`;
@@ -56,7 +56,7 @@ const normalizePermataTransaction = (raw: PermataRawTransaction): NormalizedTran
 };
 
 export class PermataAdapter implements BankAdapter {
-  id = 'permata';
+  id = 'permata' as const;
   name = 'Permata Bank';
   description = (
     <p>

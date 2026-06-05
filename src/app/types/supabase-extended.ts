@@ -23,3 +23,4 @@ export type TransactionEmbeddingUpdate =
 // Export enum types
 export type EnumTransactionCategory = Database['public']['Enums']['transaction_category'];
 export type EnumCurrencyCode = Database['public']['Enums']['currency_code'];
+export type EnumAdapterSource = Database['public']['Enums']['adapter_source'];

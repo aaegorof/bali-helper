@@ -95,7 +95,7 @@ const parseCSV = (csvText: string): DeelRawTransaction[] => {
 /**
  * Нормализует транзакцию Deel в общий формат
  */
-const normalizeDeelTransaction = (raw: DeelRawTransaction): NormalizedTransaction | null => {
+const normalizeDeelTransaction = (raw: DeelRawTransaction): Omit<NormalizedTransaction, 'source'> | null => {
   // Пропускаем отклоненные транзакции (опционально)
   // Раскомментируйте следующую строку, если не хотите импортировать DECLINED транзакции:
   if (raw.status === 'DECLINED') return null;
@@ -153,7 +153,7 @@ const normalizeDeelTransaction = (raw: DeelRawTransaction): NormalizedTransactio
 };
 
 export class DeelAdapter implements BankAdapter {
-  id = 'deel';
+  id = 'deel' as const;
   name = 'Deel Card';
   description = (
     <div>
@@ -168,7 +168,7 @@ export class DeelAdapter implements BankAdapter {
   );
   supportedFormats = ['.csv'];
 
-  async parse(file: File): Promise<NormalizedTransaction[]> {
+  async parse(file: File): Promise<Omit<NormalizedTransaction, 'source'>[]> {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     let rawTransactions: DeelRawTransaction[] = [];
 
@@ -182,7 +182,7 @@ export class DeelAdapter implements BankAdapter {
     // Фильтруем null значения (отклоненные транзакции если настроено)
     return rawTransactions
       .map(normalizeDeelTransaction)
-      .filter((t): t is NormalizedTransaction => t !== null);
+      .filter((t): t is Omit<NormalizedTransaction, 'source'> => t !== null);
   }
 
   async validate(file: File): Promise<boolean> {
