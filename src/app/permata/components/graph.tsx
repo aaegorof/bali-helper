@@ -62,7 +62,7 @@ const GraphPermata = ({ className }: Props) => {
 
   // Get all unique keys (currencies) for bars
   const barKeys = useMemo(() => {
-    if (!chartData.length) return [];
+    if (!chartData.length) return []; 
     const keys = new Set<string>();
     chartData.forEach((item) => {
       Object.keys(item).forEach((key) => {
