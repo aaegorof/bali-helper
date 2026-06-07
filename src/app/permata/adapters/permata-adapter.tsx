@@ -1,8 +1,14 @@
 import { CURRENCIES } from '@/app/lib/currencies';
-import { format, parse } from 'date-fns';
+import { format, isValid, parse } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { parseTimeFromDescription } from '../lib/TransactionParseResult';
-import { BankAdapter, NormalizedTransaction } from './base-adapter';
+import {
+  AdapterParseResult,
+  AdapterUnprocessedTransaction,
+  BankAdapter,
+  NormalizedTransaction,
+  toJson,
+} from './base-adapter';
 
 export interface PermataRawTransaction {
   [key: string]: string;
@@ -33,24 +39,37 @@ const parseCSV = (csvText: string): PermataRawTransaction[] => {
   return data;
 };
 
-const normalizePermataTransaction = (raw: PermataRawTransaction): Omit<NormalizedTransaction, 'source'> => {
+const normalizePermataTransaction = (
+  raw: PermataRawTransaction
+): Omit<NormalizedTransaction, 'source'> => {
   const { time, cleanDescription } = parseTimeFromDescription(raw.Description || '');
   const postedDate = raw['Posted Date (mm/dd/yyyy)'] ?? '';
-  const dateTimeString = `${postedDate} ${time ?? '00:00:00'}`;
-  const timestamp = dateTimeString
-    ? format(parse(dateTimeString, 'MM/dd/yyyy HH:mm:ss', new Date()), "yyyy-MM-dd'T'HH:mm:ss")
-    : '';
+  const parsedDate = parse(`${postedDate} ${time ?? '00:00:00'}`, 'MM/dd/yyyy HH:mm:ss', new Date());
+
+  if (!postedDate || !isValid(parsedDate)) {
+    throw new Error('Invalid posted date');
+  }
+
+  if (raw['Credit/Debit'] !== 'Credit' && raw['Credit/Debit'] !== 'Debit') {
+    throw new Error('Invalid credit/debit value');
+  }
+
+  const amount = parseFloat(
+    raw.Amount.replace(/[^0-9.-]+/g, '')
+      ?.split('.')
+      ?.at(0) ?? '0'
+  );
+
+  if (!Number.isFinite(amount)) {
+    throw new Error('Invalid amount');
+  }
 
   return {
     description: cleanDescription ?? '',
-    credit_debit: raw['Credit/Debit'] ?? null,
-    amount: parseFloat(
-      raw.Amount.replace(/[^0-9.-]+/g, '')
-        ?.split('.')
-        ?.at(0) ?? '0'
-    ),
+    credit_debit: raw['Credit/Debit'],
+    amount,
     currency: CURRENCIES.IDR.code,
-    date: timestamp,
+    date: format(parsedDate, "yyyy-MM-dd'T'HH:mm:ss"),
     category: null,
   };
 };
@@ -69,7 +88,7 @@ export class PermataAdapter implements BankAdapter {
   );
   supportedFormats = ['.csv', '.xlsx', '.xls'];
 
-  async parse(file: File) {
+  async parse(file: File): Promise<AdapterParseResult> {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     let rawTransactions: PermataRawTransaction[] = [];
 
@@ -86,7 +105,23 @@ export class PermataAdapter implements BankAdapter {
       throw new Error(`Unsupported file format: ${fileExtension}`);
     }
 
-    return rawTransactions.map(normalizePermataTransaction);
+    const transactions: Omit<NormalizedTransaction, 'source'>[] = [];
+    const unprocessed: AdapterUnprocessedTransaction[] = [];
+
+    rawTransactions.forEach((raw, index) => {
+      try {
+        transactions.push(normalizePermataTransaction(raw));
+      } catch (error) {
+        unprocessed.push({
+          fileName: file.name,
+          rowNumber: index + 1,
+          reason: error instanceof Error ? error.message : 'Unknown parsing error',
+          raw: toJson(raw),
+        });
+      }
+    });
+
+    return { transactions, unprocessed };
   }
 
   async validate(file: File) {

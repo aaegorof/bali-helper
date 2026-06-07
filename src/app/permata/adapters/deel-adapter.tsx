@@ -2,7 +2,13 @@ import { CurrencyCode } from '@/app/lib/currencies';
 import { EnumTransactionCategory } from '@/app/types/supabase-extended';
 import { format } from 'date-fns';
 import Papa from 'papaparse';
-import { BankAdapter, NormalizedTransaction } from './base-adapter';
+import {
+  AdapterParseResult,
+  AdapterUnprocessedTransaction,
+  BankAdapter,
+  NormalizedTransaction,
+  toJson,
+} from './base-adapter';
 
 /**
  * RAW формат данных из Deel CSV export
@@ -104,9 +110,13 @@ const normalizeDeelTransaction = (raw: DeelRawTransaction): Omit<NormalizedTrans
   let creditDebit: NormalizedTransaction['credit_debit'] = 'Debit';
   const originalAmount = parseFloat(raw.originalAmount || '0');
 
+  if (!Number.isFinite(originalAmount)) {
+    throw new Error('Invalid original amount');
+  }
+
   if (raw.type === 'DEPOSIT' || raw.type === 'REFUND') {
     creditDebit = 'Credit';
-  } 
+  }
   if (
     raw.type === 'POS_TX' ||
     raw.type === 'WITHDRAWAL' ||
@@ -128,10 +138,13 @@ const normalizeDeelTransaction = (raw: DeelRawTransaction): Omit<NormalizedTrans
   } catch (error) {
     console.error('Error parsing date:', raw.date, error);
   }
-  
-    // Fallback на оригинальную валюту если accountCurrency не найдена
-   const currency = raw.originalCurrency as CurrencyCode;
 
+  if (!timestamp) {
+    throw new Error('Invalid transaction date');
+  }
+
+  // Fallback на оригинальную валюту если accountCurrency не найдена
+  const currency = raw.originalCurrency as CurrencyCode;
 
   // Используем accountAmount (в валюте счета)
   const amount = Math.abs(originalAmount);
@@ -168,7 +181,7 @@ export class DeelAdapter implements BankAdapter {
   );
   supportedFormats = ['.csv'];
 
-  async parse(file: File): Promise<Omit<NormalizedTransaction, 'source'>[]> {
+  async parse(file: File): Promise<AdapterParseResult> {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     let rawTransactions: DeelRawTransaction[] = [];
 
@@ -179,10 +192,26 @@ export class DeelAdapter implements BankAdapter {
       throw new Error(`Unsupported file format: ${fileExtension}`);
     }
 
-    // Фильтруем null значения (отклоненные транзакции если настроено)
-    return rawTransactions
-      .map(normalizeDeelTransaction)
-      .filter((t): t is Omit<NormalizedTransaction, 'source'> => t !== null);
+    const transactions: Omit<NormalizedTransaction, 'source'>[] = [];
+    const unprocessed: AdapterUnprocessedTransaction[] = [];
+
+    rawTransactions.forEach((raw, index) => {
+      try {
+        const transaction = normalizeDeelTransaction(raw);
+        if (transaction) {
+          transactions.push(transaction);
+        }
+      } catch (error) {
+        unprocessed.push({
+          fileName: file.name,
+          rowNumber: index + 1,
+          reason: error instanceof Error ? error.message : 'Unknown parsing error',
+          raw: toJson(raw),
+        });
+      }
+    });
+
+    return { transactions, unprocessed };
   }
 
   async validate(file: File): Promise<boolean> {

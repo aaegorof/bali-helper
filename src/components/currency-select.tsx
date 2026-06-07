@@ -34,9 +34,8 @@ export function CurrencySelect({
         {CURRENCY_OPTIONS.map((currency) => (
           <SelectItem key={currency.code} value={currency.code}>
             <div className="flex items-center gap-2">
-              <span className="font-medium">{currency.symbol}</span>
-              <span>{currency.name}</span>
               <span className="text-xs text-muted-foreground">({currency.code})</span>
+              <span className="font-medium">{currency.symbol}</span>
             </div>
           </SelectItem>
         ))}

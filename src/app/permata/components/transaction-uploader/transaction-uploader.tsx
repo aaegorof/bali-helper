@@ -1,5 +1,11 @@
 import { useAuth } from '@/app/lib/auth';
-import { AVAILABLE_ADAPTERS, getAdapterById, NormalizedTransaction } from '@/app/permata/adapters';
+import {
+  AdapterUnprocessedTransaction,
+  AVAILABLE_ADAPTERS,
+  getAdapterById,
+  NormalizedTransaction,
+} from '@/app/permata/adapters';
+import { saveTransactionImportErrors } from '@/app/permata/lib/transaction-import-errors-service';
 import { saveTransactions } from '@/app/permata/lib/transactions-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +20,8 @@ import {
 } from '@/components/ui/select';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { useTransactionsContext } from './transactions-context';
+import { useTransactionsContext } from '../transactions-context';
+import { showUnprocessedTransactionsToast } from './unprocessed-transactions-toast';
 
 const saveTransactionsToDatabase = async (
   transactions: NormalizedTransaction[],
@@ -36,7 +43,7 @@ const saveTransactionsToDatabase = async (
 
 const TransactionUploader = () => {
   const { user: currentUser } = useAuth();
-  const { setTransactions } = useTransactionsContext();
+  const { refreshCurrentView } = useTransactionsContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [selectedAdapterId, setSelectedAdapterId] = useState<string>(
@@ -46,6 +53,7 @@ const TransactionUploader = () => {
   const handleFileUpload = async (formData: FormData) => {
     const files = formData.getAll('file') as File[];
     let allParsedData: NormalizedTransaction[] = [];
+    let allUnprocessed: AdapterUnprocessedTransaction[] = [];
 
     if (!currentUser) {
       toast.error('No user logged in');
@@ -74,16 +82,37 @@ const TransactionUploader = () => {
           }
 
           const parsedData = await adapter.parse(file);
-          const parsedWithSource = parsedData.map((t) => ({
+          const parsedWithSource = parsedData.transactions.map((t) => ({
             ...t,
             source: adapter.id,
           }));
           allParsedData = allParsedData.concat(parsedWithSource);
+          allUnprocessed = allUnprocessed.concat(parsedData.unprocessed);
         } catch (error) {
           console.error(`Error parsing file ${file.name}:`, error);
-          toast.error(
-            `Failed to parse ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
-          );
+          allUnprocessed.push({
+            fileName: file.name,
+            rowNumber: null,
+            reason: error instanceof Error ? error.message : 'Unknown file parsing error',
+            raw: file.name,
+          });
+        }
+      }
+
+      if (allUnprocessed.length > 0) {
+        const savedErrors = await saveTransactionImportErrors({
+          source: adapter.id,
+          fileNames: files.map((file) => file.name),
+          errors: allUnprocessed,
+        });
+
+        showUnprocessedTransactionsToast({
+          errors: allUnprocessed,
+          referenceId: savedErrors.success ? savedErrors.data.id : undefined,
+        });
+
+        if (!savedErrors.success) {
+          toast.error(savedErrors.details ?? savedErrors.error);
         }
       }
 
@@ -91,12 +120,12 @@ const TransactionUploader = () => {
         toast.error('No valid transactions found in the uploaded files');
         return;
       }
-      
+
       setIsLoading(true);
       // Save to database
       const res = await saveTransactionsToDatabase(allParsedData);
-      if (res.success && res.data?.inserted_rows) {
-        setTransactions(res.data.inserted_rows);
+      if (res.success) {
+        await refreshCurrentView();
       }
     } catch (error) {
       console.error('Error processing transactions:', error);

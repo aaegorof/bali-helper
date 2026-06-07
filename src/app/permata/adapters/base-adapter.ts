@@ -1,5 +1,18 @@
-import { CurrencyCode } from "@/app/lib/currencies";
-import { EnumAdapterSource, InsertUniqueTransactionsReq } from "@/app/types/supabase-extended";
+import { CurrencyCode } from '@/app/lib/currencies';
+import { Json } from '@/app/types/supabase';
+import { EnumAdapterSource, InsertUniqueTransactionsReq } from '@/app/types/supabase-extended';
+
+export interface AdapterUnprocessedTransaction {
+  fileName: string;
+  rowNumber: number | null;
+  reason: string;
+  raw: Json;
+}
+
+export interface AdapterParseResult {
+  transactions: Omit<NormalizedTransaction, 'source'>[];
+  unprocessed: AdapterUnprocessedTransaction[];
+}
 
 export interface NormalizedTransaction extends InsertUniqueTransactionsReq {
   // rewrited to make sure they are not nulled. please dont remove this comment
@@ -7,6 +20,10 @@ export interface NormalizedTransaction extends InsertUniqueTransactionsReq {
   currency: CurrencyCode;
   date: string;
   source: EnumAdapterSource;
+}
+
+export function toJson(value: unknown): Json {
+  return JSON.parse(JSON.stringify(value ?? null)) as Json;
 }
 
 export interface BankAdapter {
@@ -31,9 +48,9 @@ export interface BankAdapter {
   supportedFormats: string[];
 
   /**
-   * Парсит файл и возвращает нормализованные транзакции
+   * Парсит файл и возвращает нормализованные транзакции и необработанные строки
    */
-  parse(file: File): Promise<Omit<NormalizedTransaction, 'source'>[]>;
+  parse(file: File): Promise<AdapterParseResult>;
 
   /**
    * Опциональная валидация файла перед парсингом

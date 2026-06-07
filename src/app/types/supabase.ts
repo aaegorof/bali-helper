@@ -68,6 +68,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      transaction_import_errors: {
+        Row: {
+          created_at: string;
+          error_count: number;
+          errors: Json;
+          file_names: string[];
+          id: string;
+          source: Database['public']['Enums']['adapter_source'];
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          error_count?: number;
+          errors?: Json;
+          file_names?: string[];
+          id?: string;
+          source: Database['public']['Enums']['adapter_source'];
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          error_count?: number;
+          errors?: Json;
+          file_names?: string[];
+          id?: string;
+          source?: Database['public']['Enums']['adapter_source'];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       transactions: {
         Row: {
           amount: number | null;
@@ -171,7 +201,18 @@ export type Database = {
     };
     Enums: {
       adapter_source: 'permata' | 'deel';
-      currency_code: 'RUB' | 'USD' | 'AUD' | 'GBP' | 'IDR' | 'EUR';
+      currency_code:
+        | 'RUB'
+        | 'USD'
+        | 'AUD'
+        | 'GBP'
+        | 'IDR'
+        | 'EUR'
+        | 'VND'
+        | 'MYR'
+        | 'CNY'
+        | 'THB'
+        | 'AED';
       transaction_category:
         | 'Cafe/Restaurant'
         | 'Transfers/Payments'
@@ -342,7 +383,7 @@ export const Constants = {
   public: {
     Enums: {
       adapter_source: ['permata', 'deel'],
-      currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR'],
+      currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR', 'VND', 'MYR', 'CNY', 'THB', 'AED'],
       transaction_category: [
         'Cafe/Restaurant',
         'Transfers/Payments',

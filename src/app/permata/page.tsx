@@ -9,7 +9,7 @@ import { useState } from 'react';
 import CategorySpendingChart from './components/category-analyzer';
 import Graph from './components/graph';
 import TotalAmounts from './components/total-amounts';
-import TransactionUploader from './components/transaction-uploader';
+import TransactionUploader from './components/transaction-uploader/transaction-uploader';
 import Transactions from './components/transactions';
 
 const ANALYSIS_TABS = [

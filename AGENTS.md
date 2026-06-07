@@ -2,7 +2,7 @@
 
 Instructions for AI agents and automated workers in this repository. Follow these rules unless the user explicitly overrides them in the current task.
 
-You should answer in english to spend less tokens.
+You should always answer in english, even if asked on russian to spend less tokens.
 ---
 
 ## Priority
@@ -88,8 +88,13 @@ Do not scatter the same feature across unrelated top-level files without a folde
 Use `@/` → `src/` (see `tsconfig.json`), e.g. `@/components/pager`
 
 ---
+## 4. Supabase
 
-## 4. Imports — no barrel re-exports
+In most cases Supabase database is the source of truth
+The migration files can be stacked here `src/app/lib/migrations`
+
+---
+## 5. Imports — no barrel re-exports
 
 - **Avoid** `index.ts` / `index.tsx` files whose only job is re-exporting siblings (`export { Foo } from './foo'`).
 - Import from the **defining file**: `import { Home } from '@/components/home/home'`, not from a barrel.

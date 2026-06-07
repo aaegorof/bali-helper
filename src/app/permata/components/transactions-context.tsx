@@ -36,6 +36,7 @@ interface TransactionsContextType {
   totalCount: number;
   monthlyStats: MonthlyTransactionStats[];
   categoryStats: CategoryTransactionStats[];
+  refreshCurrentView: () => Promise<void>;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -87,7 +88,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         }
 
         const response = await fetchDataForTableView({
-          userId: user?.id,
+          userId: user.id,
           pagination,
           filters,
           sorting,
@@ -102,33 +103,41 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         return [];
       }
     },
-    [user]
+    [user?.id]
   );
 
-  const fetchMonthlyStats = async (filters: ColumnFiltersState) => {
-    if (!user?.id) return;
+  const fetchMonthlyStats = useCallback(
+    async (filters: ColumnFiltersState) => {
+      if (!user?.id) return;
 
-    try {
-      const data = await fetchAggregatedData({ userId: user.id, filters });
-      setMonthlyStats(data.monthly);
-      setCategoryStats(data.category);
-    } catch (err) {
-      console.error('Error fetching monthly stats:', err);
-    }
-  };
+      try {
+        const data = await fetchAggregatedData({ userId: user.id, filters });
+        setMonthlyStats(data.monthly);
+        setCategoryStats(data.category);
+      } catch (err) {
+        console.error('Error fetching monthly stats:', err);
+      }
+    },
+    [user?.id]
+  );
 
-  const fetchTotals = async () => {
+  const fetchTotals = useCallback(async () => {
     if (!user?.id) return;
     const data = await fetchTotalCount();
     setTotalCount(data);
-  };
+  }, [user?.id]);
+
+  const refreshCurrentView = useCallback(async () => {
+    await Promise.all([
+      fetchTransactions({ pagination, filters, sorting }),
+      fetchMonthlyStats(filters),
+      fetchTotals(),
+    ]);
+  }, [fetchMonthlyStats, fetchTotals, fetchTransactions, filters, pagination, sorting]);
 
   useEffect(() => {
-    fetchTransactions({ pagination, filters, sorting });
-    fetchMonthlyStats(filters);
-    fetchTotals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination, filters, sorting]);
+    refreshCurrentView();
+  }, [refreshCurrentView]);
 
   return (
     <TransactionsContext.Provider
@@ -138,6 +147,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         fetchTransactions,
         monthlyStats,
         categoryStats,
+        refreshCurrentView,
         filters,
         setFilters,
         pagination,

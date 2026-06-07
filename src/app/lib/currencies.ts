@@ -42,6 +42,36 @@ export const CURRENCIES = {
     symbol: '€',
     locale: 'de-DE',
   },
+  VND: {
+    code: 'VND' as CurrencyCode,
+    name: 'Vietnamese Dong',
+    symbol: '₫',
+    locale: 'vi-VN',
+  },
+  MYR: {
+    code: 'MYR' as CurrencyCode,
+    name: 'Malaysian Ringgit',
+    symbol: 'RM',
+    locale: 'ms-MY',
+  },
+  CNY: {
+    code: 'CNY' as CurrencyCode,
+    name: 'Chinese Yuan',
+    symbol: '¥',
+    locale: 'zh-CN',
+  },
+  THB: {
+    code: 'THB' as CurrencyCode,
+    name: 'Thai Baht',
+    symbol: '฿',
+    locale: 'th-TH',
+  },
+  AED: {
+    code: 'AED' as CurrencyCode,
+    name: 'UAE Dirham',
+    symbol: 'د.إ',
+    locale: 'ar-AE',
+  },
 } as const;
 
 /**
