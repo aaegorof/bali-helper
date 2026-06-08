@@ -3,7 +3,8 @@
 import { createClient } from '@/app/lib/supabase/server';
 import { NormalizedTransaction } from '@/app/permata/adapters';
 
-import { createEmbedding, determineCategory, saveEmbedding } from '@/app/permata/lib/vectorDb';
+import { processEmbeddingsInBatches } from '@/app/permata/lib/embedding-batch';
+import { determineCategory } from '@/app/permata/lib/vectorDb';
 import { InsertUniqueTransactionsReq, Transaction } from '@/app/types/supabase-extended';
 
 export interface TransactionDb extends Transaction {
@@ -28,19 +29,18 @@ export type DeleteTransactionsResult = {
 async function prepareTransactions(
   transactions: NormalizedTransaction[]
 ): Promise<InsertUniqueTransactionsReq[]> {
-  
-  return await Promise.all(
-    transactions.map(async (tr) => {
-      if(!tr.category) {
+  const result: InsertUniqueTransactionsReq[] = [];
+
+  for (const tr of transactions) {
+    if (!tr.category) {
       const category = await determineCategory(tr.description);
-      return {
-        ...tr,
-        category,
-      };
+      result.push({ ...tr, category });
+    } else {
+      result.push(tr);
     }
-      return tr
-    })
-  );
+  }
+
+  return result;
 }
 
 export async function saveTransactions({ transactions }: SaveTransactionsRequest) {
@@ -73,14 +73,15 @@ export async function saveTransactions({ transactions }: SaveTransactionsRequest
     }
 
     if (data.inserted_rows && data.inserted_rows.length > 0) {
-      const embeddingPromises = data.inserted_rows.map(async (transaction) => {
-        if (transaction.description && transaction.category) {
-          const embedding = await createEmbedding(transaction.description);
-          await saveEmbedding(transaction.description, transaction.category, embedding);
-        }
-      });
+      const embeddableRows = data.inserted_rows.filter(
+        (t) => t.description && t.category
+      ) as Array<{ description: string; category: string }>;
 
-      await Promise.all(embeddingPromises);
+      try {
+        await processEmbeddingsInBatches(embeddableRows);
+      } catch (err) {
+        console.error('Embedding batch failed (non-fatal):', err);
+      }
     }
 
     return {
@@ -98,6 +99,47 @@ export async function saveTransactions({ transactions }: SaveTransactionsRequest
       error: 'Error saving transactions',
       details: errorMessage,
     };
+  }
+}
+
+export async function backfillEmbeddings(): Promise<{
+  success: boolean;
+  processed?: number;
+  failed?: number;
+  error?: string;
+  data?: {description: string; category: string}[];
+}> {
+  try {
+    const supabase = await createClient();
+
+    const { data: transactions, error: txError } = await supabase
+      .from('transactions')
+      .select('description, category')
+      .not('description', 'is', null);
+
+    if (txError) throw txError;
+
+    const { data: existingEmbeddings, error: embError } = await supabase
+      .from('transaction_embeddings')
+      .select('description');
+
+    if (embError) throw embError;
+
+    const embeddedDescriptions = new Set(
+      (existingEmbeddings ?? []).map((e) => e.description)
+    );
+
+    const missing = (transactions ?? []).filter(
+      (t) => t.description && !embeddedDescriptions.has(t.description) && t.category
+    ) as Array<{ description: string; category: string }>;
+
+    // const result = await processEmbeddingsInBatches(missing);
+
+    return { success: true, data: missing };
+  } catch (error) {
+    console.error('Backfill embeddings error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: errorMessage };
   }
 }
 

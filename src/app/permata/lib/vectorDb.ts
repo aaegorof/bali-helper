@@ -11,7 +11,7 @@ const MODEL = 'claude-3-5-sonnet-20241022';
 const EMBEDDING_MODEL_OPENAI = 'text-embedding-3-small';
 
 // const embeddingModel = voyage.textEmbeddingModel(EMBEDDING_MODEL);
-const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
+export const embeddingModel = openai.embedding(EMBEDDING_MODEL_OPENAI);
 
 export interface SimilarTransaction {
   description: string;
@@ -293,6 +293,37 @@ async function determineCategory(description: string | null) {
   }
 }
 
+async function saveManyEmbeddings(
+  items: Array<{
+    description: string;
+    category: (typeof transactionCategories)[number];
+    embedding: number[];
+  }>
+): Promise<void> {
+  if (items.length === 0) return;
+
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const rows = items.map((item) => ({
+    description: item.description,
+    category: item.category,
+    embedding: JSON.stringify(item.embedding),
+    last_used_at: now,
+    usage_count: 1,
+  }));
+
+  const { error } = await supabase.from('transaction_embeddings').upsert(rows, {
+    onConflict: 'description',
+    ignoreDuplicates: false,
+  });
+
+  if (error) {
+    console.error('Error bulk-saving embeddings:', error);
+    throw error;
+  }
+}
+
 export {
   createEmbedding,
   determineCategory,
@@ -301,4 +332,5 @@ export {
   determineKeywordCategory,
   findSimilarTransactions,
   saveEmbedding,
+  saveManyEmbeddings,
 };

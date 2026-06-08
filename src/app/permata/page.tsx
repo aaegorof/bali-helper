@@ -30,7 +30,7 @@ export default function Permata() {
   const [activeTab, setActiveTab] = useState(ANALYSIS_TABS[0].id);
 
   return (
-    <main className="container mx-auto">
+    <main>
       <div className="flex justify-between items-center">
         <h1>Permata</h1>
         <Link href="/">

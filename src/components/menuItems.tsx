@@ -1,6 +1,6 @@
 export const menuItems = [
   { title: 'Home', description: 'Home', href: '/' },
-
+  { title: 'Backfilling', description: 'Backfill transaction embeddings', href: '/permata/backfilling' },
   {
     title: 'Permata',
     description: 'Manage and categorize your financial transactions',
