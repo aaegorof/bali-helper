@@ -11,6 +11,12 @@ export interface TransactionDb extends Transaction {
   id: number;
 }
 
+export type EmbeddingBackfillItem = {
+  description: string;
+  date: NonNullable<Transaction['date']>;
+  category: NonNullable<Transaction['category']>;
+};
+
 export type SaveTransactionsRequest = {
   transactions: NormalizedTransaction[];
 };
@@ -45,7 +51,6 @@ async function prepareTransactions(
 
 export async function saveTransactions({ transactions }: SaveTransactionsRequest) {
   try {
-
     const supabase = await createClient();
     const {
       data: { user },
@@ -60,8 +65,7 @@ export async function saveTransactions({ transactions }: SaveTransactionsRequest
 
     const preparedTransactions = await prepareTransactions(transactions);
 
-
-// return {success: true, data: {message: 'Transactions prepared successfully', inserted_rows: []}}
+    // return {success: true, data: {message: 'Transactions prepared successfully', inserted_rows: []}}
 
     const { data, error } = await supabase.rpc('insert_unique_transactions', {
       _txns: preparedTransactions,
@@ -102,19 +106,17 @@ export async function saveTransactions({ transactions }: SaveTransactionsRequest
   }
 }
 
-export async function backfillEmbeddings(): Promise<{
+export async function getMissingEmbeddings(): Promise<{
   success: boolean;
-  processed?: number;
-  failed?: number;
   error?: string;
-  data?: {description: string; category: string}[];
+  data: EmbeddingBackfillItem[];
 }> {
   try {
     const supabase = await createClient();
 
     const { data: transactions, error: txError } = await supabase
       .from('transactions')
-      .select('description, category')
+      .select('description, category, date')
       .not('description', 'is', null);
 
     if (txError) throw txError;
@@ -125,21 +127,21 @@ export async function backfillEmbeddings(): Promise<{
 
     if (embError) throw embError;
 
-    const embeddedDescriptions = new Set(
-      (existingEmbeddings ?? []).map((e) => e.description)
-    );
-
-    const missing = (transactions ?? []).filter(
-      (t) => t.description && !embeddedDescriptions.has(t.description) && t.category
-    ) as Array<{ description: string; category: string }>;
-
-    // const result = await processEmbeddingsInBatches(missing);
+    const embeddedDescriptions = new Set((existingEmbeddings ?? []).map((e) => e.description));
+ 
+    const seen = new Set<string>();
+    const missing = (transactions ?? []).filter((t) => {
+      if (!t.description || !t.category || embeddedDescriptions.has(t.description)) return false;
+      if (seen.has(t.description)) return false;
+      seen.add(t.description);
+      return true;
+    }) as EmbeddingBackfillItem[];
 
     return { success: true, data: missing };
   } catch (error) {
     console.error('Backfill embeddings error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return { success: false, error: errorMessage };
+    return { success: false, error: errorMessage, data: [] };
   }
 }
 

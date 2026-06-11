@@ -149,6 +149,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_roles: {
+        Row: {
+          created_at: string;
+          role: Database['public']['Enums']['app_role'];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          role?: Database['public']['Enums']['app_role'];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          role?: Database['public']['Enums']['app_role'];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       transactions_by_month: {
@@ -198,9 +219,14 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      rebuild_transaction_embedding_mapping: {
+        Args: { p_similarity_threshold: number; p_top_k?: number };
+        Returns: undefined;
+      };
     };
     Enums: {
       adapter_source: 'permata' | 'deel';
+      app_role: 'editor' | 'admin';
       currency_code:
         | 'RUB'
         | 'USD'
@@ -383,6 +409,7 @@ export const Constants = {
   public: {
     Enums: {
       adapter_source: ['permata', 'deel'],
+      app_role: ['editor', 'admin'],
       currency_code: ['RUB', 'USD', 'AUD', 'GBP', 'IDR', 'EUR', 'VND', 'MYR', 'CNY', 'THB', 'AED'],
       transaction_category: [
         'Cafe/Restaurant',

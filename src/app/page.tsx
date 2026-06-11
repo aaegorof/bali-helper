@@ -1,5 +1,6 @@
-'use client';
+import { getAllowedRoleProtectedItems } from '@/app/lib/route-access-server';
 import { menuItems } from '@/components/menuItems';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -10,20 +11,22 @@ import {
 } from '@/components/ui/card';
 import Link from 'next/link';
 
-export default function Home() {
+export default async function Home() {
+  const allowedMenuItems = await getAllowedRoleProtectedItems(menuItems);
+
   return (
     <main>
       <div className="container mx-auto">
-      <h1>Home page</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-        {menuItems.map((item) => (
-          <ModuleCard
-            key={item.href}
-            title={item.title}
-            description={item.description}
-            href={item.href}
-          />
-        ))}
+        <h1>Home page</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          {allowedMenuItems.map((item) => (
+            <ModuleCard
+              key={item.href}
+              title={item.title}
+              description={item.description}
+              href={item.href}
+            />
+          ))}
         </div>
       </div>
     </main>
@@ -47,11 +50,9 @@ function ModuleCard({
       </CardHeader>
       <CardContent className="flex-grow">{/* Content can be added here if needed */}</CardContent>
       <CardFooter>
-        <Link href={href} className="w-full">
-          <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-2 rounded-md">
-            Open
-          </button>
-        </Link>
+        <Button asChild className="w-full">
+          <Link href={href}>Open</Link>
+        </Button>
       </CardFooter>
     </Card>
   );
