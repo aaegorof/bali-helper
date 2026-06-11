@@ -25,19 +25,12 @@ const ANALYSIS_TABS = [
   },
 ] as const;
 
-export default function Permata() {
+export default function TransactionsPage() {
   // const router = useRouter();
   const [activeTab, setActiveTab] = useState(ANALYSIS_TABS[0].id);
 
   return (
     <main>
-      <div className="flex justify-between items-center">
-        <h1>Permata</h1>
-        <Link href="/">
-          <Button variant="outline">Back to Home</Button>
-        </Link>
-      </div>
-
       <TransactionsProvider>
         <div className="mb-8 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_2fr]">
           <div className="flex flex-col gap-4">

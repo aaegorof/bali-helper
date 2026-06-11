@@ -9,18 +9,18 @@ export type MenuItem = {
 };
 
 export const menuItems = [
-  { title: 'Home', description: 'Home', href: '/' },
   {
     title: 'Backfilling',
     description: 'Backfill transaction embeddings',
-    href: '/permata/backfilling',
-    requiredRoles: ['admin'],
+    href: '/transactions/backfilling',
+    requiredRoles: ['admin'] as const,
   },
   {
-    title: 'Permata',
+    title: 'Transactions',
     description: 'Manage and categorize your financial transactions',
-    href: '/permata',
-    authMatcher: '/permata/:path*',
+    href: '/transactions',
+    authMatcher: '/transactions/:path*',
+    requiredRoles: ['editor', 'admin'] as const,
   },
   // { title: 'APY Calculation', description: 'Calculate and forecast investment returns based on APY', href: '/apy-calculation' },
   // { title: 'Trading Analyser', description: 'Analyze your trading history and performance', href: '/trading-analyser', authMatcher: "/trading-analyser/:path*" },

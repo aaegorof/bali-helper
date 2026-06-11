@@ -1,5 +1,5 @@
 import { cn } from '@/app/lib/utils';
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

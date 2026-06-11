@@ -1,8 +1,8 @@
 import { useDebounceCallback } from '@/app/hooks/useDebounceCallback';
 import { CURRENCY_OPTIONS, CurrencyCode } from '@/app/lib/currencies';
 import { toISOString } from '@/app/lib/helpers';
-import { AVAILABLE_ADAPTERS } from '@/app/permata/adapters/index';
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { AVAILABLE_ADAPTERS } from '@/app/transactions/adapters/index';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
 import { DatePicker } from '@/components/ui/datepicker';
 import { DebounceInput, DebounceNumberInput } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';

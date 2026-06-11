@@ -1,10 +1,10 @@
 'use server';
 
 import { createClient } from '@/app/lib/supabase/server';
-import { NormalizedTransaction } from '@/app/permata/adapters';
+import { NormalizedTransaction } from '@/app/transactions/adapters';
 
-import { processEmbeddingsInBatches } from '@/app/permata/lib/embedding-batch';
-import { determineCategory } from '@/app/permata/lib/vectorDb';
+import { processEmbeddingsInBatches } from '@/app/transactions/lib/embedding-batch';
+import { determineCategory } from '@/app/transactions/lib/vectorDb';
 import { InsertUniqueTransactionsReq, Transaction } from '@/app/types/supabase-extended';
 
 export interface TransactionDb extends Transaction {
@@ -15,6 +15,7 @@ export type EmbeddingBackfillItem = {
   description: string;
   date: NonNullable<Transaction['date']>;
   category: NonNullable<Transaction['category']>;
+  source: NonNullable<Transaction['source']>;
 };
 
 export type SaveTransactionsRequest = {
@@ -116,7 +117,7 @@ export async function getMissingEmbeddings(): Promise<{
 
     const { data: transactions, error: txError } = await supabase
       .from('transactions')
-      .select('description, category, date')
+      .select('description, category, date, source')
       .not('description', 'is', null);
 
     if (txError) throw txError;

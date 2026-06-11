@@ -1,7 +1,7 @@
 'use client';
 
-import { handleProcessEmbeddingsInBatches } from '@/app/permata/backfilling/actions';
-import type { EmbeddingBackfillItem } from '@/app/permata/lib/transactions-service';
+import { handleProcessEmbeddingsInBatches } from '@/app/transactions/backfilling/actions';
+import type { EmbeddingBackfillItem } from '@/app/transactions/lib/transactions-service';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -124,6 +124,7 @@ export function BackfillingTable({ items: initialItems }: BackfillingTableProps)
             <TableHead>Description</TableHead>
             <TableHead>Date</TableHead>
             <TableHead className="w-64">Category</TableHead>
+            <TableHead className="w-64">Source</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -148,6 +149,7 @@ export function BackfillingTable({ items: initialItems }: BackfillingTableProps)
                 </TableCell>
                 <TableCell>{format(new Date(item.date), 'dd MMM yyyy HH:mm:ss')}</TableCell>
                 <TableCell>{item.category}</TableCell>
+                <TableCell>{item.source}</TableCell>
               </TableRow>
             ))
           )}

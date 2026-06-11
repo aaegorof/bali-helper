@@ -17,7 +17,6 @@ export default async function Home() {
   return (
     <main>
       <div className="container mx-auto">
-        <h1>Home page</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
           {allowedMenuItems.map((item) => (
             <ModuleCard

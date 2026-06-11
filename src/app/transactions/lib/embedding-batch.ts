@@ -1,5 +1,5 @@
-import { transactionCategories } from '@/app/permata/categories';
-import { embeddingModel, saveManyEmbeddings } from '@/app/permata/lib/vectorDb';
+import { transactionCategories } from '@/app/transactions/categories';
+import { embeddingModel, saveManyEmbeddings } from '@/app/transactions/lib/vectorDb';
 import { embedMany } from 'ai';
 
 // 20 items per chunk × 300ms delay ≈ 4,000 RPM sustained — safe for text-embedding-3-small (3,000 RPM free / 1M TPM paid)

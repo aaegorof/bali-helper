@@ -4,9 +4,9 @@ import {
   AVAILABLE_ADAPTERS,
   getAdapterById,
   NormalizedTransaction,
-} from '@/app/permata/adapters';
-import { saveTransactionImportErrors } from '@/app/permata/lib/transaction-import-errors-service';
-import { saveTransactions } from '@/app/permata/lib/transactions-service';
+} from '@/app/transactions/adapters';
+import { saveTransactionImportErrors } from '@/app/transactions/lib/transaction-import-errors-service';
+import { saveTransactions } from '@/app/transactions/lib/transactions-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

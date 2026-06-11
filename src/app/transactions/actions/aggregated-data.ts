@@ -2,7 +2,7 @@
 
 import { CurrencyCode } from '@/app/lib/currencies';
 import { createClient } from '@/app/lib/supabase/server';
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { ColumnFiltersState } from '@tanstack/react-table';
 

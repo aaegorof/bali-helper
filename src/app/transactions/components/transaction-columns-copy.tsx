@@ -1,4 +1,4 @@
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
 import { Checkbox } from '@/components/ui/checkbox';
 import { createColumnHelper } from '@tanstack/react-table';
 import { format } from 'date-fns';

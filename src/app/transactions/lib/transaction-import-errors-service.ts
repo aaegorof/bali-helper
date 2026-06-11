@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/app/lib/supabase/server';
-import { AdapterUnprocessedTransaction } from '@/app/permata/adapters';
+import { AdapterUnprocessedTransaction } from '@/app/transactions/adapters';
 import { Json } from '@/app/types/supabase';
 import {
   EnumAdapterSource,

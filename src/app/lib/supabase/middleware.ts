@@ -1,3 +1,5 @@
+import { getUserRolesFromClient } from '@/app/lib/route-access-server';
+import { getRouteAccessConfig, isPublicRoute } from '@/app/lib/route-access';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -15,7 +17,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({
             request,
           });
@@ -27,53 +29,44 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
-  // const negativeMatcher =
-  //   '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)';
-
-  // const regex = new RegExp(negativeMatcher);
-
+  // IMPORTANT: DO NOT add code between createServerClient and getUser().
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    // regex.test(request.nextUrl.pathname) &&
-    !request.nextUrl.pathname.includes('.svg') &&
-    !request.nextUrl.pathname.includes('.png') &&
-    !request.nextUrl.pathname.includes('.jpg') &&
-    !request.nextUrl.pathname.includes('.jpeg') &&
-    !request.nextUrl.pathname.includes('.gif') &&
-    !request.nextUrl.pathname.includes('.webp') &&
-    !request.nextUrl.pathname.includes('_next/static') &&
-    !request.nextUrl.pathname.includes('_next/image') &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/error')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const pathname = request.nextUrl.pathname;
+
+  const isUnprotected =
+    pathname.includes('_next/static') ||
+    pathname.includes('_next/image') ||
+    /\.(svg|png|jpg|jpeg|gif|webp)$/.test(pathname) ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/error') ||
+    isPublicRoute(pathname);
+
+  if (!user && !isUnprotected) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
+  // Role-based route enforcement
+  if (user) {
+    const routeConfig = getRouteAccessConfig(pathname);
+    if (routeConfig?.requiredRoles && routeConfig.requiredRoles.length > 0) {
+      const userRoles = await getUserRolesFromClient(supabase);
+      const userRoleSet = new Set(userRoles);
+      const hasAccess = routeConfig.requiredRoles.some((role) => userRoleSet.has(role));
 
+      if (!hasAccess) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+    }
+  }
+
+  // IMPORTANT: return supabaseResponse as-is to keep cookies in sync.
   return supabaseResponse;
 }

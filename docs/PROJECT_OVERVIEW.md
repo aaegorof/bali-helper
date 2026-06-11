@@ -9,7 +9,7 @@ Quick map of the codebase for agents and developers.
 | Path | Description |
 |------|-------------|
 | `/` (`page.tsx`) | Home — grid of module cards, reads from `src/components/menuItems.tsx` |
-| `/permata` | **Main working project.** Financial transaction manager — import, categorize, analyze. See below. |
+| `/transactions` | **Main working project.** Financial transaction manager — import, categorize, analyze. See below. |
 | `/trading-analyser` | Bybit trading history analysis and performance charts |
 | `/apy-calculation` | APY/investment return calculator |
 | `/mantlescanner` | Mantle blockchain transaction scanner |
@@ -26,12 +26,12 @@ Quick map of the codebase for agents and developers.
 
 ---
 
-## `/permata` — Detailed Structure
+## `/transactions` — Detailed Structure
 
 Transaction manager: import CSV/XLSX files from multiple banks, auto-categorize via embeddings, filter and analyze.
 
 ```
-src/app/permata/
+src/app/transactions/
 ├── page.tsx                        # Entry point — layout, TransactionsProvider
 ├── categories.ts                   # Enum values for transaction_category
 │

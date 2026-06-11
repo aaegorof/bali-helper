@@ -6,7 +6,7 @@
 
 ```bash
 # Создайте файл для вашего банка
-touch src/app/permata/adapters/bca-adapter.ts
+touch src/app/transactions/adapters/bca-adapter.ts
 ```
 
 ### Шаг 2: Скопируйте базовую структуру
@@ -86,7 +86,7 @@ export class BCAAdapter implements BankAdapter {
 
 ### Шаг 3: Зарегистрируйте адаптер
 
-Откройте `src/app/permata/adapters/index.ts`:
+Откройте `src/app/transactions/adapters/index.ts`:
 
 ```typescript
 import { BankAdapter } from './base-adapter';

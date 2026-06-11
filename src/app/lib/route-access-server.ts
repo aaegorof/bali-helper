@@ -1,6 +1,7 @@
 import { createClient } from '@/app/lib/supabase/server';
 import { getRouteAccessConfig } from '@/app/lib/route-access';
 import type { EnumAppRole } from '@/app/types/supabase-extended';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type RoleProtectedItem = {
   requiredRoles?: readonly EnumAppRole[];
@@ -8,7 +9,17 @@ type RoleProtectedItem = {
 
 export async function getCurrentUserRoles(): Promise<EnumAppRole[]> {
   const supabase = await createClient();
+  return getUserRolesFromClient(supabase);
+}
 
+/**
+ * Fetch roles using a pre-existing Supabase client.
+ * Used by the middleware which constructs its own client.
+ */
+export async function getUserRolesFromClient(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any>
+): Promise<EnumAppRole[]> {
   const {
     data: { user },
     error: userError,
@@ -25,7 +36,7 @@ export async function getCurrentUserRoles(): Promise<EnumAppRole[]> {
     return [];
   }
 
-  return (data ?? []).map(({ role }) => role);
+  return (data ?? []).map(({ role }: { role: EnumAppRole }) => role);
 }
 
 export async function hasRequiredRole(requiredRoles?: readonly EnumAppRole[]): Promise<boolean> {

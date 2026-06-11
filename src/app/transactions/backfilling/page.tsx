@@ -1,5 +1,5 @@
-import { handleGetMissingEmbeddings } from '@/app/permata/backfilling/actions';
-import { BackfillingTable } from '@/app/permata/backfilling/components/backfilling-table';
+import { handleGetMissingEmbeddings } from '@/app/transactions/backfilling/actions';
+import { BackfillingTable } from '@/app/transactions/backfilling/components/backfilling-table';
 
 
 export default async function BackfillingPage() {

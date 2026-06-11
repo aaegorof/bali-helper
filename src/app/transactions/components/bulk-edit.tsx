@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/select';
 import { useCallback, useState } from 'react';
 
-import { transactionCategories } from '@/app/permata/categories';
-import { deleteTransactions } from '@/app/permata/lib/transactions-service';
+import { transactionCategories } from '@/app/transactions/categories';
+import { deleteTransactions } from '@/app/transactions/lib/transactions-service';
 import { toast } from 'sonner';
 import { updateCategory } from '../actions/update-category';
 

@@ -1,5 +1,5 @@
 import { createClient } from '@/app/lib/supabase/server';
-import { catKeywords, transactionCategories } from '@/app/permata/categories';
+import { catKeywords, transactionCategories } from '@/app/transactions/categories';
 import { Database } from '@/app/types/supabase';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';

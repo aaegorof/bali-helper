@@ -1,11 +1,11 @@
 'use server';
 
 import { hasRequiredRole } from '@/app/lib/route-access-server';
-import { processEmbeddingsInBatches } from '@/app/permata/lib/embedding-batch';
+import { processEmbeddingsInBatches } from '@/app/transactions/lib/embedding-batch';
 import {
   EmbeddingBackfillItem,
   getMissingEmbeddings,
-} from '@/app/permata/lib/transactions-service';
+} from '@/app/transactions/lib/transactions-service';
 import { revalidatePath } from 'next/cache';
 
 const REQUIRED_ROLES = ['admin'] as const;
@@ -38,7 +38,7 @@ export async function handleProcessEmbeddingsInBatches(items: EmbeddingBackfillI
 
   try {
     const result = await processEmbeddingsInBatches(items);
-    revalidatePath('/permata/backfilling');
+    revalidatePath('/transactions/backfilling');
 
     return {
       success: true,

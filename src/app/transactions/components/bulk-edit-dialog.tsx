@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
-import { deleteTransactions } from '@/app/permata/lib/transactions-service';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
+import { deleteTransactions } from '@/app/transactions/lib/transactions-service';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

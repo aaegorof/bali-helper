@@ -1,4 +1,4 @@
-import { AdapterUnprocessedTransaction } from '@/app/permata/adapters';
+import { AdapterUnprocessedTransaction } from '@/app/transactions/adapters';
 import {
   SaveTransactionImportErrorsRequest,
   SaveTransactionImportErrorsResult,

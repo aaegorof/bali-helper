@@ -1,5 +1,5 @@
 import { useAuth } from '@/app/lib/auth';
-import { TransactionDb } from '@/app/permata/lib/transactions-service';
+import { TransactionDb } from '@/app/transactions/lib/transactions-service';
 import {
   ColumnFiltersState,
   OnChangeFn,
